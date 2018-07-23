@@ -22,4 +22,4 @@ proteios_sounds.py -o <results_directory> -m <mode> [-t <tempo>] <uniprot_access
 - `-o --out <results_directory>`: the path of the output directory where the MIDI file is produced.
 - `-m --mode <mode>`: the mode to apply (major, mixolydian, dorian or blues).
 - `-t --tempo <tempo>`: optional, the tempo in BPM. Must be an integer between 60 and 150, default is 100.
-- `<uniprot_accession_number>`: the uniprot accession number of the protein to transform to a MIDI file. i.e: human interleukine 8 accession number is [P10145](https://www.uniprot.org/uniprot/P10145).
+- `<uniprot_accession_number>`: the uniprot accession number of the protein to create the MIDI file from the Uniprot entry. i.e: human interleukine 8 accession number is [P10145](https://www.uniprot.org/uniprot/P10145).
