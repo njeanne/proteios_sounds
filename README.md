@@ -12,7 +12,7 @@ The proteins data are retrieved from the [UniProt](https://www.uniprot.org/) dat
 ## Python libraries
 
 - [Biopython](https://biopython.org/)
-- [mudiutil](https://pypi.org/project/MIDIUtil/)
+- [midiutil](https://pypi.org/project/MIDIUtil/)
 
 ## Usage
 ```

@@ -10,7 +10,6 @@ import os
 import re
 from Bio import ExPASy
 from Bio import SwissProt
-from Bio import SeqIO
 from midiutil import MIDIFile
 import subprocess
 
