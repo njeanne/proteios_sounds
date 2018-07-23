@@ -1,0 +1,40 @@
+ID   IL8_HUMAN               Reviewed;          99 AA.
+AC   P10145; B2R4L8; Q6FGF6; Q6LAE6; Q96RG6; Q9C077; Q9UCE1; Q9UCR8;
+DE   RecName: Full=Interleukin-8;
+DE            Short=IL-8;
+FT   SIGNAL        1     20       {ECO:0000269|PubMed:2145175,
+FT                                ECO:0000269|PubMed:2523801,
+FT                                ECO:0000269|PubMed:2648135}.
+FT   CHAIN        21     99       MDNCF-a.
+FT                                /FTId=PRO_0000005126.
+FT   CHAIN        23     99       Interleukin-8.
+FT                                /FTId=PRO_0000005127.
+FT   CHAIN        27     99       IL-8(5-77).
+FT                                /FTId=PRO_0000041948.
+FT   CHAIN        28     99       IL-8(6-77).
+FT                                /FTId=PRO_0000005128.
+FT   CHAIN        29     99       IL-8(7-77).
+FT                                /FTId=PRO_0000005129.
+FT   CHAIN        30     99       IL-8(8-77).
+FT                                /FTId=PRO_0000005130.
+FT   CHAIN        31     99       IL-8(9-77).
+FT                                /FTId=PRO_0000005131.
+FT   SITE         27     28       Cleavage; by thrombin. {ECO:0000305}.
+FT   SITE         28     29       Cleavage; by MMP9.
+FT   MOD_RES      27     27       Citrulline. {ECO:0000269|PubMed:18710930,
+FT                                ECO:0000269|PubMed:19608678}.
+FT   DISULFID     34     61
+FT   DISULFID     36     77
+FT   STRAND       37     42       {ECO:0000244|PDB:1ROD}.
+FT   HELIX        46     48       {ECO:0000244|PDB:4XDX}.
+FT   STRAND       49     55       {ECO:0000244|PDB:4XDX}.
+FT   STRAND       58     60       {ECO:0000244|PDB:1ICW}.
+FT   STRAND       61     63       {ECO:0000244|PDB:4XDX}.
+FT   STRAND       65     70       {ECO:0000244|PDB:4XDX}.
+FT   TURN         71     73       {ECO:0000244|PDB:1IKL}.
+FT   STRAND       75     78       {ECO:0000244|PDB:4XDX}.
+FT   HELIX        83     97       {ECO:0000244|PDB:4XDX}.
+SQ   SEQUENCE   99 AA;  11098 MW;  15C649996E89319F CRC64;
+     MTSKLAVALL AAFLISAALC EGAVLPRSAK ELRCQCIKTY SKPFHPKFIK ELRVIESGPH
+     CANTEIIVKL SDGRELCLDP KENWVQRVVE KFLKRAENS
+//
