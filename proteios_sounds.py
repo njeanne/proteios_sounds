@@ -39,7 +39,7 @@ parser.add_argument('-o', '--out', required=True, help='path to the results dire
 parser.add_argument('-m', '--mode', required=True, choices=['major', 'mixolydian', 'dorian', 'blues', 'persian'], help='The mode to apply: major, mixolydian, dorian or blues.')
 parser.add_argument('-p', '--play', required=False, help='play the music with Timidity, just for tests.')
 parser.add_argument('-t', '--tempo', required=False, type=restricted_tempo, help='tempo selection in BPM. Value between 60 and 150.')
-parser.add_argument('uniprot_accession_number', help='the protein accession number in UniProt database. Example: Hemoglobin sub-unit A1 > P69905')
+parser.add_argument('uniprot_accession_number', help='the protein accession number in the UniProt database. Example: Hemoglobin sub-unit Alpha 1 > P69905')
 args = parser.parse_args()
 
 
