@@ -1,5 +1,10 @@
 #! /usr/bin/python3
 
+__author__ = 'Jacques TOEN & Nicolas JEANNE'
+__copyright__ = 'GNU General Public License'
+__version__ = '1.0'
+__email__ = 'nicolas.jeanne@ntymail.com'
+
 import argparse
 import os
 import re
@@ -9,19 +14,37 @@ from Bio import SeqIO
 from midiutil import MIDIFile
 import subprocess
 
+# Check range for tempo argument, must be between 60 and 150.
+# @param x:	[str] value of tempo argument in BPM.
+# @return:		[int] the tempo.
+def restricted_tempo(x):
+	x = int(x)
+	if x < 60 or x > 150:
+		raise argparse.ArgumentTypeError('{} not in range 60 to 150.'.format(x))
+	return x
+
+descr = '''
+proteios_sounds.py v.{}
+
+Created by {}.
+Contact: {}
+{}
+
+Create a MIDI file from a protein entry of the UniProt database (https://www.uniprot.org/)
+'''.format(__version__, __author__, __email__, __copyright__)
+
 # Parse arguments
-parser = argparse.ArgumentParser(description='Create a MIDI file from a protein entry of the UniProt database (https://www.uniprot.org/)')
+parser = argparse.ArgumentParser(description=descr, formatter_class=argparse.RawTextHelpFormatter)
 parser.add_argument('-o', '--out', required=True, help='path to the results directory.')
 parser.add_argument('-m', '--mode', required=True, choices=['major', 'mixolydian', 'dorian', 'blues', 'persian'], help='The mode to apply: major, mixolydian, dorian or blues.')
-parser.add_argument('-p', '--play', required=False, help='play the music.')
-parser.add_argument('-t', '--tempo', required=False, type=int, help='tempo selection in BPM. Value between 60 and 150.')
+parser.add_argument('-p', '--play', required=False, help='play the music with Timidity, just for tests.')
+parser.add_argument('-t', '--tempo', required=False, type=restricted_tempo, help='tempo selection in BPM. Value between 60 and 150.')
 parser.add_argument('uniprot_accession_number', help='the protein accession number in UniProt database. Example: Hemoglobin sub-unit A1 > P69905')
 args = parser.parse_args()
 
 
-
 ### midi keys correspondance with AA
-# Major		
+# Major
 MIDI_KEYS ={'major':{'A':48, 'C':50, 'D':52, 'E':53, 'F':55, 'G':57, 'H':59, 'I':60, 'K':62, 'L':64, 'M':65, 'N':67, 'P':69, 'Q':71,
 'R':[48,52,55,59], 'S':[48,50,53,57], 'T':[52,55,59,62], 'U':[52,53,57,60], 'V':[50,53,55,59], 'W':[48,52,55,57], 'Y':[50,53,57,59]}}
 # Mixolydian
@@ -83,9 +106,9 @@ for feature in uniprot.features:
 # create the MIDI file
 file_base_name = '{}_{}_{}_{}'.format(args.uniprot_accession_number, entry_name, organism, modeName)
 midiFilePath = os.path.join(outDir, '{}.midi'.format(file_base_name))
-debugFilePath = os.path.join(outDir, '{}.csv'.format(file_base_name))	
+debugFilePath = os.path.join(outDir, '{}.csv'.format(file_base_name))
 with open(midiFilePath, 'wb') as  midiFile:
-	
+
 	track    = 0
 	time     = 0   # In beats
 	if args.tempo:
@@ -94,7 +117,7 @@ with open(midiFilePath, 'wb') as  midiFile:
 		tempo    = 100  # In BPM
 	# a channel is defined by an instrument nbr and a volume (0-127, as per the MIDI standard)
 	channels = {0: {'instrument': 1, 'vol': 100}, 1: {'instrument': 42, 'vol': 40}, 2: {'instrument': 65, 'vol': 60}}
-	
+
 	MyMIDI = MIDIFile(numTracks=1, adjust_origin=False) # One track, defaults to format 1 (tempo track automatically created)
 	MyMIDI.addTempo(track, time, tempo)
 	# add the channels (1 per instrument)
@@ -107,7 +130,7 @@ with open(midiFilePath, 'wb') as  midiFile:
 	for i in range(1, len(protein['seq'])):
 		AA = protein['seq'][i]
 		duration = 1
-		
+
 		if 'structure' in protein.keys():
 			if i in protein['structure'].keys():
 				debugFile.write('\n{}'.format(protein['structure'][i]))
@@ -123,13 +146,13 @@ with open(midiFilePath, 'wb') as  midiFile:
 					channels[0]['vol'] = 100
 					channels[1]['vol'] = 40
 					channels[2]['vol'] = 60
-		
+
 		# test if key is a chord
 		if isinstance(mode[AA], list):
 			for channelNbr in channels.keys():
 				debugFile.write('\n{};{};{};{};{};{}'.format(AA, mode[AA], time, channelNbr, channels[channelNbr]['vol'], duration))
 				for key in mode[AA]:
-					MyMIDI.addNote(track, channel=channelNbr, pitch=key, time=time, duration=duration, volume=channels[channelNbr]['vol'])		
+					MyMIDI.addNote(track, channel=channelNbr, pitch=key, time=time, duration=duration, volume=channels[channelNbr]['vol'])
 		# just a key
 		else:
 			key = mode[AA]
@@ -137,7 +160,7 @@ with open(midiFilePath, 'wb') as  midiFile:
 				MyMIDI.addNote(track, channel=channelNbr, pitch=key, time=time, duration=duration, volume=channels[channelNbr]['vol'])
 				debugFile.write('\n{};{};{};{};{};{}'.format(AA, key, time, channelNbr, channels[channelNbr]['vol'], duration))
 		time = time + duration
-		
+
 	MyMIDI.writeFile(midiFile)
 	debugFile.close()
 
@@ -146,4 +169,3 @@ with open(midiFilePath, 'wb') as  midiFile:
 if args.play:
 	cmd = 'timidity {}'.format(midiFilePath)
 	subprocess.run(cmd, shell=True)
-
