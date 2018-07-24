@@ -47,7 +47,7 @@ parser.add_argument('uniprot_accession_number', help='the protein accession numb
 args = parser.parse_args()
 
 
-### midi keys correspondance with AA
+### midi notes correspondance with AA
 # Major
 MIDI_KEYS ={'major':{'A':48, 'C':50, 'D':52, 'E':53, 'F':55, 'G':57, 'H':59, 'I':60, 'K':62, 'L':64, 'M':65, 'N':67, 'P':69, 'Q':71,
 'R':[48,52,55,59], 'S':[48,50,53,57], 'T':[52,55,59,62], 'U':[52,53,57,60], 'V':[50,53,55,59], 'W':[48,52,55,57], 'Y':[50,53,57,59]}}
@@ -154,8 +154,8 @@ with open(midi_file_path, 'wb') as  midiFile:
 	MyMIDI = MIDIFile(numTracks=1, adjust_origin=False) # One track, defaults to format 1 (tempo track automatically created)
 	MyMIDI.addTempo(track, time, tempo)
 	# add the channels (1 per instrument)
-	for channelNbr in channels.keys():
-		MyMIDI.addProgramChange(track, channel=channelNbr, time=time, program=channels[channelNbr]['instrument'])
+	for channel_nbr in channels.keys():
+		MyMIDI.addProgramChange(track, channel=channel_nbr, time=time, program=channels[channel_nbr]['instrument'])
 
 	mode = MIDI_KEYS[mode_name]
 	for i in range(1, len(protein['seq'])):
@@ -177,18 +177,31 @@ with open(midi_file_path, 'wb') as  midiFile:
 					channels[0]['vol'] = 100
 					channels[1]['vol'] = 40
 					channels[2]['vol'] = 60
+				else:
+					channels[0]['vol'] = 50
+					channels[1]['vol'] = 50
+					channels[2]['vol'] = 50
 
-		# test if key is a chord
+		# test if note is a chord
 		if isinstance(mode[AA], list):
-			for channelNbr in channels.keys():
-				for key in mode[AA]:
-					MyMIDI.addNote(track, channel=channelNbr, pitch=key, time=time, duration=duration, volume=channels[channelNbr]['vol'])
-		# just a key
+			for channel_nbr in channels.keys():
+				for note in mode[AA]:
+					MyMIDI.addNote(track, channel=channel_nbr, pitch=note, time=time, duration=duration, volume=channels[channel_nbr]['vol'])
+		# just a note
 		else:
-			key = mode[AA]
-			for channelNbr in channels.keys():
-				MyMIDI.addNote(track, channel=channelNbr, pitch=key, time=time, duration=duration, volume=channels[channelNbr]['vol'])
-		logging.debug('\tAA: {}\tkey: {}\ttime: {}\tchannel: {}\tvolume: {}\tduration: {}'.format(AA, mode[AA], time, channelNbr, channels[channelNbr]['vol'], duration))
+			note = mode[AA]
+			for channel_nbr in channels.keys():
+				MyMIDI.addNote(track, channel=channel_nbr, pitch=note, time=time, duration=duration, volume=channels[channel_nbr]['vol'])
+
+		if args.debug:
+			if isinstance(mode[AA], list):
+				played_note = '[{}]'.format(' , '.join(str(v) for v in mode[AA]))
+			else:
+				played_note = mode[AA]
+			logging.debug('\tposition: {:<5}\tAA: {:<5}\tnote: {:<20}\ttime: {:<5}\tduration: {:<5}'.format(i, AA, played_note, time, duration))
+			for channel_nbr in channels.keys():
+				logging.debug('\t\tchannel: {:<5}\tvolume: {:<5}'.format(channel_nbr, channels[channel_nbr]['vol']))
+
 		time = time + duration
 
 	MyMIDI.writeFile(midiFile)
