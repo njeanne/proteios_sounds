@@ -1,0 +1,115 @@
+2018/07/24 12:05:32	INFO:	./proteios_sounds.py -o sounds_proteins/ -t 100 -m blues -d P10145
+2018/07/24 12:05:32	DEBUG:	FREE:
+2018/07/24 12:05:32	DEBUG:		AA: M	key: 64	time: 0	channel: 2	volume: 60	duration: 1
+2018/07/24 12:05:32	DEBUG:		AA: T	key: [51, 55, 58, 62]	time: 1	channel: 2	volume: 60	duration: 1
+2018/07/24 12:05:32	DEBUG:		AA: S	key: [48, 50, 52, 57]	time: 2	channel: 2	volume: 60	duration: 1
+2018/07/24 12:05:32	DEBUG:		AA: K	key: 62	time: 3	channel: 2	volume: 60	duration: 1
+2018/07/24 12:05:32	DEBUG:		AA: L	key: 63	time: 4	channel: 2	volume: 60	duration: 1
+2018/07/24 12:05:32	DEBUG:		AA: A	key: 48	time: 5	channel: 2	volume: 60	duration: 1
+2018/07/24 12:05:32	DEBUG:		AA: V	key: [50, 52, 55, 58]	time: 6	channel: 2	volume: 60	duration: 1
+2018/07/24 12:05:32	DEBUG:		AA: A	key: 48	time: 7	channel: 2	volume: 60	duration: 1
+2018/07/24 12:05:32	DEBUG:		AA: L	key: 63	time: 8	channel: 2	volume: 60	duration: 1
+2018/07/24 12:05:32	DEBUG:		AA: L	key: 63	time: 9	channel: 2	volume: 60	duration: 1
+2018/07/24 12:05:32	DEBUG:		AA: A	key: 48	time: 10	channel: 2	volume: 60	duration: 1
+2018/07/24 12:05:32	DEBUG:		AA: A	key: 48	time: 11	channel: 2	volume: 60	duration: 1
+2018/07/24 12:05:32	DEBUG:		AA: F	key: 55	time: 12	channel: 2	volume: 60	duration: 1
+2018/07/24 12:05:32	DEBUG:		AA: L	key: 63	time: 13	channel: 2	volume: 60	duration: 1
+2018/07/24 12:05:32	DEBUG:		AA: I	key: 60	time: 14	channel: 2	volume: 60	duration: 1
+2018/07/24 12:05:32	DEBUG:		AA: S	key: [48, 50, 52, 57]	time: 15	channel: 2	volume: 60	duration: 1
+2018/07/24 12:05:32	DEBUG:		AA: A	key: 48	time: 16	channel: 2	volume: 60	duration: 1
+2018/07/24 12:05:32	DEBUG:		AA: A	key: 48	time: 17	channel: 2	volume: 60	duration: 1
+2018/07/24 12:05:32	DEBUG:		AA: L	key: 63	time: 18	channel: 2	volume: 60	duration: 1
+2018/07/24 12:05:32	DEBUG:		AA: C	key: 50	time: 19	channel: 2	volume: 60	duration: 1
+2018/07/24 12:05:32	DEBUG:		AA: E	key: 52	time: 20	channel: 2	volume: 60	duration: 1
+2018/07/24 12:05:32	DEBUG:		AA: G	key: 57	time: 21	channel: 2	volume: 60	duration: 1
+2018/07/24 12:05:32	DEBUG:		AA: A	key: 48	time: 22	channel: 2	volume: 60	duration: 1
+2018/07/24 12:05:32	DEBUG:		AA: V	key: [50, 52, 55, 58]	time: 23	channel: 2	volume: 60	duration: 1
+2018/07/24 12:05:32	DEBUG:		AA: L	key: 63	time: 24	channel: 2	volume: 60	duration: 1
+2018/07/24 12:05:32	DEBUG:		AA: P	key: 69	time: 25	channel: 2	volume: 60	duration: 1
+2018/07/24 12:05:32	DEBUG:		AA: R	key: [48, 51, 55, 58]	time: 26	channel: 2	volume: 60	duration: 1
+2018/07/24 12:05:32	DEBUG:		AA: S	key: [48, 50, 52, 57]	time: 27	channel: 2	volume: 60	duration: 1
+2018/07/24 12:05:32	DEBUG:		AA: A	key: 48	time: 28	channel: 2	volume: 60	duration: 1
+2018/07/24 12:05:32	DEBUG:		AA: K	key: 62	time: 29	channel: 2	volume: 60	duration: 1
+2018/07/24 12:05:32	DEBUG:		AA: E	key: 52	time: 30	channel: 2	volume: 60	duration: 1
+2018/07/24 12:05:32	DEBUG:		AA: L	key: 63	time: 31	channel: 2	volume: 60	duration: 1
+2018/07/24 12:05:32	DEBUG:		AA: R	key: [48, 51, 55, 58]	time: 32	channel: 2	volume: 60	duration: 1
+2018/07/24 12:05:32	DEBUG:		AA: C	key: 50	time: 33	channel: 2	volume: 60	duration: 1
+2018/07/24 12:05:32	DEBUG:		AA: Q	key: 70	time: 34	channel: 2	volume: 60	duration: 1
+2018/07/24 12:05:32	DEBUG:		AA: C	key: 50	time: 35	channel: 2	volume: 60	duration: 1
+2018/07/24 12:05:32	DEBUG:	STRAND:
+2018/07/24 12:05:32	DEBUG:		AA: I	key: 60	time: 36	channel: 2	volume: 100	duration: 1
+2018/07/24 12:05:32	DEBUG:		AA: K	key: 62	time: 37	channel: 2	volume: 100	duration: 1
+2018/07/24 12:05:32	DEBUG:		AA: T	key: [51, 55, 58, 62]	time: 38	channel: 2	volume: 100	duration: 1
+2018/07/24 12:05:32	DEBUG:		AA: Y	key: [50, 52, 57, 58]	time: 39	channel: 2	volume: 100	duration: 1
+2018/07/24 12:05:32	DEBUG:		AA: S	key: [48, 50, 52, 57]	time: 40	channel: 2	volume: 100	duration: 1
+2018/07/24 12:05:32	DEBUG:		AA: K	key: 62	time: 41	channel: 2	volume: 100	duration: 1
+2018/07/24 12:05:32	DEBUG:	FREE:
+2018/07/24 12:05:32	DEBUG:		AA: P	key: 69	time: 42	channel: 2	volume: 100	duration: 1
+2018/07/24 12:05:32	DEBUG:		AA: F	key: 55	time: 43	channel: 2	volume: 100	duration: 1
+2018/07/24 12:05:32	DEBUG:		AA: H	key: 58	time: 44	channel: 2	volume: 100	duration: 1
+2018/07/24 12:05:32	DEBUG:	HELIX:
+2018/07/24 12:05:32	DEBUG:		AA: P	key: 69	time: 45	channel: 2	volume: 60	duration: 1
+2018/07/24 12:05:32	DEBUG:		AA: K	key: 62	time: 46	channel: 2	volume: 60	duration: 1
+2018/07/24 12:05:32	DEBUG:		AA: F	key: 55	time: 47	channel: 2	volume: 60	duration: 1
+2018/07/24 12:05:32	DEBUG:	STRAND:
+2018/07/24 12:05:32	DEBUG:		AA: I	key: 60	time: 48	channel: 2	volume: 100	duration: 1
+2018/07/24 12:05:32	DEBUG:		AA: K	key: 62	time: 49	channel: 2	volume: 100	duration: 1
+2018/07/24 12:05:32	DEBUG:		AA: E	key: 52	time: 50	channel: 2	volume: 100	duration: 1
+2018/07/24 12:05:32	DEBUG:		AA: L	key: 63	time: 51	channel: 2	volume: 100	duration: 1
+2018/07/24 12:05:32	DEBUG:		AA: R	key: [48, 51, 55, 58]	time: 52	channel: 2	volume: 100	duration: 1
+2018/07/24 12:05:32	DEBUG:		AA: V	key: [50, 52, 55, 58]	time: 53	channel: 2	volume: 100	duration: 1
+2018/07/24 12:05:32	DEBUG:		AA: I	key: 60	time: 54	channel: 2	volume: 100	duration: 1
+2018/07/24 12:05:32	DEBUG:	FREE:
+2018/07/24 12:05:32	DEBUG:		AA: E	key: 52	time: 55	channel: 2	volume: 100	duration: 1
+2018/07/24 12:05:32	DEBUG:		AA: S	key: [48, 50, 52, 57]	time: 56	channel: 2	volume: 100	duration: 1
+2018/07/24 12:05:32	DEBUG:	STRAND:
+2018/07/24 12:05:32	DEBUG:		AA: G	key: 57	time: 57	channel: 2	volume: 100	duration: 1
+2018/07/24 12:05:32	DEBUG:		AA: P	key: 69	time: 58	channel: 2	volume: 100	duration: 1
+2018/07/24 12:05:32	DEBUG:		AA: H	key: 58	time: 59	channel: 2	volume: 100	duration: 1
+2018/07/24 12:05:32	DEBUG:	STRAND:
+2018/07/24 12:05:32	DEBUG:		AA: C	key: 50	time: 60	channel: 2	volume: 100	duration: 1
+2018/07/24 12:05:32	DEBUG:		AA: A	key: 48	time: 61	channel: 2	volume: 100	duration: 1
+2018/07/24 12:05:32	DEBUG:		AA: N	key: 67	time: 62	channel: 2	volume: 100	duration: 1
+2018/07/24 12:05:32	DEBUG:	FREE:
+2018/07/24 12:05:32	DEBUG:		AA: T	key: [51, 55, 58, 62]	time: 63	channel: 2	volume: 100	duration: 1
+2018/07/24 12:05:32	DEBUG:	STRAND:
+2018/07/24 12:05:32	DEBUG:		AA: E	key: 52	time: 64	channel: 2	volume: 100	duration: 1
+2018/07/24 12:05:32	DEBUG:		AA: I	key: 60	time: 65	channel: 2	volume: 100	duration: 1
+2018/07/24 12:05:32	DEBUG:		AA: I	key: 60	time: 66	channel: 2	volume: 100	duration: 1
+2018/07/24 12:05:32	DEBUG:		AA: V	key: [50, 52, 55, 58]	time: 67	channel: 2	volume: 100	duration: 1
+2018/07/24 12:05:32	DEBUG:		AA: K	key: 62	time: 68	channel: 2	volume: 100	duration: 1
+2018/07/24 12:05:32	DEBUG:		AA: L	key: 63	time: 69	channel: 2	volume: 100	duration: 1
+2018/07/24 12:05:32	DEBUG:	TURN:
+2018/07/24 12:05:32	DEBUG:		AA: S	key: [48, 50, 52, 57]	time: 70	channel: 2	volume: 60	duration: 1
+2018/07/24 12:05:32	DEBUG:		AA: D	key: 51	time: 71	channel: 2	volume: 60	duration: 1
+2018/07/24 12:05:32	DEBUG:		AA: G	key: 57	time: 72	channel: 2	volume: 60	duration: 1
+2018/07/24 12:05:32	DEBUG:	FREE:
+2018/07/24 12:05:32	DEBUG:		AA: R	key: [48, 51, 55, 58]	time: 73	channel: 2	volume: 60	duration: 1
+2018/07/24 12:05:32	DEBUG:	STRAND:
+2018/07/24 12:05:32	DEBUG:		AA: E	key: 52	time: 74	channel: 2	volume: 100	duration: 1
+2018/07/24 12:05:32	DEBUG:		AA: L	key: 63	time: 75	channel: 2	volume: 100	duration: 1
+2018/07/24 12:05:32	DEBUG:		AA: C	key: 50	time: 76	channel: 2	volume: 100	duration: 1
+2018/07/24 12:05:32	DEBUG:		AA: L	key: 63	time: 77	channel: 2	volume: 100	duration: 1
+2018/07/24 12:05:32	DEBUG:	FREE:
+2018/07/24 12:05:32	DEBUG:		AA: D	key: 51	time: 78	channel: 2	volume: 100	duration: 1
+2018/07/24 12:05:32	DEBUG:		AA: P	key: 69	time: 79	channel: 2	volume: 100	duration: 1
+2018/07/24 12:05:32	DEBUG:		AA: K	key: 62	time: 80	channel: 2	volume: 100	duration: 1
+2018/07/24 12:05:32	DEBUG:		AA: E	key: 52	time: 81	channel: 2	volume: 100	duration: 1
+2018/07/24 12:05:32	DEBUG:	HELIX:
+2018/07/24 12:05:32	DEBUG:		AA: N	key: 67	time: 82	channel: 2	volume: 60	duration: 1
+2018/07/24 12:05:32	DEBUG:		AA: W	key: [48, 51, 55, 57]	time: 83	channel: 2	volume: 60	duration: 1
+2018/07/24 12:05:32	DEBUG:		AA: V	key: [50, 52, 55, 58]	time: 84	channel: 2	volume: 60	duration: 1
+2018/07/24 12:05:32	DEBUG:		AA: Q	key: 70	time: 85	channel: 2	volume: 60	duration: 1
+2018/07/24 12:05:32	DEBUG:		AA: R	key: [48, 51, 55, 58]	time: 86	channel: 2	volume: 60	duration: 1
+2018/07/24 12:05:32	DEBUG:		AA: V	key: [50, 52, 55, 58]	time: 87	channel: 2	volume: 60	duration: 1
+2018/07/24 12:05:32	DEBUG:		AA: V	key: [50, 52, 55, 58]	time: 88	channel: 2	volume: 60	duration: 1
+2018/07/24 12:05:32	DEBUG:		AA: E	key: 52	time: 89	channel: 2	volume: 60	duration: 1
+2018/07/24 12:05:32	DEBUG:		AA: K	key: 62	time: 90	channel: 2	volume: 60	duration: 1
+2018/07/24 12:05:32	DEBUG:		AA: F	key: 55	time: 91	channel: 2	volume: 60	duration: 1
+2018/07/24 12:05:32	DEBUG:		AA: L	key: 63	time: 92	channel: 2	volume: 60	duration: 1
+2018/07/24 12:05:32	DEBUG:		AA: K	key: 62	time: 93	channel: 2	volume: 60	duration: 1
+2018/07/24 12:05:32	DEBUG:		AA: R	key: [48, 51, 55, 58]	time: 94	channel: 2	volume: 60	duration: 1
+2018/07/24 12:05:32	DEBUG:		AA: A	key: 48	time: 95	channel: 2	volume: 60	duration: 1
+2018/07/24 12:05:32	DEBUG:		AA: E	key: 52	time: 96	channel: 2	volume: 60	duration: 1
+2018/07/24 12:05:32	DEBUG:	FREE:
+2018/07/24 12:05:32	DEBUG:		AA: N	key: 67	time: 97	channel: 2	volume: 60	duration: 1
