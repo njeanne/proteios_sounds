@@ -158,7 +158,7 @@ with open(midi_file_path, 'wb') as  midiFile:
 		MyMIDI.addProgramChange(track, channel=channel_nbr, time=time, program=channels[channel_nbr]['instrument'])
 
 	mode = MIDI_KEYS[mode_name]
-	for i in range(1, len(protein['seq'])):
+	for i in range(1, len(protein['seq']) + 1):
 		AA = protein['seq'][i]
 		duration = 1
 
