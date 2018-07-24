@@ -96,10 +96,13 @@ entry_name = uniprot.entry_name
 
 # create a dictionary for the protein
 protein = {'seq': {}}
-for i in range(0,len(uniprot.sequence)):
+sequence_length = len(uniprot.sequence)
+for i in range(sequence_length):
 	protein['seq'][i+1] = uniprot.sequence[i]
 #print(dir(uniprot))
 
+# create a dictionary to get the structures positions => type
+structures = {}
 for feature in uniprot.features:
 	print(feature)
 	if feature[0] == 'MOD_RES':
@@ -108,11 +111,29 @@ for feature in uniprot.features:
 		else:
 			protein['modification'] = {feature[1]: re.split('\W+', feature[3])[0]}
 	if feature[0] == 'HELIX' or feature[0] == 'STRAND' or feature[0] == 'TURN':
+		structures[feature[1]] = {'type': feature[0], 'end': feature[2]}
+
+# update protein with the structures
+structure_last_position = 0
+for position in sorted(structures.keys()):
+	if structure_last_position == 0 and position == 1:
 		if 'structure' in protein.keys():
-			protein['structure'][feature[1]] = feature[0]
+			protein['structure'][position] = structures[position]['type']
 		else:
-			protein['structure'] = {feature[1]: feature[0]}
-print(protein)
+			protein['structure'] = {position: structures[position]['type']}
+		structure_last_position = structures[position]['end']
+	elif position >= structure_last_position + 1:
+		if 'structure' in protein.keys():
+			protein['structure'][structure_last_position + 1] = 'FREE'
+		else:
+			protein['structure'] = {structure_last_position + 1: 'FREE'}
+		protein['structure'][position] = structures[position]['type']
+		structure_last_position = structures[position]['end']
+if structure_last_position < sequence_length:
+	if 'structure' in protein.keys():
+		protein['structure'][structure_last_position + 1] = 'FREE'
+	else:
+		protein['structure'] = {structure_last_position + 1: 'FREE'}
 
 # create the MIDI file
 mode_name = args.mode
