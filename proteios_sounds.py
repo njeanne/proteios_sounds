@@ -6,12 +6,16 @@ __version__ = '1.0'
 __email__ = 'nicolas.jeanne@ntymail.com'
 
 import argparse
+import sys
 import os
 import re
+import logging
+import subprocess
+from datetime import datetime
 from Bio import ExPASy
 from Bio import SwissProt
 from midiutil import MIDIFile
-import subprocess
+
 
 # Check range for tempo argument, must be between 60 and 150.
 # @param x:	[str] value of tempo argument in BPM.
@@ -29,16 +33,17 @@ Created by {}.
 Contact: {}
 {}
 
-Create a MIDI file from a protein entry of the UniProt database (https://www.uniprot.org/)
+Create a MIDI file from a protein entry of the UniProt database (https://www.uniprot.org/).
 '''.format(__version__, __author__, __email__, __copyright__)
 
 # Parse arguments
 parser = argparse.ArgumentParser(description=descr, formatter_class=argparse.RawTextHelpFormatter)
 parser.add_argument('-o', '--out', required=True, help='path to the results directory.')
-parser.add_argument('-m', '--mode', required=True, choices=['major', 'mixolydian', 'dorian', 'blues', 'persian'], help='The mode to apply: major, mixolydian, dorian or blues.')
-parser.add_argument('-p', '--play', required=False, help='play the music with Timidity, just for tests.')
-parser.add_argument('-t', '--tempo', required=False, type=restricted_tempo, help='tempo selection in BPM. Value between 60 and 150.')
-parser.add_argument('uniprot_accession_number', help='the protein accession number in the UniProt database. Example: Hemoglobin sub-unit Alpha 1 > P69905')
+parser.add_argument('-m', '--mode', required=True, choices=['major', 'mixolydian', 'dorian', 'blues'], help='The mode to apply: major, mixolydian, dorian or blues.')
+parser.add_argument('-p', '--play', required=False, action='store_true', help='play the music with Timidity, just for tests.')
+parser.add_argument('-t', '--tempo', required=False, type=restricted_tempo, help='set the tempo in BPM. Value between 60 and 150.')
+parser.add_argument('-d', '--debug', required=False, action='store_true', help='debug mode, create a log file which details each entry of the MIDI file.')
+parser.add_argument('uniprot_accession_number', help='the protein accession number in the UniProt database. Example: Human Interleukin-8 > P10145')
 args = parser.parse_args()
 
 
@@ -71,12 +76,17 @@ MIDI_KEYS['blues']['V'][1] = 52
 MIDI_KEYS['blues']['Y'][1] = 52
 MIDI_KEYS['blues']['M'] = 64
 
+# create the output directory
+out_dir = os.path.abspath(args.out)
+if not os.path.exists(out_dir):
+	os.makedirs(out_dir)
 
-
-outDir = os.path.abspath(args.out)
-if not os.path.exists(outDir):
-	os.makedirs(outDir)
-modeName = args.mode
+if args.debug:
+	# create the log file
+	logPath = os.path.join(out_dir, '{}_{}_{}.log'.format(args.uniprot_accession_number, args.mode, datetime.now().strftime('%Y-%m-%d_%H-%M-%S')))
+	logging.basicConfig(filename=logPath, level=logging.DEBUG, format='%(asctime)s\t%(levelname)s:\t%(message)s', datefmt='%Y/%m/%d %H:%M:%S')
+	logger = logging.getLogger(__name__)
+	logger.info(' '.join(sys.argv))
 
 # Parse the Uniprot entry
 handle = ExPASy.get_sprot_raw(args.uniprot_accession_number)
@@ -84,29 +94,32 @@ uniprot = SwissProt.read(handle)
 organism = uniprot.organism.split('(')[1].split(')')[0]
 entry_name = uniprot.entry_name
 
+# create a dictionary for the protein
 protein = {'seq': {}}
 for i in range(0,len(uniprot.sequence)):
 	protein['seq'][i+1] = uniprot.sequence[i]
 #print(dir(uniprot))
 
 for feature in uniprot.features:
+	print(feature)
 	if feature[0] == 'MOD_RES':
 		if 'modification' in protein.keys():
-			protein['modification'][feature[1]] = re.split('\W?', feature[3])[0]
+			protein['modification'][feature[1]] = re.split('\W+', feature[3])[0]
 		else:
-			protein['modification'] = {feature[1]: re.split('\W?', feature[3])[0]}
+			protein['modification'] = {feature[1]: re.split('\W+', feature[3])[0]}
 	if feature[0] == 'HELIX' or feature[0] == 'STRAND' or feature[0] == 'TURN':
 		if 'structure' in protein.keys():
 			protein['structure'][feature[1]] = feature[0]
 		else:
 			protein['structure'] = {feature[1]: feature[0]}
-
+print(protein)
 
 # create the MIDI file
-file_base_name = '{}_{}_{}_{}'.format(args.uniprot_accession_number, entry_name, organism, modeName)
-midiFilePath = os.path.join(outDir, '{}.midi'.format(file_base_name))
-debugFilePath = os.path.join(outDir, '{}.csv'.format(file_base_name))
-with open(midiFilePath, 'wb') as  midiFile:
+mode_name = args.mode
+file_base_name = '{}_{}_{}_{}'.format(args.uniprot_accession_number, entry_name, organism, mode_name)
+midi_file_path = os.path.join(out_dir, '{}.midi'.format(file_base_name))
+
+with open(midi_file_path, 'wb') as  midiFile:
 
 	track    = 0
 	time     = 0   # In beats
@@ -123,16 +136,14 @@ with open(midiFilePath, 'wb') as  midiFile:
 	for channelNbr in channels.keys():
 		MyMIDI.addProgramChange(track, channel=channelNbr, time=time, program=channels[channelNbr]['instrument'])
 
-	debugFile = open(debugFilePath, 'w')
-	debugFile.write('AA\tkey\ttime\tchannel\tvolume\tduration')
-	mode = MIDI_KEYS[modeName]
+	mode = MIDI_KEYS[mode_name]
 	for i in range(1, len(protein['seq'])):
 		AA = protein['seq'][i]
 		duration = 1
 
 		if 'structure' in protein.keys():
 			if i in protein['structure'].keys():
-				debugFile.write('\n{}'.format(protein['structure'][i]))
+				logging.debug('{}:'.format(protein['structure'][i]))
 				if protein['structure'][i] == 'HELIX':
 					channels[0]['vol'] = 40
 					channels[1]['vol'] = 100
@@ -149,7 +160,6 @@ with open(midiFilePath, 'wb') as  midiFile:
 		# test if key is a chord
 		if isinstance(mode[AA], list):
 			for channelNbr in channels.keys():
-				debugFile.write('\n{};{};{};{};{};{}'.format(AA, mode[AA], time, channelNbr, channels[channelNbr]['vol'], duration))
 				for key in mode[AA]:
 					MyMIDI.addNote(track, channel=channelNbr, pitch=key, time=time, duration=duration, volume=channels[channelNbr]['vol'])
 		# just a key
@@ -157,14 +167,15 @@ with open(midiFilePath, 'wb') as  midiFile:
 			key = mode[AA]
 			for channelNbr in channels.keys():
 				MyMIDI.addNote(track, channel=channelNbr, pitch=key, time=time, duration=duration, volume=channels[channelNbr]['vol'])
-				debugFile.write('\n{};{};{};{};{};{}'.format(AA, key, time, channelNbr, channels[channelNbr]['vol'], duration))
+		logging.debug('\tAA: {}\tkey: {}\ttime: {}\tchannel: {}\tvolume: {}\tduration: {}'.format(AA, mode[AA], time, channelNbr, channels[channelNbr]['vol'], duration))
 		time = time + duration
 
 	MyMIDI.writeFile(midiFile)
-	debugFile.close()
+
+print('Done!\nMIDI file for {} {} ({}) created in: {}'.format(entry_name, organism, args.uniprot_accession_number, midi_file_path))
 
 
 # play the file with timidity if asked
 if args.play:
-	cmd = 'timidity {}'.format(midiFilePath)
+	cmd = 'timidity {}'.format(midi_file_path)
 	subprocess.run(cmd, shell=True)
