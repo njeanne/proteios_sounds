@@ -104,7 +104,7 @@ for i in range(sequence_length):
 # create a dictionary to get the structures positions => type
 structures = {}
 for feature in uniprot.features:
-	print(feature)
+	# print(feature)
 	if feature[0] == 'MOD_RES':
 		if 'modification' in protein.keys():
 			protein['modification'][feature[1]] = re.split('\W+', feature[3])[0]
