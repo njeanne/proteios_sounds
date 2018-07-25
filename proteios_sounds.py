@@ -10,6 +10,7 @@ import sys
 import os
 import re
 import logging
+import urllib
 import subprocess
 from datetime import datetime
 from Bio import ExPASy
@@ -89,7 +90,15 @@ if args.debug:
 	logger.info(' '.join(sys.argv))
 
 # Parse the Uniprot entry
-handle = ExPASy.get_sprot_raw(args.uniprot_accession_number)
+try:
+	handle = ExPASy.get_sprot_raw(args.uniprot_accession_number)
+except urllib.error.HTTPError as err:
+	msg = '{}{} accession number does not exists in UniProt database, check https://www.uniprot.org/ for the correct accession number.'.format(err, args.uniprot_accession_number)
+	print('ERROR: {}'.format(msg))
+	if args.debug:
+		logger.error(msg)
+	sys.exit(0)
+
 uniprot = SwissProt.read(handle)
 organism = uniprot.organism.split('(')[1].split(')')[0]
 entry_name = uniprot.entry_name
