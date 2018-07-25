@@ -100,27 +100,62 @@ except urllib.error.HTTPError as err:
 	sys.exit(0)
 
 uniprot = SwissProt.read(handle)
-organism = uniprot.organism.split('(')[1].split(')')[0]
+
+### TOREMOVE
+for item in uniprot.features:
+	print(item)
+##############
+
+print(uniprot.organism)
+organism = uniprot.organism
+if '(' in organism:
+	 organism = organism.split('(')[1].split(')')[0]
+organism = organism.rstrip('.,;:').replace(' ', '_')
 entry_name = uniprot.entry_name
+print(organism)
 
 # create a dictionary for the protein
-protein = {'seq': {}}
+protein = {'seq': {}, 'modified_residue': {}, 'structure': {}, 'glycosylation': {}, 'site': {}, 'propeptide': {}}
 sequence_length = len(uniprot.sequence)
 for i in range(sequence_length):
 	protein['seq'][i+1] = uniprot.sequence[i]
-#print(dir(uniprot))
+
 
 # create a dictionary to get the structures positions => type
 structures = {}
+# parse the UniProt Features (see https://www.uniprot.org/help/?query=*&fil=category%3A%22PTM+processing%22+AND+section%3Amanual&columns=title)
 for feature in uniprot.features:
-	# print(feature)
-	if feature[0] == 'MOD_RES':
-		if 'modification' in protein.keys():
-			protein['modification'][feature[1]] = re.split('\W+', feature[3])[0]
-		else:
-			protein['modification'] = {feature[1]: re.split('\W+', feature[3])[0]}
 	if feature[0] == 'HELIX' or feature[0] == 'STRAND' or feature[0] == 'TURN':
 		structures[feature[1]] = {'type': feature[0], 'end': feature[2]}
+	# Modified residue: Modified residues excluding lipids, glycans and protein crosslinks
+	if feature[0] == 'MOD_RES':
+		modif = re.split(' {', feature[3])[0].rstrip('.;,')
+		if modif in protein['modified_residue'].keys():
+			protein['modified_residue'][modif].append((feature[1], feature[2]))
+		else:
+			protein['modified_residue'][modif] = [(feature[1], feature[2])]
+	# Glycosylation: Covalently attached glycan group(s)
+	if feature[0] == 'CARBOHYD':
+		glyco = re.split(' ', feature[3])[0].rstrip('.;,')
+		if glyco in protein['glycosylation'].keys():
+			protein['glycosylation'][glyco].append((feature[1], feature[2]))
+		else:
+			protein['glycosylation'][glyco] = [(feature[1], feature[2])]
+	# Site: Any interesting single amino acid site on the sequence
+	if feature[0] == 'SITE':
+		site = re.split(' {', feature[3])[0].rstrip('.;,')
+		if site in protein['site'].keys():
+			protein['site'][site].append((feature[1], feature[2]))
+		else:
+			protein['site'][site] = [(feature[1], feature[2])]
+	# Propeptide: Part of a protein that is cleaved during maturation or activation
+	if feature[0] == 'PROPEP':
+		propep = re.split(' {', feature[3])[0].rstrip('.;,')
+		if propep in protein['propeptide'].keys():
+			protein['propeptide'][propep].append((feature[1], feature[2]))
+		else:
+			protein['propeptide'][propep] = [(feature[1], feature[2])]
+
 
 # update protein with the structures
 structure_last_position = 0
@@ -143,6 +178,34 @@ if structure_last_position < sequence_length:
 		protein['structure'][structure_last_position + 1] = 'FREE'
 	else:
 		protein['structure'] = {structure_last_position + 1: 'FREE'}
+
+### TOREMOVE
+for k,v in protein.items():
+	if k == 'modified_residue':
+		print(k)
+		for k2,v2 in v.items():
+			print('\t{}'.format(k2))
+			for pos in v2:
+				print('\t\t{}'.format(pos))
+	elif k == 'glycosylation':
+		print(k)
+		for k2,v2 in v.items():
+			print('\t{}'.format(k2))
+			for pos in v2:
+				print('\t\t{}'.format(pos))
+	elif k == 'site':
+		print(k)
+		for k2,v2 in v.items():
+			print('\t{}'.format(k2))
+			for pos in v2:
+				print('\t\t{}'.format(pos))
+	elif k == 'propeptide':
+		print(k)
+		for k2,v2 in v.items():
+			print('\t{}'.format(k2))
+			for pos in v2:
+				print('\t\t{}'.format(pos))
+########################
 
 # create the MIDI file
 mode_name = args.mode
