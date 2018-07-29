@@ -60,7 +60,7 @@ if args.instruments:
 			args.instruments[i] = instru
 	instrus = args.instruments
 else:
-	insrus = [0, 42, 65]
+	instrus = [0, 42, 65]
 	
 # tempo
 if args.tempo:
