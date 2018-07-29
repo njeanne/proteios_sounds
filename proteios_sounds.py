@@ -58,6 +58,15 @@ if args.instruments:
 			raise argparse.ArgumentTypeError('{} should be 3 integers between 0 and 127.'.format(args.instruments))
 		else:
 			args.instruments[i] = instru
+	instrus = args.instruments
+else:
+	insrus = [0, 42, 65]
+	
+# tempo
+if args.tempo:
+	tempo = int(args.tempo)
+else:
+	tempo = 100  # In BPM
 
 ### midi notes correspondance with AA
 # Major
@@ -114,19 +123,17 @@ AA_PHY_CHI = {'A': {'hybrophobic', 'small'},
 out_dir = os.path.abspath(args.out)
 if not os.path.exists(out_dir):
 	os.makedirs(out_dir)
-	
-# tempo
-if args.tempo:
-	tempo = int(args.tempo)
-else:
-	tempo = 100  # In BPM
 
+# create the log file
 if args.debug:
-	# create the log file
 	logPath = os.path.join(out_dir, '{}_{}_{}bpm_{}.log'.format(args.uniprot_accession_number, args.mode, tempo, datetime.now().strftime('%Y-%m-%d_%H-%M-%S')))
 	logging.basicConfig(filename=logPath, level=logging.DEBUG, format='%(asctime)s\t%(levelname)s:\t%(message)s', datefmt='%Y/%m/%d %H:%M:%S')
 	logger = logging.getLogger(__name__)
 	logger.info(' '.join(sys.argv))
+	
+
+if args.debug:
+	logger.info('tempo: {} BPM'.format(tempo))
 
 # Parse the Uniprot entry
 try:
@@ -146,13 +153,12 @@ for item in uniprot.features:
 	print(item)
 ##############
 
-print(uniprot.organism)
+# get the organism and entry name in UniProt
 organism = uniprot.organism
 if '(' in organism:
 	 organism = organism.split('(')[1].split(')')[0]
 organism = organism.rstrip('.,;:').replace(' ', '_')
 entry_name = uniprot.entry_name
-print(organism)
 
 # create a dictionary for the protein
 protein = {'seq': {}, 'modified_residue': {}, 'structure': {}, 'glycosylation': {}, 'site': {}, 'propeptide': {}}
@@ -258,14 +264,12 @@ with open(midi_file_path, 'wb') as  midiFile:
 	time     = 0   # In beats
 	
 	# a channel is defined by an instrument nbr and a volume (0-127, as per the MIDI standard, see: http://www.pjb.com.au/muscript/gm.html)
-	# default is 	0:  Acoustic Grand (piano)
-	# 				42: Cello
-	# 				65: Alto Sax
-	if args.instruments:
-		channels = {0: {'instrument': args.instruments[0], 'vol': 100}, 1: {'instrument': args.instruments[1], 'vol': 40}, 2: {'instrument': args.instruments[2], 'vol': 60}}
-	else:
-		channels = {0: {'instrument': 0, 'vol': 100}, 1: {'instrument': 42, 'vol': 40}, 2: {'instrument': 65, 'vol': 60}}
-
+	channels = {0: {'instrument': instrus[0], 'vol': 100}, 1: {'instrument': instrus[1], 'vol': 40}, 2: {'instrument': instrus[2], 'vol': 60}}
+	if args.debug:
+		logger.info('Instrument number by channel, see: http://www.pjb.com.au/muscript/gm.html for instruments number correspondance:')
+		for channel_nb in channels.keys():
+			logger.info('\tchannel {}: instrument {}'.format(channel_nb, channels[channel_nb]['instrument']))
+	
 	MyMIDI = MIDIFile(numTracks=1, adjust_origin=False) # One track, defaults to format 1 (tempo track automatically created)
 	MyMIDI.addTempo(track, time, tempo)
 	# add the channels (1 per instrument)
@@ -273,6 +277,7 @@ with open(midi_file_path, 'wb') as  midiFile:
 		MyMIDI.addProgramChange(track, channel=channel_nbr, time=time, program=channels[channel_nbr]['instrument'])
 
 	mode = MIDI_KEYS[mode_name]
+	
 	for i in range(1, len(protein['seq']) + 1):
 		AA = protein['seq'][i]
 		if i == 1:
@@ -281,6 +286,8 @@ with open(midi_file_path, 'wb') as  midiFile:
 			next_AA = protein['seq'][1]
 		else:
 			next_AA = protein['seq'][i+1]
+			
+		# set the duration depending on the number of shared properties
 		shared_properties = len(set.intersection(AA_PHY_CHI[AA], AA_PHY_CHI[next_AA]))
 		if shared_properties == 0:
 			duration = 1
@@ -291,6 +298,7 @@ with open(midi_file_path, 'wb') as  midiFile:
 		else:
 			duration = 4
 
+		# change the volume of each instrument depending on the structure
 		if 'structure' in protein.keys():
 			if i in protein['structure'].keys():
 				logging.debug('{}:'.format(protein['structure'][i]))
@@ -307,9 +315,9 @@ with open(midi_file_path, 'wb') as  midiFile:
 					channels[1]['vol'] = 40
 					channels[2]['vol'] = 60
 				else:
-					channels[0]['vol'] = 50
-					channels[1]['vol'] = 50
-					channels[2]['vol'] = 50
+					channels[0]['vol'] = 100
+					channels[1]['vol'] = 60
+					channels[2]['vol'] = 40
 
 		# test if note is a chord
 		if isinstance(mode[AA], list):
