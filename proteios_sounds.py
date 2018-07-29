@@ -1,4 +1,4 @@
-#! /usr/bin/python3
+#! /usr/bin/env python3
 
 __author__ = 'Nina Verstraete, Jacques TOEN & Nicolas JEANNE'
 __copyright__ = 'GNU General Public License'
@@ -77,6 +77,28 @@ MIDI_KEYS['blues']['V'][1] = 52
 MIDI_KEYS['blues']['Y'][1] = 52
 MIDI_KEYS['blues']['M'] = 64
 
+### Physico-chemical properties of AA
+AA_PHY_CHI = {'A': {'hybrophobic', 'small'}, 
+				'R': {'polar', 'pos_charged'}, 
+				'N': {'polar', 'small'}, 
+				'D': {'polar', 'small', 'neg_charged'}, 
+				'C': {'hydrophobic', 'polar', 'small'}, 
+				'E': {'polar', 'neg_charged'}, 
+				'Q': {'polar'}, 
+				'G': {'hydrophobic', 'small'}, 
+				'H': {'hydrophobic', 'polar', 'neg_charged', 'aromatic'},
+				'I': {'hydrophobic', 'aliphatic'}, 
+				'L': {'hydrophobic', 'aliphatic'},
+				'K': {'hydrophobic', 'polar', 'pos_charged'}, 
+				'M': {'hydrophobic'}, 
+				'F': {'hydrophobic', 'aromatic'}, 
+				'P': {'small'},
+				'S': {'polar', 'small'}, 
+				'T': {'hydrophobic', 'polar', 'small'}, 
+				'W': {'hydrophobic', 'polar', 'aromatic'}, 
+				'Y': {'hydrophobic', 'polar', 'aromatic'}, 
+				'V': {'hydrophobic', 'small', 'aliphatic'}}
+
 # create the output directory
 out_dir = os.path.abspath(args.out)
 if not os.path.exists(out_dir):
@@ -102,6 +124,7 @@ except urllib.error.HTTPError as err:
 uniprot = SwissProt.read(handle)
 
 ### TOREMOVE
+print(uniprot.sequence)
 for item in uniprot.features:
 	print(item)
 ##############
@@ -208,18 +231,19 @@ for k,v in protein.items():
 ########################
 
 # create the MIDI file
+if args.tempo:
+	tempo = int(args.tempo)
+else:
+	tempo = 100  # In BPM
 mode_name = args.mode
-file_base_name = '{}_{}_{}_{}'.format(args.uniprot_accession_number, entry_name, organism, mode_name)
+file_base_name = '{}_{}_{}_{}_{}bpm'.format(args.uniprot_accession_number, entry_name, organism, mode_name,tempo)
 midi_file_path = os.path.join(out_dir, '{}.midi'.format(file_base_name))
 
 with open(midi_file_path, 'wb') as  midiFile:
 
 	track    = 0
 	time     = 0   # In beats
-	if args.tempo:
-		tempo = int(args.tempo)
-	else:
-		tempo    = 100  # In BPM
+	
 	# a channel is defined by an instrument nbr and a volume (0-127, as per the MIDI standard)
 	channels = {0: {'instrument': 1, 'vol': 100}, 1: {'instrument': 42, 'vol': 40}, 2: {'instrument': 65, 'vol': 60}}
 
@@ -232,7 +256,13 @@ with open(midi_file_path, 'wb') as  midiFile:
 	mode = MIDI_KEYS[mode_name]
 	for i in range(1, len(protein['seq']) + 1):
 		AA = protein['seq'][i]
-		duration = 1
+		if i == 1:
+			next_AA = protein['seq'][sequence_length]
+		elif i == len(protein['seq']):
+			next_AA = protein['seq'][1]
+		else:
+			next_AA = protein['seq'][i+1]
+		duration = 1 + len(set.intersection(AA_PHY_CHI[AA], AA_PHY_CHI[next_AA]))
 
 		if 'structure' in protein.keys():
 			if i in protein['structure'].keys():
