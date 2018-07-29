@@ -27,6 +27,7 @@ def restricted_tempo(x):
 		raise argparse.ArgumentTypeError('{} not in range 60 to 150.'.format(x))
 	return x
 
+
 descr = '''
 proteios_sounds.py v.{}
 
@@ -43,10 +44,20 @@ parser.add_argument('-o', '--out', required=True, help='path to the results dire
 parser.add_argument('-m', '--mode', required=True, choices=['major', 'mixolydian', 'dorian', 'blues'], help='The mode to apply: major, mixolydian, dorian or blues.')
 parser.add_argument('-p', '--play', required=False, action='store_true', help='play the music with Timidity, just for tests.')
 parser.add_argument('-t', '--tempo', required=False, type=restricted_tempo, help='set the tempo in BPM. Value between 60 and 150.')
+parser.add_argument('-i', '--instruments', required=False, nargs=3, help='set channel 0, 1 and 2 instruments, restricted to 3 values between 0 and 127 separated by spaces. Default is 0:  Acoustic Grand, 42: Cello and 65: Alto Sax. See: http://www.pjb.com.au/muscript/gm.html#patch for details.')
 parser.add_argument('-d', '--debug', required=False, action='store_true', help='debug mode, create a log file which details each entry of the MIDI file.')
 parser.add_argument('uniprot_accession_number', help='the protein accession number in the UniProt database. Example: Human Interleukin-8 > P10145')
 args = parser.parse_args()
 
+
+# check if instruments are between 0 and 127
+if args.instruments:
+	for i in range(len(args.instruments)):
+		instru = int(args.instruments[i])
+		if instru < 0 or instru > 127:
+			raise argparse.ArgumentTypeError('{} should be 3 integers between 0 and 127.'.format(args.instruments))
+		else:
+			args.instruments[i] = instru
 
 ### midi notes correspondance with AA
 # Major
@@ -247,10 +258,13 @@ with open(midi_file_path, 'wb') as  midiFile:
 	time     = 0   # In beats
 	
 	# a channel is defined by an instrument nbr and a volume (0-127, as per the MIDI standard, see: http://www.pjb.com.au/muscript/gm.html)
-	# 0:  Acoustic Grand (piano)
-	# 42: Cello
-	# 65: Alto Sax
-	channels = {0: {'instrument': 0, 'vol': 100}, 1: {'instrument': 42, 'vol': 40}, 2: {'instrument': 65, 'vol': 60}}
+	# default is 	0:  Acoustic Grand (piano)
+	# 				42: Cello
+	# 				65: Alto Sax
+	if args.instruments:
+		channels = {0: {'instrument': args.instruments[0], 'vol': 100}, 1: {'instrument': args.instruments[1], 'vol': 40}, 2: {'instrument': args.instruments[2], 'vol': 60}}
+	else:
+		channels = {0: {'instrument': 0, 'vol': 100}, 1: {'instrument': 42, 'vol': 40}, 2: {'instrument': 65, 'vol': 60}}
 
 	MyMIDI = MIDIFile(numTracks=1, adjust_origin=False) # One track, defaults to format 1 (tempo track automatically created)
 	MyMIDI.addTempo(track, time, tempo)
