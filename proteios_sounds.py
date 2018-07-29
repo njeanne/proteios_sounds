@@ -86,7 +86,7 @@ AA_PHY_CHI = {'A': {'hybrophobic', 'small'},
 				'E': {'polar', 'neg_charged'}, 
 				'Q': {'polar'}, 
 				'G': {'hydrophobic', 'small'}, 
-				'H': {'hydrophobic', 'polar', 'neg_charged', 'aromatic'},
+				'H': {'hydrophobic', 'polar', 'pos_charged', 'aromatic'},
 				'I': {'hydrophobic', 'aliphatic'}, 
 				'L': {'hydrophobic', 'aliphatic'},
 				'K': {'hydrophobic', 'polar', 'pos_charged'}, 
@@ -103,10 +103,16 @@ AA_PHY_CHI = {'A': {'hybrophobic', 'small'},
 out_dir = os.path.abspath(args.out)
 if not os.path.exists(out_dir):
 	os.makedirs(out_dir)
+	
+# tempo
+if args.tempo:
+	tempo = int(args.tempo)
+else:
+	tempo = 100  # In BPM
 
 if args.debug:
 	# create the log file
-	logPath = os.path.join(out_dir, '{}_{}_{}.log'.format(args.uniprot_accession_number, args.mode, datetime.now().strftime('%Y-%m-%d_%H-%M-%S')))
+	logPath = os.path.join(out_dir, '{}_{}_{}bpm_{}.log'.format(args.uniprot_accession_number, args.mode, tempo, datetime.now().strftime('%Y-%m-%d_%H-%M-%S')))
 	logging.basicConfig(filename=logPath, level=logging.DEBUG, format='%(asctime)s\t%(levelname)s:\t%(message)s', datefmt='%Y/%m/%d %H:%M:%S')
 	logger = logging.getLogger(__name__)
 	logger.info(' '.join(sys.argv))
@@ -231,10 +237,6 @@ for k,v in protein.items():
 ########################
 
 # create the MIDI file
-if args.tempo:
-	tempo = int(args.tempo)
-else:
-	tempo = 100  # In BPM
 mode_name = args.mode
 file_base_name = '{}_{}_{}_{}_{}bpm'.format(args.uniprot_accession_number, entry_name, organism, mode_name,tempo)
 midi_file_path = os.path.join(out_dir, '{}.midi'.format(file_base_name))
@@ -244,8 +246,11 @@ with open(midi_file_path, 'wb') as  midiFile:
 	track    = 0
 	time     = 0   # In beats
 	
-	# a channel is defined by an instrument nbr and a volume (0-127, as per the MIDI standard)
-	channels = {0: {'instrument': 1, 'vol': 100}, 1: {'instrument': 42, 'vol': 40}, 2: {'instrument': 65, 'vol': 60}}
+	# a channel is defined by an instrument nbr and a volume (0-127, as per the MIDI standard, see: http://www.pjb.com.au/muscript/gm.html)
+	# 0:  Acoustic Grand (piano)
+	# 42: Cello
+	# 65: Alto Sax
+	channels = {0: {'instrument': 0, 'vol': 100}, 1: {'instrument': 42, 'vol': 40}, 2: {'instrument': 65, 'vol': 60}}
 
 	MyMIDI = MIDIFile(numTracks=1, adjust_origin=False) # One track, defaults to format 1 (tempo track automatically created)
 	MyMIDI.addTempo(track, time, tempo)
@@ -262,7 +267,15 @@ with open(midi_file_path, 'wb') as  midiFile:
 			next_AA = protein['seq'][1]
 		else:
 			next_AA = protein['seq'][i+1]
-		duration = 1 + len(set.intersection(AA_PHY_CHI[AA], AA_PHY_CHI[next_AA]))
+		shared_properties = len(set.intersection(AA_PHY_CHI[AA], AA_PHY_CHI[next_AA]))
+		if shared_properties == 0:
+			duration = 1
+		elif shared_properties == 1:
+			duration = 1.5
+		elif shared_properties == 2:
+			duration = 2
+		else:
+			duration = 4
 
 		if 'structure' in protein.keys():
 			if i in protein['structure'].keys():
