@@ -2,7 +2,6 @@ Visualisation sur fichier .pdb avec projection et rotation 3D de la protéine
 
 voir banque de son MIDI SF2
 
-pour rythme prendre couple d'AA de gauche à droite et si partagent une propriété physico-chimique => noir pointée, si 2 => blanche, si plus => ronde
-pour accords, prendre couple d'AA de droite à gauche
+pour accords, prendre couple d'AA de droite à gauche et si partagent une propriété physico-chimique
 
 identifier des formes (cadence etc...) qui permettraient de mieux caler la musique sur une gamme donnée
