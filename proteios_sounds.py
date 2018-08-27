@@ -20,7 +20,7 @@ from midiutil import MIDIFile
 
 # Check range for tempo argument, must be between 60 and 150.
 # @param x:	[str] value of tempo argument in BPM.
-# @return:		[int] the tempo.
+# @return: [int] the tempo.
 def restricted_tempo(x):
 	x = int(x)
 	if x < 60 or x > 150:
@@ -61,7 +61,7 @@ if args.instruments:
 	instrus = args.instruments
 else:
 	instrus = [0, 42, 65]
-	
+
 # tempo
 if args.tempo:
 	tempo = int(args.tempo)
@@ -98,25 +98,25 @@ MIDI_KEYS['blues']['Y'][1] = 52
 MIDI_KEYS['blues']['M'] = 64
 
 ### Physico-chemical properties of AA
-AA_PHY_CHI = {'A': {'hybrophobic', 'small'}, 
-				'R': {'polar', 'pos_charged'}, 
-				'N': {'polar', 'small'}, 
-				'D': {'polar', 'small', 'neg_charged'}, 
-				'C': {'hydrophobic', 'polar', 'small'}, 
-				'E': {'polar', 'neg_charged'}, 
-				'Q': {'polar'}, 
-				'G': {'hydrophobic', 'small'}, 
+AA_PHY_CHI = {'A': {'hybrophobic', 'small'},
+				'R': {'polar', 'pos_charged'},
+				'N': {'polar', 'small'},
+				'D': {'polar', 'small', 'neg_charged'},
+				'C': {'hydrophobic', 'polar', 'small'},
+				'E': {'polar', 'neg_charged'},
+				'Q': {'polar'},
+				'G': {'hydrophobic', 'small'},
 				'H': {'hydrophobic', 'polar', 'pos_charged', 'aromatic'},
-				'I': {'hydrophobic', 'aliphatic'}, 
+				'I': {'hydrophobic', 'aliphatic'},
 				'L': {'hydrophobic', 'aliphatic'},
-				'K': {'hydrophobic', 'polar', 'pos_charged'}, 
-				'M': {'hydrophobic'}, 
-				'F': {'hydrophobic', 'aromatic'}, 
+				'K': {'hydrophobic', 'polar', 'pos_charged'},
+				'M': {'hydrophobic'},
+				'F': {'hydrophobic', 'aromatic'},
 				'P': {'small'},
-				'S': {'polar', 'small'}, 
-				'T': {'hydrophobic', 'polar', 'small'}, 
-				'W': {'hydrophobic', 'polar', 'aromatic'}, 
-				'Y': {'hydrophobic', 'polar', 'aromatic'}, 
+				'S': {'polar', 'small'},
+				'T': {'hydrophobic', 'polar', 'small'},
+				'W': {'hydrophobic', 'polar', 'aromatic'},
+				'Y': {'hydrophobic', 'polar', 'aromatic'},
 				'V': {'hydrophobic', 'small', 'aliphatic'}}
 
 # create the output directory
@@ -130,7 +130,7 @@ if args.debug:
 	logging.basicConfig(filename=logPath, level=logging.DEBUG, format='%(asctime)s\t%(levelname)s:\t%(message)s', datefmt='%Y/%m/%d %H:%M:%S')
 	logger = logging.getLogger(__name__)
 	logger.info(' '.join(sys.argv))
-	
+
 
 if args.debug:
 	logger.info('tempo: {} BPM'.format(tempo))
@@ -262,14 +262,14 @@ with open(midi_file_path, 'wb') as  midiFile:
 
 	track    = 0
 	time     = 0   # In beats
-	
+
 	# a channel is defined by an instrument nbr and a volume (0-127, as per the MIDI standard, see: http://www.pjb.com.au/muscript/gm.html)
 	channels = {0: {'instrument': instrus[0], 'vol': 100}, 1: {'instrument': instrus[1], 'vol': 40}, 2: {'instrument': instrus[2], 'vol': 60}}
 	if args.debug:
 		logger.info('Instrument number by channel, see: http://www.pjb.com.au/muscript/gm.html for instruments number correspondance:')
 		for channel_nb in channels.keys():
 			logger.info('\tchannel {}: instrument {}'.format(channel_nb, channels[channel_nb]['instrument']))
-	
+
 	MyMIDI = MIDIFile(numTracks=1, adjust_origin=False) # One track, defaults to format 1 (tempo track automatically created)
 	MyMIDI.addTempo(track, time, tempo)
 	# add the channels (1 per instrument)
@@ -277,7 +277,7 @@ with open(midi_file_path, 'wb') as  midiFile:
 		MyMIDI.addProgramChange(track, channel=channel_nbr, time=time, program=channels[channel_nbr]['instrument'])
 
 	mode = MIDI_KEYS[mode_name]
-	
+
 	for i in range(1, len(protein['seq']) + 1):
 		AA = protein['seq'][i]
 		if i == 1:
@@ -286,7 +286,7 @@ with open(midi_file_path, 'wb') as  midiFile:
 			next_AA = protein['seq'][1]
 		else:
 			next_AA = protein['seq'][i+1]
-			
+
 		# set the duration depending on the number of shared properties
 		shared_properties = len(set.intersection(AA_PHY_CHI[AA], AA_PHY_CHI[next_AA]))
 		if shared_properties == 0:
