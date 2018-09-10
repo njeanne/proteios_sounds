@@ -255,13 +255,15 @@ for k,v in protein.items():
 
 # create the MIDI file
 mode_name = args.mode
-file_base_name = '{}_{}_{}_{}_{}bpm'.format(args.uniprot_accession_number, entry_name, organism, mode_name,tempo)
+file_base_name = '{}_{}_{}_{}_{}bpm_instrus'.format(args.uniprot_accession_number, entry_name, organism, mode_name,tempo)
+for instru in instrus:
+	file_base_name = '{}-{}'.format(file_base_name, instru)
 midi_file_path = os.path.join(out_dir, '{}.midi'.format(file_base_name))
 
 with open(midi_file_path, 'wb') as  midiFile:
 
-	track    = 0
-	time     = 0   # In beats
+	track = 0
+	time = 0   # In beats
 
 	# a channel is defined by an instrument nbr and a volume (0-127, as per the MIDI standard, see: http://www.pjb.com.au/muscript/gm.html)
 	channels = {0: {'instrument': instrus[0], 'vol': 100}, 1: {'instrument': instrus[1], 'vol': 40}, 2: {'instrument': instrus[2], 'vol': 60}}
