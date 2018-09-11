@@ -269,8 +269,7 @@ with open(midi_file_path, 'wb') as  midiFile:
 	# channel 9 is for percussions (see https://pjb.com.au/muscript/gm.html#perc)
 	channels = {0: {'instrument': instrus[0], 'vol': 100}, 
 				1: {'instrument': instrus[1], 'vol': 40}, 
-				2: {'instrument': instrus[2], 'vol': 60},
-				9: {'instrument': 35, 'vol': 100}}
+				2: {'instrument': instrus[2], 'vol': 60}}
 	
 	if args.debug:
 		logger.info('Instrument number by channel, see: http://www.pjb.com.au/muscript/gm.html for instruments number correspondance:')
