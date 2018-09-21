@@ -1,7 +1,10 @@
 Visualisation sur fichier .pdb avec projection et rotation 3D de la protéine
+--> possibilité d'utiliser le logiciel Pymol pour la visualisation (rotation / zoom in / zoom out) de la protéine en 3D
 
 voir banque de son MIDI SF2
 
 pour accords, prendre couple d'AA de droite à gauche et si partagent une propriété physico-chimique
 
 identifier des formes (cadence etc...) qui permettraient de mieux caler la musique sur une gamme donnée
+--> possibilité d'utiliser des marqueurs épigénétiques (acétylation, méthylation) : comme l'acétylation et la méthylation sont des marqueurs d'activation ou d'inactivation des gènes, cela peut être assez "parlant" musicalement pour transmettre l'idée qu'on entre dans une phase silencée ou au contraire exprimée.
+
