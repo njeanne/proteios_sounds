@@ -1,10 +1,10 @@
 # Correspondance Acides Aminés/notes:
 on part sur une gamme majeur de 7 notes
 
- |DO|RE|MI|FA|SOL|LA|SI
----|---|---|---|---|---|---|
-1ere ocatve|48|50|52|53|55|57|59
-2eme octave|60|62|64|65|67|69|71
+octave|DO|RE|MI|FA|SOL|LA|SI
+---|---|---|---|---|---|---|---
+1ère|48|50|52|53|55|57|59
+2ème|60|62|64|65|67|69|71
 dernière note|72||||||
 
 ## 1) première étape du classement
