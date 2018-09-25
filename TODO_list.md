@@ -1,13 +1,13 @@
 # Correspondance Acides Aminés/notes:
 on part sur une gamme majeur de 7 notes
 
-|DO|RE|MI|FA|SOL|LA|SI
+ |DO|RE|MI|FA|SOL|LA|SI
 ---|---|---|---|---|---|---|
 1ere ocatve|48|50|52|53|55|57|59
 2eme octave|60|62|64|65|67|69|71
-dernier note|72||||||||
+dernière note|72||||||
 
-## 1) premiere etape du classement
+## 1) première étape du classement
 - [ ] 16 AA donc 2 octaves (15 notes) + 1 note: fixées par une propriété de l'AA, massse moléculaire, Pk...
 - [ ]4 AA restant sont des altérations: choisi par la fréquence la moins importante puis classées par la propriété choisie ci-dessus. Rajout d'un dièse:
  - 1ere altération, un SOL# (1ere octave): 55# = 56
@@ -22,10 +22,10 @@ dernier note|72||||||||
 - [ ] Peut être une analyse statistique basée sur une mesure (3 ou 4 temps) pourrait nous mener à faire une transposition, l'analyse statistique peut également nous permettre de choisir entre une mesure à 3 ou 4 temps.
 
 # Accords
-Prendre couple d'AA de droite à gauche et si partagent une propriété physico-chimique
+Prendre couple d'AA de droite à gauche et si ils partagent une propriété physico-chimique -> accord
 
 # Percussions:
-- [ ] En fonction de la métrique, caler dessus des patterns rythmiques et en fonction d'une modif post traductionnelle (résidu modifié?), changement de pattern.
+- [ ] En fonction de la métrique, caler dessus des patterns rythmiques et en fonction d'une modification post-traductionnelle (résidu modifié?), changement de pattern.
 - [ ] Ajout d'une basse systématique élaborée en fonction de la mesure et des percussions.
 - [ ] Si la basse fonctionne bien, rajout d'accords.
 
@@ -38,6 +38,6 @@ Visualisation sur fichier .pdb avec projection et rotation 3D de la protéine.
 --> possibilité d'utiliser le logiciel Pymol pour la visualisation (rotation / zoom in / zoom out) de la protéine en 3D
 
 # Divers
-- [ ] Utiliser musescore dans le script.
+- [ ] Utiliser musescore dans le script pour produire la partition.
 - voir banque de son MIDI SF2
 - identifier des formes (cadence etc...) qui permettraient de mieux caler la musique sur une gamme donnée
