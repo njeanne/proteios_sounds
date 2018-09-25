@@ -267,10 +267,10 @@ with open(midi_file_path, 'wb') as  midiFile:
 
 	# a channel is defined by an instrument nbr and a volume (0-127, as per the MIDI standard, see: http://www.pjb.com.au/muscript/gm.html)
 	# channel 9 is for percussions (see https://pjb.com.au/muscript/gm.html#perc)
-	channels = {0: {'instrument': instrus[0], 'vol': 100}, 
-				1: {'instrument': instrus[1], 'vol': 40}, 
+	channels = {0: {'instrument': instrus[0], 'vol': 100},
+				1: {'instrument': instrus[1], 'vol': 40},
 				2: {'instrument': instrus[2], 'vol': 60}}
-	
+
 	if args.debug:
 		logger.info('Instrument number by channel, see: http://www.pjb.com.au/muscript/gm.html for instruments number correspondance:')
 		for channel_nb in channels.keys():
@@ -293,7 +293,7 @@ with open(midi_file_path, 'wb') as  midiFile:
 		else:
 			next_AA = protein['seq'][i+1]
 
-		# set the duration depending on the number of shared properties
+		# set the duration of the key (current AA) depending on the number of shared properties with the next AA 
 		shared_properties = len(set.intersection(AA_PHY_CHI[AA], AA_PHY_CHI[next_AA]))
 		if shared_properties == 0:
 			duration = 1
