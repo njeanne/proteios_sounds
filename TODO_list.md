@@ -37,6 +37,10 @@ dernière note|72|74|||||
 
 - [ ] possibilité d'utiliser le logiciel Pymol pour la visualisation (rotation / zoom in / zoom out) de la protéine en 3D
 
+# IHM
+- [ ] créer une interface graphique.
+- [ ] Mettre le logiciel en ligne.
+
 # Divers
 - [ ] Utiliser musescore dans le script pour produire la partition.
 - [ ] voir banque de son MIDI SF2
