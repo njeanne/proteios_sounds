@@ -41,7 +41,7 @@ Create a MIDI file from a protein entry of the UniProt database (https://www.uni
 # Parse arguments
 parser = argparse.ArgumentParser(description=descr, formatter_class=argparse.RawTextHelpFormatter)
 parser.add_argument('-o', '--out', required=True, help='path to the results directory.')
-parser.add_argument('-m', '--mode', required=True, choices=['major', 'mixolydian', 'dorian', 'blues'], help='The mode to apply: major, mixolydian, dorian or blues.')
+parser.add_argument('-s', '--score', required=False, action='store_true', help='use musescore software to create the score corresponding to the MIDI file.')
 parser.add_argument('-p', '--play', required=False, action='store_true', help='play the music with Timidity, just for tests.')
 parser.add_argument('-t', '--tempo', required=False, type=restricted_tempo, help='set the tempo in BPM. Value between 60 and 150.')
 parser.add_argument('-i', '--instruments', required=False, nargs=3, help='set channel 0, 1 and 2 instruments, restricted to 3 values between 0 and 127 separated by spaces. Default is 0:  Acoustic Grand, 42: Cello and 65: Alto Sax. See: http://www.pjb.com.au/muscript/gm.html#patch for details.')
@@ -96,6 +96,8 @@ MIDI_KEYS['blues']['U'][1] = 52 # donne 'U':[52,52,57,60] ??????
 MIDI_KEYS['blues']['V'][1] = 52
 MIDI_KEYS['blues']['Y'][1] = 52
 MIDI_KEYS['blues']['M'] = 64
+#mode to use
+mode_name='major'
 
 ### Physico-chemical properties of AA
 AA_PHY_CHI = {'A': {'hybrophobic', 'small'},
@@ -293,7 +295,7 @@ with open(midi_file_path, 'wb') as  midiFile:
 		else:
 			next_AA = protein['seq'][i+1]
 
-		# set the duration of the key (current AA) depending on the number of shared properties with the next AA 
+		# set the duration of the key (current AA) depending on the number of shared properties with the next AA
 		shared_properties = len(set.intersection(AA_PHY_CHI[AA], AA_PHY_CHI[next_AA]))
 		if shared_properties == 0:
 			duration = 1
