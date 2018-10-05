@@ -16,7 +16,7 @@ dernière note|72|74|||||
   - 4eme altération, FA#(2eme octave) 65# = 66
 
 ## 2) raffinage du classement
-- [ ] Par rapport aux degrés dans la gamme, utiliser les propriétés physico-chimiques communes pour les attribuer aux degrés forts 1er, 4eme et 5eme de la 1ere octave ainsi que 8eme, 11 et 12eme de la 2eme octave et 15eme (la note seule). Une fois sortie la liste des 2 octaves + 1 note, recherche de celui qui a le plus de propriétés physico-chimiques et le placer en 1er car ce sera celui qui aura le plus de durées longues et d'accords et ainsi de suite... D'abord 1, 8, 15, puis 5, 12 et finalement 4, 11.
+- [ ] Par rapport aux degrés dans la gamme, utiliser les propriétés physico-chimiques communes pour les attribuer aux degrés forts 1er, 4eme et 5eme de la 1ere octave ainsi que 8eme, 11 et 12eme de la 2eme octave et 15eme (la première note seule). Une fois sortie la liste des 2 octaves + 2 notes, recherche de celui qui a le plus de propriétés physico-chimiques et le placer en 1er car ce sera celui qui aura le plus de durées longues et d'accords et ainsi de suite... D'abord 1, 8, 15, puis 5, 12 et finalement 4, 11.
 
 ## 3) transposition
 - [ ] Peut être une analyse statistique basée sur une mesure (3 ou 4 temps) pourrait nous mener à faire une transposition, l'analyse statistique peut également nous permettre de choisir entre une mesure à 3 ou 4 temps.
