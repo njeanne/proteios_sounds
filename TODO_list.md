@@ -1,22 +1,26 @@
 # Correspondance Acides Aminés/notes:
-on part sur une gamme majeur de 7 notes
+on part sur une gamme majeur de 7 notes (2 octaves) à laquelle on rajoute des altérations pour arriver au nombre total d'AA existants (22 : les 20 usuels + O (HydroxyProline) et U(PyroGlutamatique)).
 
 octave|DO|RE|MI|FA|SOL|LA|SI
 ---|---|---|---|---|---|---|---
 1ère|48|50|52|53|55|57|59
 2ème|60|62|64|65|67|69|71
-dernière note|72|74|||||
+dernière note|72||||||
 
 ## 1) première étape du classement
-- [ ] 16 AA donc 2 octaves (14 notes) + 2 notes: fixées par une propriété de l'AA, massse moléculaire, Pk...
-- [ ] 4 AA restant sont des altérations: choisies par la fréquence la moins importante puis classées par la propriété choisie ci-dessus. Rajout d'un dièse:
-  - 1ere altération, un SOL# (1ere octave): 55# = 56
-  - 2eme altération, SOL# (2eme octave) 67# = 68
-  - 3eme altération, FA# (1ere octave) 53# = 54
-  - 4eme altération, FA#(2eme octave) 65# = 66
+- [ ] 15 AA donc 2 octaves (14 notes) + 1 note: fixées par la fréquence d'occurence des AA, puis par les propriétés de l'AA, masse moléculaire, Pk...
+- [ ] 7 AA restants sont représentés par des altérations répartis sur les 2 octaves : choisies par la fréquence d'AA la moins importante dans la séquence protéique, puis classées par la propriété choisie ci-dessus. Rajout d'un dièse (revoir avec Jacques pourquoi SOL# puis FA#) / nouvelle proposition : suivre l'ordre des quintes ascendantes:
+  - 1ere altération, FA# (1ere octave) 53# = 54
+  - 2eme altération, FA# (2eme octave) 65# = 66
+  - 3eme altération, DO# (1ere octave) 58# = 49
+  - 4eme altération, DO# (2eme octave) 60# = 61
+  - 5eme altération, SOL# (1ere octave) 55# = 56
+  - 6eme altération, SOL# (2eme octave) 67# = 68
+  - 7eme alteration, RE# (1ere octave) 50# = 51.
+  
 
 ## 2) raffinage du classement
-- [ ] Par rapport aux degrés dans la gamme, utiliser les propriétés physico-chimiques communes pour les attribuer aux degrés forts 1er, 4eme et 5eme de la 1ere octave ainsi que 8eme, 11 et 12eme de la 2eme octave et 15eme (la note seule). Une fois sortie la liste des 2 octaves + 1 note, recherche de celui qui a le plus de propriétés physico-chimiques et le placer en 1er car ce sera celui qui aura le plus de durées longues et d'accords et ainsi de suite... D'abord 1, 8, 15, puis 5, 12 et finalement 4, 11.
+- [ ] Par rapport aux degrés dans la gamme, utiliser les propriétés physico-chimiques communes pour les attribuer aux degrés forts 1er, 4eme et 5eme de la 1ere octave ainsi que 8eme, 11 et 12eme de la 2eme octave et 15eme (la note seule). Une fois sortie la liste des 2 octaves + 1 note, recherche de celui qui a le plus de propriétés physico-chimiques (annotations sur le diagramme de Wenn) et le placer en 1er car ce sera celui qui aura le plus de durées longues et d'accords et ainsi de suite... D'abord 1, 8, 15 (les do - degré I) puis 5, 12 (les sol - degré V)et finalement 4, 11 (les fa - degré IV).
 
 ## 3) transposition
 - [ ] Peut être une analyse statistique basée sur une mesure (3 ou 4 temps) pourrait nous mener à faire une transposition, l'analyse statistique peut également nous permettre de choisir entre une mesure à 3 ou 4 temps.
