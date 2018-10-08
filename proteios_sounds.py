@@ -69,9 +69,9 @@ else:
     tempo = 100  # In BPM
 
 ### midi notes on major mode correspondance with AA sorted by decreasing molecular weight
-INITIAL_MIDI_KEYS = [48, 50, 52, 53, 55, 57, 59, 60, 62, 64, 65, 67, 69, 71, 72, 74, 56, 68, 54, 66]
+INITIAL_MIDI_KEYS = [48, 50, 52, 53, 55, 57, 59, 60, 62, 64, 65, 67, 69, 71, 72, 54, 66, 49, 61, 56, 68, 51]
 AA_SORTED_BY_MOL_WEIGHTS = ['W', 'Y', 'R', 'F', 'H', 'M', 'E', 'K', 'Q', 'U', 'D', 'N',
-                            'I', 'L', 'C', 'T', 'V', 'P', 'S', 'A', 'G']
+                            'I', 'L', 'O', 'C', 'T', 'V', 'P', 'S', 'A', 'G']
 print(len(INITIAL_MIDI_KEYS))
 print(len(AA_SORTED_BY_MOL_WEIGHTS))
 MIDI_KEYS = {}
