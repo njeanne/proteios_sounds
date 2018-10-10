@@ -154,7 +154,6 @@ if __name__ == '__main__':
         proportion_AA[AA] = uniprot_sequence.count(AA) / sequence_length
     # sort by decreasing frequency
     proportion_AA = sorted(proportion_AA.items(), key=lambda kv: kv[1], reverse=True)
-    print(proportion_AA)
 
     for idx in range(0, len(proportion_AA)):
         MIDI_KEYS[proportion_AA[idx][0]] = INITIAL_MIDI_KEYS[idx]
