@@ -1,22 +1,23 @@
 # Correspondance Acides Aminés/notes:
-on part sur une gamme majeur de 7 notes (2 octaves) à laquelle on rajoute des altérations pour arriver au nombre total d'AA existants (22 : les 20 usuels + O (HydroxyProline) et U(PyroGlutamatique)).
+on part sur une gamme majeur de 7 notes (2 octaves) + 1 note. A cette gamme, on rajoute des altérations pour arriver au nombre total d'AA existants (22 : les 20 usuels + O (HydroxyProline) et U(PyroGlutamatique)).
 
-octave|DO|RE|MI|FA|SOL|LA|SI
+Notes|DO|RE|MI|FA|SOL|LA|SI
 ---|---|---|---|---|---|---|---
-1ère|48|50|52|53|55|57|59
-2ème|60|62|64|65|67|69|71
-dernière note|72||||||
+1ère octave|48|50|52|53|55|57|59
+2ème octave|60|62|64|65|67|69|71
+note supplémentaire|72||||||
+altérations (#)|54|66|49|61|56|68|51
 
 ## 1) première étape du classement
-- [ ] 15 AA donc 2 octaves (14 notes) + 1 note: fixées par la fréquence d'occurence des AA, puis par les propriétés de l'AA, masse moléculaire, Pk...
-- [ ] 7 AA restants sont représentés par des altérations répartis sur les 2 octaves : choisies par la fréquence d'AA la moins importante dans la séquence protéique, puis classées par la propriété choisie ci-dessus. Rajout d'un dièse (revoir avec Jacques pourquoi SOL# puis FA#) / nouvelle proposition : suivre l'ordre des quintes ascendantes:
+- [ x ] 15 AA donc 2 octaves (14 notes) + 1 note.
+- [ x ] 7 AA restants sont représentés par des altérations répartis sur les 2 octaves : choisies par la fréquence d'AA la moins importante dans la séquence protéique, puis classées par la propriété choisie ci-dessus. Rajout d'un dièse (revoir avec Jacques pourquoi SOL# puis FA#) / nouvelle proposition : suivre l'ordre des quintes ascendantes:
   - 1ere altération, FA# (1ere octave) 53# = 54
   - 2eme altération, FA# (2eme octave) 65# = 66
   - 3eme altération, DO# (1ere octave) 58# = 49
   - 4eme altération, DO# (2eme octave) 60# = 61
   - 5eme altération, SOL# (1ere octave) 55# = 56
   - 6eme altération, SOL# (2eme octave) 67# = 68
-  - 7eme alteration, RE# (1ere octave) 50# = 51.
+  - 7eme altération, RE# (1ere octave) 50# = 51.
   
 
 ## 2) raffinage du classement
