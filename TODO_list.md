@@ -9,8 +9,8 @@ note supplémentaire|72||||||
 altérations (#)|54|66|49|61|56|68|51
 
 ## 1) première étape du classement
-- [ x ] 15 AA donc 2 octaves (14 notes) + 1 note.
-- [ x ] 7 AA restants sont représentés par des altérations répartis sur les 2 octaves : choisies par la fréquence d'AA la moins importante dans la séquence protéique, puis classées par la propriété choisie ci-dessus. Rajout d'un dièse (revoir avec Jacques pourquoi SOL# puis FA#) / nouvelle proposition : suivre l'ordre des quintes ascendantes:
+- [x] 15 AA donc 2 octaves (14 notes) + 1 note.
+- [x] 7 AA restants sont représentés par des altérations répartis sur les 2 octaves : choisies par la fréquence d'AA la moins importante dans la séquence protéique, puis classées par la propriété choisie ci-dessus. Rajout d'un dièse (revoir avec Jacques pourquoi SOL# puis FA#) / nouvelle proposition : suivre l'ordre des quintes ascendantes:
   - 1ere altération, FA# (1ere octave) 53# = 54
   - 2eme altération, FA# (2eme octave) 65# = 66
   - 3eme altération, DO# (1ere octave) 58# = 49
