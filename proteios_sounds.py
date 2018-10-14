@@ -27,7 +27,7 @@ def restricted_tempo(x):
         raise argparse.ArgumentTypeError('{} not in range 60 to 150.'.format(x))
     return x
 
-if __name__ == 'main':
+if __name__ == '__main__':
     descr = '''
     proteios_sounds.py v.{}
 
@@ -68,36 +68,12 @@ if __name__ == 'main':
     else:
         tempo = 100  # In BPM
 
-    ### midi notes correspondance with AA
-    # Major
-    MIDI_KEYS ={'major':{'A':48, 'C':50, 'D':52, 'E':53, 'F':55, 'G':57, 'H':59, 'I':60, 'K':62, 'L':64, 'M':65, 'N':67, 'P':69, 'Q':71,
-    'R':[48,52,55,59], 'S':[48,50,53,57], 'T':[52,55,59,62], 'U':[52,53,57,60], 'V':[50,53,55,59], 'W':[48,52,55,57], 'Y':[50,53,57,59]}}
-    # Mixolydian
-    MIDI_KEYS['mixolydian'] = MIDI_KEYS['major']
-    MIDI_KEYS['mixolydian']['H']=58
-    MIDI_KEYS['mixolydian']['R'][3]=58
-    MIDI_KEYS['mixolydian']['T'][2]=58
-    MIDI_KEYS['mixolydian']['V'][3]=58
-    MIDI_KEYS['mixolydian']['Y'][3]=58
-    MIDI_KEYS['mixolydian']['Q']=70
-    # Dorian
-    MIDI_KEYS['dorian'] = MIDI_KEYS['mixolydian']
-    MIDI_KEYS['dorian']['D'] = 51
-    MIDI_KEYS['dorian']['R'][1] = 51
-    MIDI_KEYS['dorian']['T'][0] = 51
-    MIDI_KEYS['dorian']['U'][0] = 51
-    MIDI_KEYS['dorian']['W'][1] = 51
-    MIDI_KEYS['dorian']['L'] = 63
-    # Blues
-    MIDI_KEYS['blues'] = MIDI_KEYS['dorian']
-    MIDI_KEYS['blues']['E'] = 52
-    MIDI_KEYS['blues']['S'][2] = 52
-    MIDI_KEYS['blues']['U'][1] = 52 # donne 'U':[52,52,57,60] ??????
-    MIDI_KEYS['blues']['V'][1] = 52
-    MIDI_KEYS['blues']['Y'][1] = 52
-    MIDI_KEYS['blues']['M'] = 64
-    #mode to use
-    mode_name='major'
+    ### midi notes on major mode correspondance with AA sorted by decreasing molecular weight
+    # keys are set as DO (48, 60, 72) degrees I, SOL (53, 55) degrees V, FA (67, 65) degrees IV, RE (50, 62) degrees II,
+    # MI (52, 64) degrees III, LA (57, 69) degrees VI and SI (59, 71) degrees VII. Finally, we add 7 alterations #
+    # following the ascending quint (54, 66, 49, 61, 56, 68, 51)
+    initial_midi_keys = [48, 60, 72, 53, 55, 67, 65, 50, 62, 52, 64, 57, 69, 59, 71, 54, 66, 49, 61, 56, 68, 51]
+    midi_keys = {}
 
     ### Physico-chemical properties of AA
     AA_PHY_CHI = {'A': {'hybrophobic', 'small'},
@@ -128,7 +104,7 @@ if __name__ == 'main':
 
     # create the log file
     if args.debug:
-        logPath = os.path.join(out_dir, '{}_{}_{}bpm_{}.log'.format(args.uniprot_accession_number, args.mode, tempo, datetime.now().strftime('%Y-%m-%d_%H-%M-%S')))
+        logPath = os.path.join(out_dir, '{}_{}bpm_{}.log'.format(args.uniprot_accession_number, tempo, datetime.now().strftime('%Y-%m-%d_%H-%M-%S')))
         logging.basicConfig(filename=logPath, level=logging.DEBUG, format='%(asctime)s\t%(levelname)s:\t%(message)s', datefmt='%Y/%m/%d %H:%M:%S')
         logger = logging.getLogger(__name__)
         logger.info(' '.join(sys.argv))
@@ -150,9 +126,9 @@ if __name__ == 'main':
     uniprot = SwissProt.read(handle)
 
     ### TOREMOVE
-    print(uniprot.sequence)
-    for item in uniprot.features:
-        print(item)
+    # print(uniprot.sequence)
+    # for item in uniprot.features:
+    #     print(item)
     ##############
 
     # get the organism and entry name in UniProt
@@ -164,9 +140,27 @@ if __name__ == 'main':
 
     # create a dictionary for the protein
     protein = {'seq': {}, 'modified_residue': {}, 'structure': {}, 'glycosylation': {}, 'site': {}, 'propeptide': {}}
-    sequence_length = len(uniprot.sequence)
+    uniprot_sequence = uniprot.sequence
+    sequence_length = len(uniprot_sequence)
+    if args.debug:
+        logger.info('AA sequence ({} AA): {}'.format(sequence_length, uniprot_sequence))
     for i in range(sequence_length):
-        protein['seq'][i+1] = uniprot.sequence[i]
+        protein['seq'][i] = uniprot.sequence[i]
+
+    # frequence of AA in the sequence
+    set_AA = set(''.join(uniprot_sequence))
+    proportion_AA = {}
+    for aa in set_AA:
+        proportion_AA[aa] = uniprot_sequence.count(aa) / sequence_length
+    # sort by decreasing frequency
+    proportion_AA = sorted(proportion_AA.items(), key=lambda kv: kv[1], reverse=True)
+
+    for idx in range(0, len(proportion_AA)):
+        midi_keys[proportion_AA[idx][0]] = initial_midi_keys[idx]
+
+    print(midi_keys)
+
+
 
 
     # create a dictionary to get the structures positions => type
@@ -256,8 +250,7 @@ if __name__ == 'main':
     ########################
 
     # create the MIDI file
-    mode_name = args.mode
-    file_base_name = '{}_{}_{}_{}_{}bpm_instrus'.format(args.uniprot_accession_number, entry_name, organism, mode_name,tempo)
+    file_base_name = '{}_{}_{}_{}bpm_instrus'.format(args.uniprot_accession_number, entry_name, organism, tempo)
     for instru in instrus:
         file_base_name = '{}-{}'.format(file_base_name, instru)
     midi_file_path = os.path.join(out_dir, '{}.midi'.format(file_base_name))
@@ -284,16 +277,18 @@ if __name__ == 'main':
         for channel_nbr in channels.keys():
             MyMIDI.addProgramChange(track, channel=channel_nbr, time=time, program=channels[channel_nbr]['instrument'])
 
-        mode = MIDI_KEYS[mode_name]
-
-        for i in range(1, len(protein['seq']) + 1):
+        print(protein['seq'])
+        for i in range(0, len(protein['seq'])):
             AA = protein['seq'][i]
-            if i == 1:
-                next_AA = protein['seq'][sequence_length]
-            elif i == len(protein['seq']):
-                next_AA = protein['seq'][1]
+            if i == 0:
+                prev_AA = protein['seq'][sequence_length - 1]
+                next_AA = protein['seq'][i + 1]
+            elif i == len(protein['seq']) - 1:
+                prev_AA = protein['seq'][i - 1]
+                next_AA = protein['seq'][0]
             else:
-                next_AA = protein['seq'][i+1]
+                prev_AA = protein['seq'][i - 1]
+                next_AA = protein['seq'][i + 1]
 
             # set the duration of the key (current AA) depending on the number of shared properties with the next AA
             shared_properties = len(set.intersection(AA_PHY_CHI[AA], AA_PHY_CHI[next_AA]))
@@ -305,6 +300,9 @@ if __name__ == 'main':
                 duration = 2
             else:
                 duration = 4
+
+            # set the chords depending on number of shared properties between current AA and the previous AA
+            ## TODO: codage des accords
 
             # change the volume of each instrument depending on the structure
             if 'structure' in protein.keys():
@@ -327,24 +325,11 @@ if __name__ == 'main':
                         channels[1]['vol'] = 60
                         channels[2]['vol'] = 40
 
-            # test if note is a chord
-            if isinstance(mode[AA], list):
-                for channel_nbr in channels.keys():
-                    for note in mode[AA]:
-                        MyMIDI.addNote(track, channel=channel_nbr, pitch=note, time=time, duration=duration, volume=channels[channel_nbr]['vol'])
-            # just a note
-            else:
-                note = mode[AA]
-                for channel_nbr in channels.keys():
-                    MyMIDI.addNote(track, channel=channel_nbr, pitch=note, time=time, duration=duration, volume=channels[channel_nbr]['vol'])
-
             if args.debug:
-                if isinstance(mode[AA], list):
-                    played_note = '[{}]'.format(' , '.join(str(v) for v in mode[AA]))
-                else:
-                    played_note = mode[AA]
-                logging.debug('\tposition: {:<5}\tAA: {:<5}\tnote: {:<20}\ttime: {:<5}\tduration: {:<5}'.format(i, AA, played_note, time, duration))
-                for channel_nbr in channels.keys():
+                logging.debug('\tposition: {:<5}\tAA: {:<5}\tnote: {:<20}\ttime: {:<5}\tduration: {:<5}'.format(i, AA, midi_keys[AA], time, duration))
+            for channel_nbr in channels.keys():
+                MyMIDI.addNote(track, channel=channel_nbr, pitch=midi_keys[AA], time=time, duration=duration, volume=channels[channel_nbr]['vol'])
+                if args.debug:
                     logging.debug('\t\tchannel: {:<5}\tvolume: {:<5}'.format(channel_nbr, channels[channel_nbr]['vol']))
 
             time = time + duration

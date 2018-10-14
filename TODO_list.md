@@ -9,7 +9,7 @@ note supplémentaire|72||||||
 altérations (#)|54|66|49|61|56|68|51
 
 - 15 AA donc 2 octaves (14 notes) + 1 note.
-- 7 AA restants sont représentés par des altérations répartis sur les 2 octaves : choisies par la fréquence d'AA la moins importante dans la séquence protéique. 
+- 7 AA restants sont représentés par des altérations répartis sur les 2 octaves : choisies par la fréquence d'AA la moins importante dans la séquence protéique.
 Rajout d'un dièse (revoir avec Jacques pourquoi SOL# puis FA#?) / nouvelle proposition : suivre l'ordre des quintes ascendantes:
   - 1ere altération, FA# (1ere octave) 53# = 54
   - 2eme altération, FA# (2eme octave) 65# = 66
@@ -21,7 +21,7 @@ Rajout d'un dièse (revoir avec Jacques pourquoi SOL# puis FA#?) / nouvelle prop
 
 ## 1) première étape du classement
 - [x] Par rapport aux degrés dans la gamme, choisir la fréquence d'AA en ordre décroissant et attribuer d'abord les degrés 1, 8, 15 (les do - degré I) puis 5, 12 (les sol - degré V) et finalement 4, 11 (les fa - degré IV) et finir par les altérations.
-  
+
 ## 2) raffinage du classement
 **A revoir avec Jacques et Nina:**
 -  utiliser les propriétés physico-chimiques communes pour les attribuer aux degrés forts 1er, 4eme et 5eme de la 1ere octave ainsi que 8eme, 11 et 12eme de la 2eme octave et 15eme (la note seule). Une fois sortie la liste des 2 octaves + 1 note, recherche de celui qui a le plus de propriétés physico-chimiques (annotations sur le diagramme de Wenn) et le placer en 1er car ce sera celui qui aura le plus de durées longues et d'accords et ainsi de suite... D'abord 1, 8, 15 (les do - degré I) puis 5, 12 (les sol - degré V)et finalement 4, 11 (les fa - degré IV).
