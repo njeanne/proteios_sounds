@@ -145,7 +145,7 @@ if __name__ == '__main__':
     if args.debug:
         logger.info('AA sequence ({} AA): {}'.format(sequence_length, uniprot_sequence))
     for i in range(sequence_length):
-        protein['seq'][i+1] = uniprot.sequence[i]
+        protein['seq'][i] = uniprot.sequence[i]
 
     # frequence of AA in the sequence
     set_AA = set(''.join(uniprot_sequence))
@@ -277,6 +277,7 @@ if __name__ == '__main__':
         for channel_nbr in channels.keys():
             MyMIDI.addProgramChange(track, channel=channel_nbr, time=time, program=channels[channel_nbr]['instrument'])
 
+        print(protein['seq'])
         for i in range(0, len(protein['seq'])):
             AA = protein['seq'][i]
             if i == 0:
