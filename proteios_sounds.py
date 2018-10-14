@@ -140,7 +140,6 @@ if __name__ == '__main__':
 
     # create a dictionary for the protein
     protein = {'seq': {}}
-    # protein = {'seq': {}, 'modified_residue': {}, 'structure': {}, 'glycosylation': {}, 'site': {}, 'propeptide': {}}
     uniprot_sequence = uniprot.sequence
     sequence_length = len(uniprot_sequence)
     if args.debug:
@@ -201,7 +200,6 @@ if __name__ == '__main__':
                     protein['glycosylation'][glyco] = [(feature[1], feature[2])]
         # Site: Any interesting single amino acid site on the sequence
         if feature[0] == 'SITE':
-            print('##################### {} #################'.format(feature[0]))
             site = re.split(' {', feature[3])[0].rstrip('.;,')
             if site in protein['site'].keys():
                 protein['site'][site].append((feature[1], feature[2]))
