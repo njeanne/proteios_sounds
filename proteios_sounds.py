@@ -139,7 +139,8 @@ if __name__ == '__main__':
     entry_name = uniprot.entry_name
 
     # create a dictionary for the protein
-    protein = {'seq': {}, 'modified_residue': {}, 'structure': {}, 'glycosylation': {}, 'site': {}, 'propeptide': {}}
+    protein = {'seq': {}}
+    # protein = {'seq': {}, 'modified_residue': {}, 'structure': {}, 'glycosylation': {}, 'site': {}, 'propeptide': {}}
     uniprot_sequence = uniprot.sequence
     sequence_length = len(uniprot_sequence)
     if args.debug:
@@ -165,26 +166,42 @@ if __name__ == '__main__':
 
     # create a dictionary to get the structures positions => type
     structures = {}
+    for v in uniprot.features:
+        print('{}'.format(v))
     # parse the UniProt Features (see https://www.uniprot.org/help/?query=*&fil=category%3A%22PTM+processing%22+AND+section%3Amanual&columns=title)
     for feature in uniprot.features:
+        # strucutre information
         if feature[0] == 'HELIX' or feature[0] == 'STRAND' or feature[0] == 'TURN':
             structures[feature[1]] = {'type': feature[0], 'end': feature[2]}
+        # signal peptide
+        if feature[0] == 'SIGNAL':
+            if 'signal_peptide' in protein.keys():
+                protein['signal_peptide'].append((feature[1], feature[2]))
+            else:
+                protein['signal_peptide']= [(feature[1], feature[2])]
         # Modified residue: Modified residues excluding lipids, glycans and protein crosslinks
         if feature[0] == 'MOD_RES':
             modif = re.split(' {', feature[3])[0].rstrip('.;,')
-            if modif in protein['modified_residue'].keys():
-                protein['modified_residue'][modif].append((feature[1], feature[2]))
+            if not 'modified_residue' in protein.keys():
+                protein['modified_residue'] = {modif: [(feature[1], feature[2])]}
             else:
-                protein['modified_residue'][modif] = [(feature[1], feature[2])]
+                if modif in protein['modified_residue'].keys():
+                    protein['modified_residue'][modif].append((feature[1], feature[2]))
+                else:
+                    protein['modified_residue'][modif] = [(feature[1], feature[2])]
         # Glycosylation: Covalently attached glycan group(s)
         if feature[0] == 'CARBOHYD':
             glyco = re.split(' ', feature[3])[0].rstrip('.;,')
-            if glyco in protein['glycosylation'].keys():
-                protein['glycosylation'][glyco].append((feature[1], feature[2]))
+            if not 'glycosylation' in protein.keys():
+                protein['glycosylation'] = {glyco: [(feature[1], feature[2])]}
             else:
-                protein['glycosylation'][glyco] = [(feature[1], feature[2])]
+                if glyco in protein['glycosylation'].keys():
+                    protein['glycosylation'][glyco].append((feature[1], feature[2]))
+                else:
+                    protein['glycosylation'][glyco] = [(feature[1], feature[2])]
         # Site: Any interesting single amino acid site on the sequence
         if feature[0] == 'SITE':
+            print('##################### {} #################'.format(feature[0]))
             site = re.split(' {', feature[3])[0].rstrip('.;,')
             if site in protein['site'].keys():
                 protein['site'][site].append((feature[1], feature[2]))
@@ -197,6 +214,13 @@ if __name__ == '__main__':
                 protein['propeptide'][propep].append((feature[1], feature[2]))
             else:
                 protein['propeptide'][propep] = [(feature[1], feature[2])]
+        # Disulfid bond, get the two linked positions on the same chain (no interchain)
+        if feature[0] == 'DISULFID':
+            if not feature[3].startswith('Interchain'):
+                if 'disulfid' in protein.keys():
+                    protein['disulfid'].append((feature[1], feature[2]))
+                else:
+                    protein['disulfid'] = [(feature[1], feature[2])]
 
 
     # update protein with the structures
@@ -247,6 +271,14 @@ if __name__ == '__main__':
                 print('\t{}'.format(k2))
                 for pos in v2:
                     print('\t\t{}'.format(pos))
+        elif k == 'disulfid':
+            print(k)
+            for bond in v:
+                print('\t{} disulfid bond to {}'.format(bond[0], bond[1]))
+        elif k == 'signal_peptide':
+            print(k)
+            for signal_peptide in v:
+                print('\tsignal peptide from {} to {}'.format(signal_peptide[0], signal_peptide[1]))
     ########################
 
     # create the MIDI file
