@@ -8,16 +8,12 @@ __email__ = 'nicolas.jeanne@ntymail.com'
 import argparse
 import sys
 import os
-# import re
 import logging
 import urllib
 import subprocess
 from datetime import datetime
 import parse_uniprot
 import midi_operations
-# from Bio import ExPASy
-# from Bio import SwissProt
-# from midiutil import MIDIFile
 
 
 # Check range for tempo argument, must be between 60 and 150.
