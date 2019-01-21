@@ -1,9 +1,18 @@
 #! /usr/bin/env python3
 
 import os
+import logging
 from midiutil import MIDIFile
 
-def create_midi(uniprot_accession_number, protein, midi_keys, tempo, instrus, output_directory, aa_phy_chi, logger, debug=False):
+def create_midi(uniprot_accession_number,
+                protein,
+                midi_keys,
+                tempo,
+                instrus,
+                output_directory,
+                aa_phy_chi,
+                logger,
+                debug=False):
 
     file_base_name = '{}_{}_{}_{}bpm_instrus'.format(uniprot_accession_number, protein['entry_name'], protein['organism'], tempo)
 

@@ -101,11 +101,10 @@ if __name__ == '__main__':
         os.makedirs(out_dir)
 
     # create the log file
-    if args.debug:
-        logPath = os.path.join(out_dir, '{}_{}bpm_{}.log'.format(args.uniprot_accession_number, tempo, datetime.now().strftime('%Y-%m-%d_%H-%M-%S')))
-        logging.basicConfig(filename=logPath, level=logging.DEBUG, format='%(asctime)s\t%(levelname)s:\t%(message)s', datefmt='%Y/%m/%d %H:%M:%S')
-        logger = logging.getLogger(__name__)
-        logger.info(' '.join(sys.argv))
+    logPath = os.path.join(out_dir, '{}_{}bpm_{}.log'.format(args.uniprot_accession_number, tempo, datetime.now().strftime('%Y-%m-%d_%H-%M-%S')))
+    logging.basicConfig(filename=logPath, level=logging.DEBUG, format='%(asctime)s\t%(levelname)s:\t%(message)s', datefmt='%Y/%m/%d %H:%M:%S')
+    logger = logging.getLogger(__name__)
+    logger.info(' '.join(sys.argv))
 
 
     if args.debug:
@@ -135,9 +134,19 @@ if __name__ == '__main__':
     print(midi_keys)
 
     # create the MIDI file
-    midi_file_path = midi_operations.create_midi(args.uniprot_accession_number, protein, midi_keys, tempo, instrus, out_dir, AA_PHY_CHI, logger, args.debug)
-    print('Done!\nMIDI file for {} {} ({}) created in: {}'.format(protein['entry_name'], protein['organism'], args.uniprot_accession_number, midi_file_path))
-
+    midi_file_path = midi_operations.create_midi(args.uniprot_accession_number,
+                                                 protein,
+                                                 midi_keys,
+                                                 tempo,
+                                                 instrus,
+                                                 out_dir,
+                                                 AA_PHY_CHI,
+                                                 logger,
+                                                 args.debug)
+    print('Done!\nMIDI file for {} {} ({}) created in: {}'.format(protein['entry_name'],
+                                                                  protein['organism'],
+                                                                  args.uniprot_accession_number,
+                                                                  midi_file_path))
 
     # play the file with timidity if asked
     if args.play:
