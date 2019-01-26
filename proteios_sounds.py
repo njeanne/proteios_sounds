@@ -152,3 +152,13 @@ if __name__ == '__main__':
     if args.play:
         cmd = 'timidity {}'.format(midi_file_path)
         subprocess.run(cmd, shell=True)
+
+    # get the score
+    if args.score:
+        score_basename = '{}_{}_{}_{}bpm_score.pdf'.format(args.uniprot_accession_number,
+                                        protein['entry_name'],
+                                        protein['organism'],
+                                        tempo)
+        score_output = os.path.join(args.out, score_basename)
+        cmd = 'mscore -o {} {}'.format(score_output, midi_file_path)
+        subprocess.run(cmd, shell=True)
