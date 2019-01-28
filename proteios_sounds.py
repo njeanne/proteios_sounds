@@ -21,8 +21,8 @@ import midi_operations
 # @return: [int] the tempo.
 def restricted_tempo(x):
     x = int(x)
-    if x < 60 or x > 150:
-        raise argparse.ArgumentTypeError('{} not in range 60 to 150.'.format(x))
+    if x < 60 or x > 250:
+        raise argparse.ArgumentTypeError('{} not in range 60 to 250.'.format(x))
     return x
 
 if __name__ == '__main__':
@@ -41,7 +41,7 @@ if __name__ == '__main__':
     parser.add_argument('-o', '--out', required=True, help='path to the results directory.')
     parser.add_argument('-s', '--score', required=False, action='store_true', help='use musescore software to create the score corresponding to the MIDI file.')
     parser.add_argument('-p', '--play', required=False, action='store_true', help='play the music with Timidity, just for tests.')
-    parser.add_argument('-t', '--tempo', required=False, type=restricted_tempo, help='set the tempo in BPM. Value between 60 and 150.')
+    parser.add_argument('-t', '--tempo', required=False, type=restricted_tempo, help='set the tempo in BPM. Value between 60 and 250.')
     parser.add_argument('-i', '--instruments', required=False, nargs=3, help='set channel 0, 1 and 2 instruments, restricted to 3 values between 0 and 127 separated by spaces. Default is 0:  Acoustic Grand, 42: Cello and 65: Alto Sax. See: http://www.pjb.com.au/muscript/gm.html#patch for details.')
     parser.add_argument('-d', '--debug', required=False, action='store_true', help='debug mode, create a log file which details each entry of the MIDI file.')
     parser.add_argument('uniprot_accession_number', help='the protein accession number in the UniProt database. Example: Human Interleukin-8 > P10145')
@@ -148,11 +148,6 @@ if __name__ == '__main__':
                                                                   args.uniprot_accession_number,
                                                                   midi_file_path))
 
-    # play the file with timidity if asked
-    if args.play:
-        cmd = 'timidity {}'.format(midi_file_path)
-        subprocess.run(cmd, shell=True)
-
     # get the score
     if args.score:
         score_basename = '{}_{}_{}_{}bpm_score.pdf'.format(args.uniprot_accession_number,
@@ -161,4 +156,9 @@ if __name__ == '__main__':
                                         tempo)
         score_output = os.path.join(args.out, score_basename)
         cmd = 'mscore -o {} {}'.format(score_output, midi_file_path)
+        subprocess.run(cmd, shell=True)
+
+    # play the file with timidity if asked
+    if args.play:
+        cmd = 'timidity {}'.format(midi_file_path)
         subprocess.run(cmd, shell=True)

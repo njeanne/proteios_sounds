@@ -73,7 +73,9 @@ def parse_entry(uniprot_accession_number):
                     protein['glycosylation'][glyco] = [(feature[1], feature[2])]
         # Site: Any interesting single amino acid site on the sequence
         if feature[0] == 'SITE':
+            print('#############################')
             site = re.split(' {', feature[3])[0].rstrip('.;,')
+            print('SITE: {}'.format(site))
             if site in protein['site'].keys():
                 protein['site'][site].append((feature[1], feature[2]))
             else:
