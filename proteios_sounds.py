@@ -27,14 +27,14 @@ def restricted_tempo(x):
 
 if __name__ == '__main__':
     descr = '''
-    proteios_sounds.py v.{}
+    {} v.{}
 
     Created by {}.
     Contact: {}
     {}
 
     Create a MIDI file from a protein entry of the UniProt database (https://www.uniprot.org/).
-    '''.format(__version__, __author__, __email__, __copyright__)
+    '''.format(os.path.basename(__file__), __version__, __author__, __email__, __copyright__)
 
     # Parse arguments
     parser = argparse.ArgumentParser(description=descr, formatter_class=argparse.RawTextHelpFormatter)
@@ -101,17 +101,22 @@ if __name__ == '__main__':
         os.makedirs(out_dir)
 
     # create the log file
-    logPath = os.path.join(out_dir, '{}_{}bpm_{}.log'.format(args.uniprot_accession_number, tempo, datetime.now().strftime('%Y-%m-%d_%H-%M-%S')))
-    logging.basicConfig(filename=logPath, level=logging.DEBUG, format='%(asctime)s\t%(levelname)s:\t%(message)s', datefmt='%Y/%m/%d %H:%M:%S')
+    log_path = os.path.join(out_dir, '{}.log'.format(os.path.basename(__file__)))
+    if os.path.exists(log_path):
+        os.remove(log_path)
+    logging.basicConfig(filename=log_path, level=logging.DEBUG, format='%(asctime)s\t%(levelname)s:\t%(message)s', datefmt='%Y/%m/%d %H:%M:%S')
     logger = logging.getLogger(__name__)
     logger.info(' '.join(sys.argv))
 
-
-    if args.debug:
-        logger.info('tempo: {} BPM'.format(tempo))
-
     # parsing of uniprot entry
     protein = parse_uniprot.parse_entry(args.uniprot_accession_number)
+    logger.info('UniProt accession number: {}'.format(args.uniprot_accession_number))
+    logger.info('Output directory: {}'.format(out_dir))
+    logger.info('Protein: {}'.format(protein['entry_name']))
+    logger.info('Organism: {}'.format(protein['organism']))
+    logger.info('Tempo: {} BPM'.format(tempo))
+    logger.info('Instruments: {} (general MIDI patch numbers, see: http://www.pjb.com.au/muscript/gm.html#patch)'.format(', '.join(map(str, instrus))))
+    logger.info('Create score: {}'.format(args.score))
 
     sequence = protein['seq']
     sequence_length = len(sequence)
