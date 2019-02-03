@@ -9,7 +9,6 @@ import argparse
 import sys
 import os
 import logging
-import urllib
 import subprocess
 from datetime import datetime
 import parse_uniprot
@@ -108,15 +107,17 @@ if __name__ == '__main__':
     logger = logging.getLogger(__name__)
     logger.info(' '.join(sys.argv))
 
-    # parsing of uniprot entry
-    protein = parse_uniprot.parse_entry(args.uniprot_accession_number)
-    logger.info('UniProt accession number: {}'.format(args.uniprot_accession_number))
     logger.info('Output directory: {}'.format(out_dir))
-    logger.info('Protein: {}'.format(protein['entry_name']))
-    logger.info('Organism: {}'.format(protein['organism']))
     logger.info('Tempo: {} BPM'.format(tempo))
     logger.info('Instruments: {} (general MIDI patch numbers, see: http://www.pjb.com.au/muscript/gm.html#patch)'.format(', '.join(map(str, instrus))))
     logger.info('Create score: {}'.format(args.score))
+
+    # parsing of uniprot entry
+    protein = parse_uniprot.parse_entry(args.uniprot_accession_number, out_dir, logger)
+    logger.info('UniProt accession number: {}'.format(args.uniprot_accession_number))
+    logger.info('Protein: {}'.format(protein['entry_name']))
+    logger.info('Organism: {}'.format(protein['organism']))
+
 
     sequence = protein['seq']
     sequence_length = len(sequence)
@@ -135,8 +136,6 @@ if __name__ == '__main__':
 
     for idx in range(0, len(proportion_AA)):
         midi_keys[proportion_AA[idx][0]] = initial_midi_keys[idx]
-
-    print(midi_keys)
 
     # create the MIDI file
     midi_file_path = midi_operations.create_midi(args.uniprot_accession_number,

@@ -1,29 +1,39 @@
 #! /usr/bin/env python3
 
+import os
+import sys
 import re
+import urllib
 from Bio import ExPASy
 from Bio import SwissProt
+from Bio import SeqIO
 
-def parse_entry(uniprot_accession_number):
+def parse_entry(uniprot_accession_number, out_dir, logger):
 
-    # Parse the Uniprot entry
+    ### Load the Uniprot entry
+    # uniprot_file_path = os.path.join(out_dir, '{}.dat'.format(uniprot_accession_number))
     try:
         handle = ExPASy.get_sprot_raw(uniprot_accession_number)
+        uniprot = SwissProt.read(handle)
+        print(uniprot)
     except urllib.error.HTTPError as err:
-        msg = '{}{} accession number does not exists in UniProt database, check https://www.uniprot.org/ for the correct accession number.'.format(err, args.uniprot_accession_number)
+        msg = '{}: {} accession number does not exists in UniProt database, check https://www.uniprot.org/ for the correct accession number.'.format(err, uniprot_accession_number)
         print('ERROR: {}'.format(msg))
-        if args.debug:
-            logger.error(msg)
-        sys.exit(0)
+        logger.error(msg)
+        sys.exit(1)
+    #TODO: coder erreur uniprot indisponible
+    # except urllib.error.ATROUVER:
+    #     msg = 'Uniprot web site unavailable (https://www.uniprot.org/)'
+    #     if not os.path.exists(uniprot_file_path):
+    #         msg = '{}, try again later!'
+    #         print('ERROR: {}'.format(msg))
+    #         logger.error(msg)
+    #         sys.exit(1)
+    #     else:
+    #         msg = '{}, using previously downloaded UniProt data: {}'.format(msg, uniprot_file_path)
+    #         uniprot = SwissProt.read(uniprot_file_path)
 
-    uniprot = SwissProt.read(handle)
-
-    ### TOREMOVE
-    # print(uniprot.sequence)
-    # for item in uniprot.features:
-    #     print(item)
-    ##############
-
+    ### Parse the Uniprot entry
     # get the organism and entry name in UniProt
     organism = uniprot.organism
     if '(' in organism:
@@ -35,12 +45,12 @@ def parse_entry(uniprot_accession_number):
     # create a dictionary for the protein
     protein = {'seq': uniprot_sequence, 'organism': organism, 'entry_name': entry_name}
 
-
     # create a dictionary to get the structures positions => type
     structures = {}
-    for v in uniprot.features:
-        print('{}'.format(v))
     # parse the UniProt Features (see https://www.uniprot.org/help/?query=*&fil=category%3A%22PTM+processing%22+AND+section%3Amanual&columns=title)
+    for feature in uniprot.features:
+        print(feature)
+    print('###########################################\n\n')
     for feature in uniprot.features:
         # strucutre information
         if feature[0] == 'HELIX' or feature[0] == 'STRAND' or feature[0] == 'TURN':
@@ -73,7 +83,6 @@ def parse_entry(uniprot_accession_number):
                     protein['glycosylation'][glyco] = [(feature[1], feature[2])]
         # Site: Any interesting single amino acid site on the sequence
         if feature[0] == 'SITE':
-            print('#############################')
             site = re.split(' {', feature[3])[0].rstrip('.;,')
             print('SITE: {}'.format(site))
             if site in protein['site'].keys():
@@ -120,6 +129,11 @@ def parse_entry(uniprot_accession_number):
             protein['structure'] = {structure_last_position + 1: 'FREE'}
 
     ### TOREMOVE
+    print('#####################################################\n\n')
+    print('structures :')
+    for structure in structures:
+        print(structure)
+    print('#####################################################\n\n')
     for k,v in protein.items():
         if k == 'modified_residue':
             print(k)

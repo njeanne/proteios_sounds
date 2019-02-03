@@ -43,9 +43,11 @@ def create_midi(uniprot_accession_number,
             MyMIDI.addProgramChange(track, channel=channel_nbr, time=time, program=channels[channel_nbr]['instrument'])
 
         sequence_length = len(protein['seq'])
+        print(midi_keys)
 
         for i in range(0, sequence_length):
             AA = protein['seq'][i]
+            pitch = midi_keys[AA]
             if i == 0:
                 prev_AA = protein['seq'][sequence_length - 1]
                 next_AA = protein['seq'][i + 1]
@@ -111,9 +113,9 @@ def create_midi(uniprot_accession_number,
                         channels[2]['vol'] = 40
 
             if debug:
-                logger.debug('\tposition: {:<5}\tAA: {:<5}\tnote: {:<20}\ttime: {:<5}\tduration: {:<5}'.format(i, AA, midi_keys[AA], time, duration))
+                logger.debug('\tposition: {:<5}\tAA: {:<5}\tnote: {:<20}\ttime: {:<5}\tduration: {:<5}'.format(i, AA, pitch, time, duration))
             for channel_nbr in channels.keys():
-                MyMIDI.addNote(track, channel=channel_nbr, pitch=midi_keys[AA], time=time, duration=duration, volume=channels[channel_nbr]['vol'])
+                MyMIDI.addNote(track, channel=channel_nbr, pitch=pitch, time=time, duration=duration, volume=channels[channel_nbr]['vol'])
                 if debug:
                     logger.debug('\t\tchannel: {:<5}\tvolume: {:<5}'.format(channel_nbr, channels[channel_nbr]['vol']))
 
