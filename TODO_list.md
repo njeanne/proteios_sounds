@@ -30,7 +30,7 @@ Rajout d'un dièse (revoir avec Jacques pourquoi SOL# puis FA#?) / nouvelle prop
 - [ ] Peut être une analyse statistique basée sur une mesure (3 ou 4 temps) pourrait nous mener à faire une transposition, l'analyse statistique peut également nous permettre de choisir entre une mesure à 3 ou 4 temps.
 
 # Accords
-- [ ] Prendre couple d'AA de droite à gauche et si ils partagent une propriété physico-chimique -> accord
+- [x] Prendre couple d'AA de droite à gauche et si ils partagent une propriété physico-chimique -> accord
 
 # Percussions:
 - [ ] En fonction de la métrique, caler dessus des patterns rythmiques et en fonction d'une modification post-traductionnelle (résidu modifié?), changement de pattern.
@@ -50,6 +50,6 @@ Rajout d'un dièse (revoir avec Jacques pourquoi SOL# puis FA#?) / nouvelle prop
 - [ ] Mettre le logiciel en ligne.
 
 # Divers
-- [ ] Utiliser musescore dans le script pour produire la partition.
+- [x] Utiliser musescore dans le script pour produire la partition.
 - [ ] voir banque de son MIDI SF2
 - [ ] identifier des formes (cadence etc...) qui permettraient de mieux caler la musique sur une gamme donnée
