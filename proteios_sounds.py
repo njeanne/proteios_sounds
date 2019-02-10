@@ -10,19 +10,21 @@ import sys
 import os
 import logging
 import subprocess
-from datetime import datetime
 import parse_uniprot
 import midi_operations
 
 
-# Check range for tempo argument, must be between 60 and 150.
-# @param x:    [str] value of tempo argument in BPM.
-# @return: [int] the tempo.
-def restricted_tempo(x):
-    x = int(x)
-    if x < 60 or x > 250:
-        raise argparse.ArgumentTypeError('{} not in range 60 to 250.'.format(x))
-    return x
+def restricted_tempo(tempo_value):
+    '''
+    Check range for tempo argument, must be between 60 and 150.
+    param str tempo_value: value of the tempo argument in BPM.
+    return: the tempo.
+    rtype: int
+    '''
+    tempo_value = int(tempo_value)
+    if tempo_value < 60 or tempo_value > 250:
+        raise argparse.ArgumentTypeError('{} not in range 60 to 250.'.format(tempo_value))
+    return tempo_value
 
 if __name__ == '__main__':
     descr = '''
@@ -36,14 +38,28 @@ if __name__ == '__main__':
     '''.format(os.path.basename(__file__), __version__, __author__, __email__, __copyright__)
 
     # Parse arguments
-    parser = argparse.ArgumentParser(description=descr, formatter_class=argparse.RawTextHelpFormatter)
+    parser = argparse.ArgumentParser(description=descr,
+                                     formatter_class=argparse.RawTextHelpFormatter)
     parser.add_argument('-o', '--out', required=True, help='path to the results directory.')
-    parser.add_argument('-s', '--score', required=False, action='store_true', help='use musescore software to create the score corresponding to the MIDI file.')
-    parser.add_argument('-p', '--play', required=False, action='store_true', help='play the music with Timidity, just for tests.')
-    parser.add_argument('-t', '--tempo', required=False, type=restricted_tempo, help='set the tempo in BPM. Value between 60 and 250.')
-    parser.add_argument('-i', '--instruments', required=False, nargs=3, help='set channel 0, 1 and 2 instruments, restricted to 3 values between 0 and 127 separated by spaces. Default is 0:  Acoustic Grand, 42: Cello and 65: Alto Sax. See: http://www.pjb.com.au/muscript/gm.html#patch for details.')
-    parser.add_argument('-d', '--debug', required=False, action='store_true', help='debug mode, create a log file which details each entry of the MIDI file.')
-    parser.add_argument('uniprot_accession_number', help='the protein accession number in the UniProt database. Example: Human Interleukin-8 > P10145')
+    parser.add_argument('-s', '--score', required=False, action='store_true',
+                        help='''use musescore software to create the score
+                        corresponding to the MIDI file.''')
+    parser.add_argument('-p', '--play', required=False, action='store_true',
+                        help='play the music with Timidity, just for tests.')
+    parser.add_argument('-t', '--tempo', required=False, type=restricted_tempo,
+                        help='set the tempo in BPM. Value between 60 and 250.')
+    parser.add_argument('-i', '--instruments', required=False, nargs=3,
+                        help='''set channel 0, 1 and 2 instruments,
+                        restricted to 3 values between 0 and 127
+                        separated by spaces. Default is 0:  Acoustic Grand,
+                        42: Cello and 65: Alto Sax.
+                        See: http://www.pjb.com.au/muscript/gm.html#patch for details.''')
+    parser.add_argument('-d', '--debug', required=False, action='store_true',
+                        help='''debug mode, create a log file which details each
+                         entry of the MIDI file.''')
+    parser.add_argument('uniprot_accession_number',
+                        help='''the protein accession number in the UniProt
+                        database. Example: Human Interleukin-8 > P10145''')
     args = parser.parse_args()
 
 
@@ -66,33 +82,33 @@ if __name__ == '__main__':
         tempo = 100  # In BPM
 
     ### midi notes on major mode correspondance with AA sorted by decreasing molecular weight
-    # keys are set as DO (48, 60, 72) degrees I, SOL (53, 55) degrees V, FA (67, 65) degrees IV, RE (50, 62) degrees II,
+    # keys are set as DO (48, 60, 72) degrees I, SOL (55, 67) degrees V, FA (53, 65) degrees IV, RE (50, 62) degrees II,
     # MI (52, 64) degrees III, LA (57, 69) degrees VI and SI (59, 71) degrees VII. Finally, we add 7 alterations #
     # following the ascending quint (54, 66, 49, 61, 56, 68, 51)
-    initial_midi_keys = [48, 60, 72, 53, 55, 67, 65, 50, 62, 52, 64, 57, 69, 59, 71, 54, 66, 49, 61, 56, 68, 51]
+    initial_midi_keys = [48, 60, 72, 55, 67, 53, 65, 50, 62, 52, 64, 57, 69, 59, 71, 54, 66, 49, 61, 56, 68, 51]
     midi_keys = {}
 
     ### Physico-chemical properties of AA
     AA_PHY_CHI = {'A': {'hybrophobic', 'small'},
-                    'R': {'polar', 'pos_charged'},
-                    'N': {'polar', 'small'},
-                    'D': {'polar', 'small', 'neg_charged'},
-                    'C': {'hydrophobic', 'polar', 'small'},
-                    'E': {'polar', 'neg_charged'},
-                    'Q': {'polar'},
-                    'G': {'hydrophobic', 'small'},
-                    'H': {'hydrophobic', 'polar', 'pos_charged', 'aromatic'},
-                    'I': {'hydrophobic', 'aliphatic'},
-                    'L': {'hydrophobic', 'aliphatic'},
-                    'K': {'hydrophobic', 'polar', 'pos_charged'},
-                    'M': {'hydrophobic'},
-                    'F': {'hydrophobic', 'aromatic'},
-                    'P': {'small'},
-                    'S': {'polar', 'small'},
-                    'T': {'hydrophobic', 'polar', 'small'},
-                    'W': {'hydrophobic', 'polar', 'aromatic'},
-                    'Y': {'hydrophobic', 'polar', 'aromatic'},
-                    'V': {'hydrophobic', 'small', 'aliphatic'}}
+                  'R': {'polar', 'pos_charged'},
+                  'N': {'polar', 'small'},
+                  'D': {'polar', 'small', 'neg_charged'},
+                  'C': {'hydrophobic', 'polar', 'small'},
+                  'E': {'polar', 'neg_charged'},
+                  'Q': {'polar'},
+                  'G': {'hydrophobic', 'small'},
+                  'H': {'hydrophobic', 'polar', 'pos_charged', 'aromatic'},
+                  'I': {'hydrophobic', 'aliphatic'},
+                  'L': {'hydrophobic', 'aliphatic'},
+                  'K': {'hydrophobic', 'polar', 'pos_charged'},
+                  'M': {'hydrophobic'},
+                  'F': {'hydrophobic', 'aromatic'},
+                  'P': {'small'},
+                  'S': {'polar', 'small'},
+                  'T': {'hydrophobic', 'polar', 'small'},
+                  'W': {'hydrophobic', 'polar', 'aromatic'},
+                  'Y': {'hydrophobic', 'polar', 'aromatic'},
+                  'V': {'hydrophobic', 'small', 'aliphatic'}}
 
     # create the output directory
     out_dir = os.path.abspath(args.out)
@@ -103,7 +119,10 @@ if __name__ == '__main__':
     log_path = os.path.join(out_dir, '{}.log'.format(os.path.basename(__file__)))
     if os.path.exists(log_path):
         os.remove(log_path)
-    logging.basicConfig(filename=log_path, level=logging.DEBUG, format='%(asctime)s\t%(levelname)s:\t%(message)s', datefmt='%Y/%m/%d %H:%M:%S')
+    logging.basicConfig(filename=log_path,
+                        level=logging.DEBUG,
+                        format='%(asctime)s\t%(levelname)s:\t%(message)s',
+                        datefmt='%Y/%m/%d %H:%M:%S')
     logger = logging.getLogger(__name__)
     logger.info(' '.join(sys.argv))
 
@@ -137,7 +156,7 @@ if __name__ == '__main__':
     for idx in range(0, len(proportion_AA)):
         midi_keys[proportion_AA[idx][0]] = initial_midi_keys[idx]
 
-    # create the MIDI file
+    # create the MIDI file
     midi_file_path = midi_operations.create_midi(args.uniprot_accession_number,
                                                  protein,
                                                  midi_keys,
@@ -147,20 +166,22 @@ if __name__ == '__main__':
                                                  AA_PHY_CHI,
                                                  logger,
                                                  args.debug)
-    print('Done!\nMIDI file for {} {} ({}) created in: {}'.format(protein['entry_name'],
-                                                                  protein['organism'],
-                                                                  args.uniprot_accession_number,
-                                                                  midi_file_path))
+    print('MIDI file for {} {} ({}) created in: {}'.format(protein['entry_name'],
+                                                           protein['organism'],
+                                                           args.uniprot_accession_number,
+                                                           midi_file_path))
 
     # get the score
     if args.score:
+        print('Creating the score:')
         score_basename = '{}_{}_{}_{}bpm_score.pdf'.format(args.uniprot_accession_number,
-                                        protein['entry_name'],
-                                        protein['organism'],
-                                        tempo)
+                                                           protein['entry_name'],
+                                                           protein['organism'],
+                                                           tempo)
         score_output = os.path.join(args.out, score_basename)
         cmd = 'mscore -o {} {}'.format(score_output, midi_file_path)
         subprocess.run(cmd, shell=True)
+        print('Score created at {}'.format(score_output))
 
     # play the file with timidity if asked
     if args.play:
