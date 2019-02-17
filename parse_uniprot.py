@@ -20,30 +20,24 @@ def parse_entry(uniprot_AN, logger):
     try:
         handle = ExPASy.get_sprot_raw(uniprot_AN)
         uniprot = SwissProt.read(handle)
-    except urllib.error.HTTPError as err:
-        msg = '{}: {} accession number does not exists in UniProt database, check https://www.uniprot.org/ for the correct accession number.'.format(err, uniprot_AN)
+        print(dir(uniprot))
+    except urllib.error.HTTPError as http_err:
+        if http_err.code == 404:
+            msg = '{} {} accession number does not exists in UniProt database, check https://www.uniprot.org/ to get the correct accession number.'.format(http_err, uniprot_AN)
+        elif http_err.code == 504:
+            msg = '{} UniProt database web site unavailable.'.format(http_err)
+        else:
+            msg = http_err
         print('ERROR: {}'.format(msg))
         logger.error(msg)
         sys.exit(1)
-    #TODO:
-    #coder erreur uniprot indisponible
-    # except urllib.error.ATROUVER:
-    #     msg = 'Uniprot web site unavailable (https://www.uniprot.org/)'
-    #     if not os.path.exists(uniprot_file_path):
-    #         msg = '{}, try again later!'
-    #         print('ERROR: {}'.format(msg))
-    #         logger.error(msg)
-    #         sys.exit(1)
-    #     else:
-    #         msg = '{}, using previously downloaded UniProt data: {}'.format(msg, uniprot_file_path)
-    #         uniprot = SwissProt.read(uniprot_file_path)
 
     ### Parse the Uniprot entry
     # get the organism and entry name in UniProt
     organism = uniprot.organism
-    if '(' in organism:
-        organism = organism.split('(')[1].split(')')[0]
-    organism = organism.rstrip('.,;:').replace(' ', '_')
+    organism = organism.split(' (')[0]
+    organism = re.sub('[^A-Za-z0-9]+', '_', organism)
+
     entry_name = uniprot.entry_name
     uniprot_sequence = uniprot.sequence
 
@@ -53,9 +47,6 @@ def parse_entry(uniprot_AN, logger):
     # create a dictionary to get the structures positions => type
     structures = {}
     # parse the UniProt Features (see https://www.uniprot.org/help/?query=*&fil=category%3A%22PTM+processing%22+AND+section%3Amanual&columns=title)
-    # for feature in uniprot.features:
-    #     print(feature)
-    # print('###########################################\n\n')
     for feature in uniprot.features:
         # strucutre information
         if feature[0] == 'HELIX' or feature[0] == 'STRAND' or feature[0] == 'TURN':
@@ -114,6 +105,10 @@ def parse_entry(uniprot_AN, logger):
                 else:
                     protein['disulfid'] = [(feature[1], feature[2])]
 
+    # print('****************************************')
+    # for start in structures:
+    #     print('{}: start {}, end {}'.format(structures[start]['type'], start, structures[start]['end']))
+    # print('****************************************')
 
     # update protein with the structures
     sequence_length = len(protein['seq'])
@@ -138,45 +133,46 @@ def parse_entry(uniprot_AN, logger):
         else:
             protein['structure'] = {structure_last_position + 1: 'FREE'}
 
-    # ### TOREMOVE
-    # print('#####################################################\n\n')
-    # print('structures :')
-    # for structure in structures:
-    #     print(structure)
-    # print('#####################################################\n\n')
-    # for k, v in protein.items():
-    #     if k == 'modified_residue':
-    #         print(k)
-    #         for k2, v2 in v.items():
-    #             print('\t{}'.format(k2))
-    #             for pos in v2:
-    #                 print('\t\t{}'.format(pos))
-    #     elif k == 'glycosylation':
-    #         print(k)
-    #         for k2, v2 in v.items():
-    #             print('\t{}'.format(k2))
-    #             for pos in v2:
-    #                 print('\t\t{}'.format(pos))
-    #     elif k == 'site':
-    #         print(k)
-    #         for k2, v2 in v.items():
-    #             print('\t{}'.format(k2))
-    #             for pos in v2:
-    #                 print('\t\t{}'.format(pos))
-    #     elif k == 'propeptide':
-    #         print(k)
-    #         for k2, v2 in v.items():
-    #             print('\t{}'.format(k2))
-    #             for pos in v2:
-    #                 print('\t\t{}'.format(pos))
-    #     elif k == 'disulfid':
-    #         print(k)
-    #         for bond in v:
-    #             print('\t{} disulfid bond to {}'.format(bond[0], bond[1]))
-    #     elif k == 'signal_peptide':
-    #         print(k)
-    #         for signal_peptide in v:
-    #             print('\tsignal peptide from {} to {}'.format(signal_peptide[0], signal_peptide[1]))
-    # #################
+    ### TOREMOVE
+    print('#####################################################')
+    print('Keys in protein dictionary: {}'.format(protein.keys()))
+    for k, v in protein.items():
+        print('{}:'.format(k))
+        if k == 'organism':
+            print('\t{}'.format(v))
+        if k == 'entry_name':
+            print('\t{}'.format(v))
+        if k == 'seq':
+            print('\t{}'.format(v))
+        if k == 'structure':
+            for start_pos, structure in v.items():
+                print('\t{}: {}'.format(structure, start_pos))
+        if k == 'modified_residue':
+            for k2, v2 in v.items():
+                print('\t{}'.format(k2))
+                for pos in v2:
+                    print('\t\t{}'.format(pos))
+        elif k == 'glycosylation':
+            for k2, v2 in v.items():
+                print('\t{}'.format(k2))
+                for pos in v2:
+                    print('\t\t{}'.format(pos))
+        elif k == 'site':
+            for k2, v2 in v.items():
+                print('\t{}'.format(k2))
+                for pos in v2:
+                    print('\t\t{}'.format(pos))
+        elif k == 'propeptide':
+            for k2, v2 in v.items():
+                print('\t{}'.format(k2))
+                for pos in v2:
+                    print('\t\t{}'.format(pos))
+        elif k == 'disulfid':
+            for bond in v:
+                print('\t{} disulfid bond to {}'.format(bond[0], bond[1]))
+        elif k == 'signal_peptide':
+            for signal_peptide in v:
+                print('\tsignal peptide from {} to {}'.format(signal_peptide[0], signal_peptide[1]))
+    print('#####################################################\n\n')
 
     return protein
