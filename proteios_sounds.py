@@ -132,11 +132,10 @@ if __name__ == '__main__':
     logger.info('Create score: {}'.format(args.score))
 
     # parsing of uniprot entry
-    protein = parse_uniprot.parse_entry(args.uniprot_accession_number, out_dir, logger)
+    protein = parse_uniprot.parse_entry(args.uniprot_accession_number, logger)
     logger.info('UniProt accession number: {}'.format(args.uniprot_accession_number))
     logger.info('Protein: {}'.format(protein['entry_name']))
     logger.info('Organism: {}'.format(protein['organism']))
-
 
     sequence = protein['seq']
     sequence_length = len(sequence)

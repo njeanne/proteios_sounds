@@ -5,9 +5,8 @@ import re
 import urllib
 from Bio import ExPASy
 from Bio import SwissProt
-from Bio import SeqIO
 
-def parse_entry(uniprot_AN, out_dir, logger):
+def parse_entry(uniprot_AN, logger):
     '''
     Parse the uniprot entry.
     :param int uniprot_AN: the uniprot accession number for the protein
