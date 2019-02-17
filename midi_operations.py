@@ -84,6 +84,7 @@ def create_midi(uniprot_AN,
         for i in range(0, sequence_length):
             AA = protein['seq'][i]
             pitch_list = [midi_keys[AA]]
+
             if i == 0:
                 prev_AA = protein['seq'][sequence_length - 1]
                 next_AA = protein['seq'][i + 1]
@@ -95,8 +96,11 @@ def create_midi(uniprot_AN,
                 next_AA = protein['seq'][i + 1]
 
             # set the duration of the key (current AA) depending on the number of shared properties with the next AA
+            if AA == 'X' or next_AA == 'X': # non determined AA
+                shared_properties_current_next = 0
+            else:
+                shared_properties_current_next = len(set.intersection(aa_phy_chi[AA], aa_phy_chi[next_AA]))
 
-            shared_properties_current_next = len(set.intersection(aa_phy_chi[AA], aa_phy_chi[next_AA]))
             if shared_properties_current_next == 0:
                 duration = 1
             elif shared_properties_current_next == 1:
@@ -106,10 +110,13 @@ def create_midi(uniprot_AN,
             else:
                 duration = 4
 
-
             # set the chords depending on number of shared properties between current AA and the previous AA
-            shared_properties_current_previous = len(set.intersection(aa_phy_chi[AA],
-                                                                      aa_phy_chi[prev_AA]))
+            if AA == 'X' or prev_AA == 'X': # non determined AA
+                shared_properties_current_previous = 0
+            else:
+                shared_properties_current_previous = len(set.intersection(aa_phy_chi[AA],
+                                                                          aa_phy_chi[prev_AA]))
+
             if shared_properties_current_previous == 2:
                 # 2 keys chord
                 keys_in_chord = 2
