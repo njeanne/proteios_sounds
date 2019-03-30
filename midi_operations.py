@@ -45,6 +45,8 @@ def create_midi(uniprot_AN,
     :param boolean debug: the enable debug mode
     :return: the MIDI file path
     :rtype: str
+    :return: the list of keys durations
+    :rtype: list of floats
     '''
 
     # octaves DO, RE, MI, FA, SOL, LA, SI. 2 octaves and 1 more SOL, the remaining 7 keys are altérations (#)
@@ -81,6 +83,8 @@ def create_midi(uniprot_AN,
 
         sequence_length = len(protein['seq'])
 
+        durations_list = []
+
         for i in range(0, sequence_length):
             AA = protein['seq'][i]
             pitch_list = [midi_keys[AA]]
@@ -109,6 +113,7 @@ def create_midi(uniprot_AN,
                 duration = 2
             else:
                 duration = 4
+            durations_list.append(float(duration))
 
             # set the chords depending on number of shared properties between current AA and the previous AA
             if AA == 'X' or prev_AA == 'X': # non determined AA
@@ -172,4 +177,4 @@ def create_midi(uniprot_AN,
             time = time + duration
         MyMIDI.writeFile(midiFile)
 
-    return midi_file_path
+    return midi_file_path, durations_list
