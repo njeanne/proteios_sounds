@@ -12,6 +12,7 @@ import logging
 import subprocess
 import parse_uniprot
 import midi_operations
+import pymol_operations
 
 
 def restricted_tempo(tempo_value):
@@ -136,6 +137,10 @@ if __name__ == '__main__':
     logger.info('UniProt accession number: {}'.format(args.uniprot_accession_number))
     logger.info('Protein: {}'.format(protein['entry_name']))
     logger.info('Organism: {}'.format(protein['organism']))
+    if 'PDB' in protein:
+        logger.info('PDB: {} (Protein DataBase accession number)'.format(protein['PDB']))
+    else:
+        logger.info('PDB: No accession number in Uniprot entry')
 
     sequence = protein['seq']
     sequence_length = len(sequence)
@@ -156,19 +161,26 @@ if __name__ == '__main__':
         midi_keys[proportion_AA[idx][0]] = initial_midi_keys[idx]
 
     # create the MIDI file
-    midi_file_path = midi_operations.create_midi(args.uniprot_accession_number,
-                                                 protein,
-                                                 midi_keys,
-                                                 tempo,
-                                                 instrus,
-                                                 out_dir,
-                                                 AA_PHY_CHI,
-                                                 logger,
-                                                 args.debug)
+    midi_file_path, keys_duration = midi_operations.create_midi(args.uniprot_accession_number,
+                                                                protein,
+                                                                midi_keys,
+                                                                tempo,
+                                                                instrus,
+                                                                out_dir,
+                                                                AA_PHY_CHI,
+                                                                logger,
+                                                                args.debug)
     print('MIDI file for {} {} ({}) created in: {}'.format(protein['entry_name'],
                                                            protein['organism'],
                                                            args.uniprot_accession_number,
                                                            midi_file_path))
+
+    if 'PDB' in protein:
+        movie_path = pymol_operations.create_molecule_movie(protein,
+                                                            keys_duration,
+                                                            out_dir,
+                                                            logger)
+
 
     # get the score
     if args.score:
