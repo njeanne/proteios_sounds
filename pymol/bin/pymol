@@ -1,0 +1,3 @@
+#!/bin/sh
+export PYMOL_PATH="/home/nico/fablab/proteios_sounds/pymol//lib/python3.6/site-packages/pymol/pymol_path"
+"/home/nico/anaconda3/bin/python" "/home/nico/fablab/proteios_sounds/pymol//lib/python3.6/site-packages/pymol/__init__.py" "$@"
