@@ -1,2 +1,6 @@
 sounds_proteins/
-.gitignore
+pymol/*
+*.pdb
+*.cif
+*.fa
+__pycache__/
