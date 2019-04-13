@@ -5,7 +5,12 @@ import pymol
 import __main__
 
 def hamming(s1, s2):
-    '''Calculate the Hamming distance between two strings'''
+    '''Calculate the Hamming distance between two strings.
+
+    :param str s1: the first string.
+    :param str s2: the second string.
+    '''
+
     assert len(s1) == len(s2)
     return sum(c1 != c2 for c1, c2 in zip(s1, s2))
 
@@ -38,6 +43,7 @@ def create_molecule_movie(prot_dict, durations, output_dir, logger):
     logger.info('creating the {} movie'.format(prot_dict['PDB']))
     # set the path to download the PDB data
     pymol.cmd.set('fetch_path', pymol.cmd.exp_path(output_dir), quiet=1)
+    print('Fetching PDB accession number: {}'.format(prot_dict['PDB']))
     pymol.cmd.fetch(prot_dict['PDB'])
     img_path = os.path.join(output_dir, '{}_{}.png'.format(prot_dict['accession_number'], prot_dict['PDB']))
     pymol.cmd.disable('all')
@@ -45,21 +51,25 @@ def create_molecule_movie(prot_dict, durations, output_dir, logger):
 
     # get the PDB sequence
     pymol.stored_list = []
+    pymol.cmd.iterate('(name ca)', 'pymol.stored_list.append((resi, resn))')
+
+    # check the number of chains
     if len(pymol.cmd.get_chains(prot_dict['PDB'])) > 1:
         # more than one chain, select the Chain A
-        pymol.cmd.iterate('(name ca) and (chain A)', 'pymol.stored.list.append((resi, oneletter))')
+        pymol.cmd.iterate('(name ca) and (chain A)', 'pymol.stored_list.append((resi, oneletter))')
     else:
-        pymol.cmd.iterate('(name ca)', 'pymol.stored.list.append((resi, oneletter))')
-    pdb_seq = ''.join([tuple_aa[1] for tuple_aa in pymol.stored.list])
+        pymol.cmd.iterate('(name ca)', 'pymol.stored_list.append((resi, oneletter))')
+    # print('CHAIN: {}'.format(pymol.cmd.iterate('(name ca)', 'pymol.stored_list.append((resi, oneletter))')))
+    pdb_seq = ''.join([tuple_aa[1] for tuple_aa in pymol.stored_list])
     print('PDB seq: {}'.format(pdb_seq))
 
     uniprot_seq = ''.join([aa for aa in prot_dict['seq'].values()])
-    print('UNI seq: {}'.format(uniprot_seq))
+    print('UNI seq complete:\n{}\nlength: {}'.format(uniprot_seq, len(uniprot_seq)))
 
-    # # remove signal peptide
-    # if 'signal_peptide' in prot_dict:
-    #     uniprot_seq = uniprot_seq[prot_dict['signal_peptide'][0][1]:]
-    # print('UNI seq: {}'.format(uniprot_seq))
+    # remove signal peptide
+    if 'signal_peptide' in prot_dict:
+        uniprot_seq = uniprot_seq[prot_dict['signal_peptide'][0][1]:]
+    print('UNI seq no peptide signal:\n{}\nlength: {}'.format(uniprot_seq, len(uniprot_seq)))
     idx_start = less_difference_seq(pdb_seq, uniprot_seq)
     idx_end = idx_start + len(pdb_seq)
 
@@ -76,4 +86,4 @@ if __name__ == '__main__':
     seqA = 'ABCDEF'
     seqB = 'CEE'
 
-    less_seq_dif(seqA, seqB)
+    # less_seq_dif(seqA, seqB)
