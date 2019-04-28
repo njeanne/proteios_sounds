@@ -9,33 +9,56 @@ def hamming(s1, s2):
 
     :param str s1: the first string.
     :param str s2: the second string.
+    :return: the number of differences.
+    :rtype: int
     '''
 
     assert len(s1) == len(s2)
     return sum(c1 != c2 for c1, c2 in zip(s1, s2))
 
 def less_difference_seq(pdb_seq, uniprot_seq):
-    short_seq = pdb_seq
-    long_seq = uniprot_seq
-    if len(pdb_seq) > len(uniprot_seq):
-        print('short uniprot: {}'.format(len(pdb_seq)))
+    '''Look for the common part between the PDB and uniprot sequences. The start,
+    stop, number of differences and if PDB sequence is longer informations are returned.
+
+    :param str pdb_seq: the PDB sequence.
+    :param str uniprot_seq: the UniProt sequence.
+    :return: the start, stop, number of differences and if the PDB sequence is longer than the uniprot.
+    :rtype: dictionary.
+    '''
+    pdb_coord_matching = {'start': 0, 'stop': 0, 'longer_than_uniprot': True}
+    short_seq = uniprot_seq
+    long_seq = pdb_seq
+    if len(uniprot_seq) > len(pdb_seq):
+        pdb_coord_matching['longer_than_uniprot'] = False
+        print('shorter: pdb seq {} AA for uniprot seq {} AA'.format(len(pdb_seq), len(uniprot_seq)))
         short_seq = uniprot_seq
         long_seq = pdb_seq
     else:
-        print('short pdb')
-    min_diff = len(short_seq)
-    idx_start = 0
+        print('shorter: uniprot seq {} AA for pdb seq {} AA'.format(len(uniprot_seq), len(pdb_seq)))
+    pdb_coord_matching['nb_diff'] = len(short_seq)
+    # look for the matching part between the two sequences
     for i in range(0, len(long_seq) - len(short_seq) + 1):
         ham_dist = hamming(short_seq, long_seq[i:i+len(short_seq)])
-        if ham_dist < min_diff:
-            min_diff = ham_dist
-            idx_start = i
-            if min_diff == 0:
+        if ham_dist < pdb_coord_matching['nb_diff']:
+            pdb_coord_matching['nb_diff'] = ham_dist
+            pdb_coord_matching['start'] = i
+            if pdb_coord_matching['nb_diff'] == 0:
                 break
-    return idx_start
+    pdb_coord_matching['stop'] = pdb_coord_matching['start'] + len(short_seq)
+    return pdb_coord_matching
 
 
 def create_molecule_movie(prot_dict, durations, output_dir, logger):
+    '''Create a movie of the common part between the UniProt and PDB sequences.
+
+    :param dictionary prot_dict: the UniProt data dictionary.
+    :param list durations: the list of the durations of the music notes.
+    :param str output_dir: the path of the output directory.
+    :param logger logger: the logger.
+    :return: the movie.
+    :rtype:
+    '''
+
     print(durations)
     print('length duration: {}'.format(len(durations)))
     __main__.pymol_argv = ['pymol', '-qc'] # Pymol: quiet and no GUI
@@ -70,8 +93,9 @@ def create_molecule_movie(prot_dict, durations, output_dir, logger):
     if 'signal_peptide' in prot_dict:
         uniprot_seq = uniprot_seq[prot_dict['signal_peptide'][0][1]:]
     print('UNI seq no peptide signal:\n{}\nlength: {}'.format(uniprot_seq, len(uniprot_seq)))
-    idx_start = less_difference_seq(pdb_seq, uniprot_seq)
-    idx_end = idx_start + len(pdb_seq)
+
+    pdb_coord_data = less_difference_seq(pdb_seq, uniprot_seq)
+    print(pdb_coord_data)
 
 
     pymol.cmd.hide('all')
@@ -82,8 +106,8 @@ def create_molecule_movie(prot_dict, durations, output_dir, logger):
     pymol.cmd.png(img_path, quiet=1)
     pymol.cmd.quit()
 
-if __name__ == '__main__':
-    seqA = 'ABCDEF'
-    seqB = 'CEE'
+# if __name__ == '__main__':
+#     seqA = 'ABCDEF'
+#     seqB = 'CEE'
 
     # less_seq_dif(seqA, seqB)
