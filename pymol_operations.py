@@ -2,6 +2,7 @@
 
 import os
 import pymol
+from colorama import Fore, Style
 import __main__
 
 def hamming(s1, s2):
@@ -71,7 +72,6 @@ def create_molecule_movie(prot_dict, durations, output_dir, logger):
     pymol.cmd.set('fetch_path', pymol.cmd.exp_path(output_dir), quiet=1)
     print('Fetching PDB accession number: {}'.format(prot_dict['PDB']))
     pymol.cmd.fetch(prot_dict['PDB'])
-    img_path = os.path.join(output_dir, '{}_{}.png'.format(prot_dict['accession_number'], prot_dict['PDB']))
     pymol.cmd.disable('all')
     pymol.cmd.enable(prot_dict['PDB'])
 
@@ -89,31 +89,53 @@ def create_molecule_movie(prot_dict, durations, output_dir, logger):
 
     print('Chains: {}'.format(pymol.cmd.get_chains(prot_dict['PDB'])))
     # create the dictionary to retrieve the best match between PDB and uniprot seq
-    pdb_coord_data = {'start': 0,
-                      'stop': 0,
-                      'pdb_longer_than_uniprot': True,
-                      'nb_diff': float('inf'),
-                      'pdb_chain': None}
+    pdb_data = {'start': 0,
+                'stop': 0,
+                'pdb_longer_than_uniprot': True,
+                'nb_diff': float('inf'),
+                'chain': None}
     # iterate over the PDB chains
     for chain in pymol.cmd.get_chains(prot_dict['PDB']):
-        if pdb_coord_data['nb_diff'] != 0:
-            pdb_coord_data['pdb_chain'] = chain
+        if pdb_data['nb_diff'] != 0:
+            pdb_data['chain'] = chain
             pymol.cmd.iterate('(name ca) and (chain {})'.format(chain),
                               'pymol.stored_list.append((resi, oneletter))')
             pdb_seq = ''.join([tuple_aa[1] for tuple_aa in pymol.stored_list])
             print('PDB seq chain {}: {}'.format(chain, pdb_seq))
-            pdb_coord_data = get_common_coordinates(pdb_seq, uniprot_seq, pdb_coord_data)
-            if pdb_coord_data['nb_diff'] == 0:
+            pdb_data = get_common_coordinates(pdb_seq, uniprot_seq, pdb_data)
+            if pdb_data['nb_diff'] == 0:
                 break
-    print(pdb_coord_data)
+    print(pdb_data)
 
 
     pymol.cmd.hide('all')
     pymol.cmd.show('cartoon')
     pymol.cmd.set('ray_opaque_background', 1)
-    pymol.cmd.color('red', 'ss h')
-    pymol.cmd.color('yellow', 'ss s')
+    ##### test code to color one AA
+    pymol.cmd.color('red', 'chain B and resi 64')
+    img_path = os.path.join(output_dir, 'img', '{}_{}_{}.png'.format(prot_dict['accession_number'],
+                                                                     prot_dict['PDB'],
+                                                                     425))
     pymol.cmd.png(img_path, quiet=1)
+    # for i in range(pdb_data['start'], pdb_data['stop'] + 1):
+    #     pymol.cmd.color('red', 'resi {}'.format(i))
+    #     img_path = os.path.join(output_dir,
+    #                             'img',
+    #                             '{}_{}_{}.png'.format(prot_dict['accession_number'],
+    #                                                   prot_dict['PDB'],
+    #                                                   i))
+    #     pymol.cmd.png(img_path, quiet=1)
+
+    ### color helix TO REMOVE
+    # pymol.cmd.color('red', 'ss h')
+    ### color sheets TO REMOVE
+    # pymol.cmd.color('yellow', 'ss s')
+    # pymol.cmd.png(img_path, quiet=1)
+
+    print('''{}Attention, éclaircir pourquoi la longueur des chaines PDB est différente
+          (504 AA) de celle attendue, chaine A (72 AA) et chaine B (72 AA){}'''.format(Fore.RED,
+                                                                                       Style.RESET_ALL))
+
     pymol.cmd.quit()
 
 # if __name__ == '__main__':
