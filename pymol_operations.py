@@ -32,13 +32,13 @@ def get_common_coordinates(pdb_seq, uniprot_seq, pdb_coord_matching):
     pdb_longer = True
     if len(uniprot_seq) > len(pdb_seq):
         pdb_longer = False
-        print('PDB shorter: pdb seq {} AA for uniprot seq {} AA'.format(len(pdb_seq),
-                                                                        len(uniprot_seq)))
+        print('PDB shorter: pdb seq {} AA for uniprot seq {} AA\n'.format(len(pdb_seq),
+                                                                          len(uniprot_seq)))
         short_seq = pdb_seq
         long_seq = uniprot_seq
     else:
-        print('UNIPROT shorter: uniprot seq {} AA for pdb seq {} AA'.format(len(uniprot_seq),
-                                                                            len(pdb_seq)))
+        print('UNIPROT shorter: uniprot seq {} AA for pdb seq {} AA\n'.format(len(uniprot_seq),
+                                                                              len(pdb_seq)))
     # look for the matching part between the two sequences
     for i in range(0, len(long_seq) - len(short_seq) + 1):
         ham_dist = hamming(short_seq, long_seq[i:i+len(short_seq)])
@@ -64,7 +64,16 @@ def create_molecule_movie(prot_dict, durations, output_dir, logger):
     '''
 
     print(durations)
-    print('length duration: {}'.format(len(durations)))
+    print('length duration: {}\n\n'.format(len(durations)))
+
+    # get the UniProt sequence
+    uniprot_seq = ''.join([aa for aa in prot_dict['seq'].values()])
+    print('UNI seq complete:\n{}\nlength: {}'.format(uniprot_seq, len(uniprot_seq)))
+    # remove signal peptide
+    if 'signal_peptide' in prot_dict:
+        uniprot_seq = uniprot_seq[prot_dict['signal_peptide'][0][1]:]
+    print('UNI seq no peptide signal:\n{}\nlength: {}\n\n'.format(uniprot_seq, len(uniprot_seq)))
+
     __main__.pymol_argv = ['pymol', '-qc'] # Pymol: quiet and no GUI
     pymol.finish_launching()
     logger.info('creating the {} movie'.format(prot_dict['PDB']))
@@ -75,19 +84,9 @@ def create_molecule_movie(prot_dict, durations, output_dir, logger):
     pymol.cmd.disable('all')
     pymol.cmd.enable(prot_dict['PDB'])
 
-    # get the UniProt sequence
-    uniprot_seq = ''.join([aa for aa in prot_dict['seq'].values()])
-    print('UNI seq complete:\n{}\nlength: {}'.format(uniprot_seq, len(uniprot_seq)))
-    # remove signal peptide
-    if 'signal_peptide' in prot_dict:
-        uniprot_seq = uniprot_seq[prot_dict['signal_peptide'][0][1]:]
-    print('UNI seq no peptide signal:\n{}\nlength: {}'.format(uniprot_seq, len(uniprot_seq)))
+    # pymol.cmd.iterate('(name ca)', 'pymol.stored_list.append((resi, resn))')
 
-    # get the PDB sequence
-    pymol.stored_list = []
-    pymol.cmd.iterate('(name ca)', 'pymol.stored_list.append((resi, resn))')
-
-    print('Chains: {}'.format(pymol.cmd.get_chains(prot_dict['PDB'])))
+    print('Chains: {}\n'.format(pymol.cmd.get_chains(prot_dict['PDB'])))
     # create the dictionary to retrieve the best match between PDB and uniprot seq
     pdb_data = {'start': 0,
                 'stop': 0,
@@ -98,6 +97,8 @@ def create_molecule_movie(prot_dict, durations, output_dir, logger):
     for chain in pymol.cmd.get_chains(prot_dict['PDB']):
         if pdb_data['nb_diff'] != 0:
             pdb_data['chain'] = chain
+            # get the PDB sequence
+            pymol.stored_list = []
             pymol.cmd.iterate('(name ca) and (chain {})'.format(chain),
                               'pymol.stored_list.append((resi, oneletter))')
             pdb_seq = ''.join([tuple_aa[1] for tuple_aa in pymol.stored_list])
@@ -105,28 +106,26 @@ def create_molecule_movie(prot_dict, durations, output_dir, logger):
             pdb_data = get_common_coordinates(pdb_seq, uniprot_seq, pdb_data)
             if pdb_data['nb_diff'] == 0:
                 break
-    print(pdb_data)
+    pdb_data['pymol_stored_list'] = pymol.stored_list
+    pymol.cmd.quit()
+
+    print('\n\n\nPDB data: {}'.format(pdb_data))
 
 
-    pymol.cmd.hide('all')
-    pymol.cmd.show('cartoon')
-    pymol.cmd.set('ray_opaque_background', 1)
-    ##### test code to color one AA
-    # pymol.cmd.color('red', 'chain B and resi 64')
-    # img_path = os.path.join(output_dir, 'img', '{}_{}_{}.png'.format(prot_dict['accession_number'],
-    #                                                                  prot_dict['PDB'],
-    #                                                                  425))
-    # pymol.cmd.png(img_path, quiet=1)
-    for i in range(34, 64):
-        pymol.cmd.color('red', 'resi {}'.format(i))
-        img_path = os.path.join(output_dir,
-                                'img',
-                                '{}_{}_{}.png'.format(prot_dict['accession_number'],
-                                                      prot_dict['PDB'],
-                                                      i))
-        pymol.cmd.png(img_path, quiet=1)
 
-    # for i in range(pdb_data['start'], pdb_data['stop'] + 1):
+
+
+
+    # pymol.cmd.hide('all')
+    # pymol.cmd.show('cartoon')
+    # pymol.cmd.set('ray_opaque_background', 1)
+    # ##### test code to color one AA
+    # # pymol.cmd.color('red', 'chain B and resi 64')
+    # # img_path = os.path.join(output_dir, 'img', '{}_{}_{}.png'.format(prot_dict['accession_number'],
+    # #                                                                  prot_dict['PDB'],
+    # #                                                                  425))
+    # # pymol.cmd.png(img_path, quiet=1)
+    # for i in range(34, 64):
     #     pymol.cmd.color('red', 'resi {}'.format(i))
     #     img_path = os.path.join(output_dir,
     #                             'img',
@@ -134,18 +133,27 @@ def create_molecule_movie(prot_dict, durations, output_dir, logger):
     #                                                   prot_dict['PDB'],
     #                                                   i))
     #     pymol.cmd.png(img_path, quiet=1)
-
-    ### color helix TO REMOVE
-    # pymol.cmd.color('red', 'ss h')
-    ### color sheets TO REMOVE
-    # pymol.cmd.color('yellow', 'ss s')
-    # pymol.cmd.png(img_path, quiet=1)
-
-    print('''{}Attention, éclaircir pourquoi la longueur des chaines PDB est différente
-          (504 AA) de celle attendue, chaine A (72 AA) et chaine B (72 AA){}'''.format(Fore.RED,
-                                                                                       Style.RESET_ALL))
-
-    pymol.cmd.quit()
+    #
+    # # for i in range(pdb_data['start'], pdb_data['stop'] + 1):
+    # #     pymol.cmd.color('red', 'resi {}'.format(i))
+    # #     img_path = os.path.join(output_dir,
+    # #                             'img',
+    # #                             '{}_{}_{}.png'.format(prot_dict['accession_number'],
+    # #                                                   prot_dict['PDB'],
+    # #                                                   i))
+    # #     pymol.cmd.png(img_path, quiet=1)
+    #
+    # ### color helix TO REMOVE
+    # # pymol.cmd.color('red', 'ss h')
+    # ### color sheets TO REMOVE
+    # # pymol.cmd.color('yellow', 'ss s')
+    # # pymol.cmd.png(img_path, quiet=1)
+    #
+    # print('''{}Attention, éclaircir pourquoi la longueur des chaines PDB est différente
+    #       (504 AA) de celle attendue, chaine A (72 AA) et chaine B (72 AA){}'''.format(Fore.RED,
+    #                                                                                    Style.RESET_ALL))
+    #
+    # pymol.cmd.quit()
 
 # if __name__ == '__main__':
 #     seqA = 'ABCDEF'
