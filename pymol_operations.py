@@ -112,11 +112,20 @@ def create_molecule_movie(prot_dict, durations, output_dir, logger):
     pymol.cmd.show('cartoon')
     pymol.cmd.set('ray_opaque_background', 1)
     ##### test code to color one AA
-    pymol.cmd.color('red', 'chain B and resi 64')
-    img_path = os.path.join(output_dir, 'img', '{}_{}_{}.png'.format(prot_dict['accession_number'],
-                                                                     prot_dict['PDB'],
-                                                                     425))
-    pymol.cmd.png(img_path, quiet=1)
+    # pymol.cmd.color('red', 'chain B and resi 64')
+    # img_path = os.path.join(output_dir, 'img', '{}_{}_{}.png'.format(prot_dict['accession_number'],
+    #                                                                  prot_dict['PDB'],
+    #                                                                  425))
+    # pymol.cmd.png(img_path, quiet=1)
+    for i in range(34, 64):
+        pymol.cmd.color('red', 'resi {}'.format(i))
+        img_path = os.path.join(output_dir,
+                                'img',
+                                '{}_{}_{}.png'.format(prot_dict['accession_number'],
+                                                      prot_dict['PDB'],
+                                                      i))
+        pymol.cmd.png(img_path, quiet=1)
+
     # for i in range(pdb_data['start'], pdb_data['stop'] + 1):
     #     pymol.cmd.color('red', 'resi {}'.format(i))
     #     img_path = os.path.join(output_dir,
