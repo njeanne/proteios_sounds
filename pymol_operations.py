@@ -1,8 +1,9 @@
 #! /usr/bin/env python3
 
 import os
+import shutil
+import time
 import pymol
-from colorama import Fore, Style
 import __main__
 
 def hamming(s1, s2):
@@ -44,11 +45,11 @@ def get_common_coordinates(pdb_seq, uniprot_seq, pdb_coord_matching):
         ham_dist = hamming(short_seq, long_seq[i:i+len(short_seq)])
         if ham_dist < pdb_coord_matching['nb_diff']:
             pdb_coord_matching['nb_diff'] = ham_dist
-            pdb_coord_matching['start'] = i
+            pdb_coord_matching['start_on_uniprot_without_signal_peptide'] = i
             pdb_coord_matching['pdb_longer_than_uniprot'] = pdb_longer
             if pdb_coord_matching['nb_diff'] == 0:
                 break
-    pdb_coord_matching['stop'] = pdb_coord_matching['start'] + len(short_seq)
+    pdb_coord_matching['stop_on_uniprot_without_signal_peptide'] = pdb_coord_matching['start_on_uniprot_without_signal_peptide'] + len(short_seq)
     return pdb_coord_matching
 
 
@@ -88,9 +89,10 @@ def create_molecule_movie(prot_dict, durations, output_dir, logger):
 
     print('Chains: {}\n'.format(pymol.cmd.get_chains(prot_dict['PDB'])))
     # create the dictionary to retrieve the best match between PDB and uniprot seq
-    pdb_data = {'start': 0,
-                'stop': 0,
+    pdb_data = {'start_on_uniprot_without_signal_peptide': 0,
+                'stop_on_uniprot_without_signal_peptide': 0,
                 'pdb_longer_than_uniprot': True,
+                'uniprot_length': len(uniprot_seq),
                 'nb_diff': float('inf'),
                 'chain': None}
     # iterate over the PDB chains
@@ -107,56 +109,63 @@ def create_molecule_movie(prot_dict, durations, output_dir, logger):
             if pdb_data['nb_diff'] == 0:
                 break
     pdb_data['pymol_stored_list'] = pymol.stored_list
-    pymol.cmd.quit()
+    # pymol.cmd.quit()
 
     print('\n\n\nPDB data: {}'.format(pdb_data))
 
 
 
 
+    ## TODO: Faire un multithreading ou multi processing (voir https://realpython.com/python-concurrency/)
+    ## pour diminuer le temps de création des images. Gérer le fait que chaque processus ne produit que 2
+    ## images afin de ne pas avoir le bandeau licence expirée.
+
+    pymol.cmd.hide('all')
+    pymol.cmd.show('cartoon')
+    pymol.cmd.set('ray_opaque_background', 1)
+
+    # create the frames
+    frames_dir = os.path.join(output_dir, 'frames')
+    if os.path.exists(frames_dir):
+        shutil.rmtree(frames_dir)
+    os.mkdir(frames_dir)
+    # no AA colored frames for signal peptide
+    idx_frame = 0
+    img_path_0 = os.path.join(frames_dir,
+                              '{}_{}_{}.png'.format(prot_dict['accession_number'],
+                                                    prot_dict['PDB'],
+                                                    idx_frame))
+    pymol.cmd.png(img_path_0, quiet=1)
+    time.sleep(1)
 
 
-    # pymol.cmd.hide('all')
-    # pymol.cmd.show('cartoon')
-    # pymol.cmd.set('ray_opaque_background', 1)
-    # ##### test code to color one AA
-    # # pymol.cmd.color('red', 'chain B and resi 64')
-    # # img_path = os.path.join(output_dir, 'img', '{}_{}_{}.png'.format(prot_dict['accession_number'],
-    # #                                                                  prot_dict['PDB'],
-    # #                                                                  425))
-    # # pymol.cmd.png(img_path, quiet=1)
-    # for i in range(34, 64):
-    #     pymol.cmd.color('red', 'resi {}'.format(i))
-    #     img_path = os.path.join(output_dir,
-    #                             'img',
-    #                             '{}_{}_{}.png'.format(prot_dict['accession_number'],
-    #                                                   prot_dict['PDB'],
-    #                                                   i))
-    #     pymol.cmd.png(img_path, quiet=1)
-    #
-    # # for i in range(pdb_data['start'], pdb_data['stop'] + 1):
-    # #     pymol.cmd.color('red', 'resi {}'.format(i))
-    # #     img_path = os.path.join(output_dir,
-    # #                             'img',
-    # #                             '{}_{}_{}.png'.format(prot_dict['accession_number'],
-    # #                                                   prot_dict['PDB'],
-    # #                                                   i))
-    # #     pymol.cmd.png(img_path, quiet=1)
-    #
-    # ### color helix TO REMOVE
-    # # pymol.cmd.color('red', 'ss h')
-    # ### color sheets TO REMOVE
-    # # pymol.cmd.color('yellow', 'ss s')
-    # # pymol.cmd.png(img_path, quiet=1)
-    #
-    # print('''{}Attention, éclaircir pourquoi la longueur des chaines PDB est différente
-    #       (504 AA) de celle attendue, chaine A (72 AA) et chaine B (72 AA){}'''.format(Fore.RED,
-    #                                                                                    Style.RESET_ALL))
-    #
-    # pymol.cmd.quit()
+    for i in range(1, prot_dict['signal_peptide'][0][1]):
+        idx_frame += 1
+        img_path = os.path.join(frames_dir,
+                                '{}_{}_{}.png'.format(prot_dict['accession_number'],
+                                                      prot_dict['PDB'],
+                                                      idx_frame))
+        shutil.copyfile(img_path_0, img_path)
 
-# if __name__ == '__main__':
-#     seqA = 'ABCDEF'
-#     seqB = 'CEE'
+    # no AA colored frames for uniprot AA outside pdb and before pdb AA
+    #TODO: créer les 7 images entre le signal peptide et le début de pdb
 
-    # less_seq_dif(seqA, seqB)
+    # color the amino acids
+    for i in range(pdb_data['stop_on_uniprot_without_signal_peptide'] - pdb_data['start_on_uniprot_without_signal_peptide']):
+        idx_frame += 1
+        # add 1 because pdb index is starts on 1
+        i = i + 1
+        pymol.cmd.color('red', 'resi {}'.format(i))
+        if not i == 1:
+            pymol.cmd.color('green', 'resi {}'.format(i-1))
+        img_path = os.path.join(frames_dir,
+                                '{}_{}_{}.png'.format(prot_dict['accession_number'],
+                                                      prot_dict['PDB'],
+                                                      idx_frame))
+        pymol.cmd.png(img_path, quiet=1)
+
+    # no AA colored frames for uniprot AA outside pdb and after pdb AA
+    #TODO: tester si pdb va moins loin que uniprot, si oui copier les frames
+    # en incrémentant les numéros
+
+    pymol.cmd.quit()
