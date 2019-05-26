@@ -20,7 +20,6 @@ def parse_entry(uniprot_AN, logger):
     try:
         handle = ExPASy.get_sprot_raw(uniprot_AN)
         uniprot = SwissProt.read(handle)
-        # print(dir(uniprot))
         pdb_acc_num = None
         for cross_ref in uniprot.cross_references:
             if cross_ref[0] == 'PDB':
@@ -156,7 +155,7 @@ def parse_entry(uniprot_AN, logger):
         if k == 'entry_name':
             print('\t{}'.format(v))
         if k == 'seq':
-            print('\t{}'.format(v))
+            print('\tlength: {}\n\t{}'.format(len(v), v))
         if k == 'structure':
             for start_pos, structure in v.items():
                 print('\t{}: {}'.format(structure, start_pos))

@@ -60,7 +60,7 @@ def create_molecule_movie(prot_dict, durations, output_dir, logger):
     :param list durations: the list of the durations of the music notes.
     :param str output_dir: the path of the output directory.
     :param logger logger: the logger.
-    :return: the movie.
+    :return: the movie path.
     :rtype:
     '''
 
@@ -129,26 +129,41 @@ def create_molecule_movie(prot_dict, durations, output_dir, logger):
     if os.path.exists(frames_dir):
         shutil.rmtree(frames_dir)
     os.mkdir(frames_dir)
+
     # no AA colored frames for signal peptide
     idx_frame = 0
     img_path_0 = os.path.join(frames_dir,
                               '{}_{}_{}.png'.format(prot_dict['accession_number'],
                                                     prot_dict['PDB'],
                                                     idx_frame))
+    print('Frame {} [signal peptide first frame]: {}'.format(idx_frame,
+                                                             img_path_0))
     pymol.cmd.png(img_path_0, quiet=1)
-    time.sleep(1)
-
-
+    # wait for pymol frame creation
+    while not os.path.exists(img_path_0):
+        time.sleep(1)
+    # copy the frame to represent the signal peptide
     for i in range(1, prot_dict['signal_peptide'][0][1]):
         idx_frame += 1
         img_path = os.path.join(frames_dir,
                                 '{}_{}_{}.png'.format(prot_dict['accession_number'],
                                                       prot_dict['PDB'],
                                                       idx_frame))
+        print('Frame {} [signal peptide]: {}'.format(idx_frame,
+                                                     img_path))
         shutil.copyfile(img_path_0, img_path)
 
-    # no AA colored frames for uniprot AA outside pdb and before pdb AA
-    #TODO: créer les 7 images entre le signal peptide et le début de pdb
+    # copy the frame to represent the AA not present on pdb
+    if pdb_data['start_on_uniprot_without_signal_peptide'] > -1:
+        for i in range(pdb_data['start_on_uniprot_without_signal_peptide']):
+            idx_frame += 1
+            img_path = os.path.join(frames_dir,
+                                    '{}_{}_{}.png'.format(prot_dict['accession_number'],
+                                                          prot_dict['PDB'],
+                                                          idx_frame))
+            print('Frame {} [missing in PDB]: {}'.format(idx_frame,
+                                                         img_path))
+            shutil.copyfile(img_path_0, img_path)
 
     # color the amino acids
     for i in range(pdb_data['stop_on_uniprot_without_signal_peptide'] - pdb_data['start_on_uniprot_without_signal_peptide']):
@@ -162,6 +177,8 @@ def create_molecule_movie(prot_dict, durations, output_dir, logger):
                                 '{}_{}_{}.png'.format(prot_dict['accession_number'],
                                                       prot_dict['PDB'],
                                                       idx_frame))
+        print('Frame {} [in PDB]: {}'.format(idx_frame,
+                                             img_path))
         pymol.cmd.png(img_path, quiet=1)
 
     # no AA colored frames for uniprot AA outside pdb and after pdb AA
