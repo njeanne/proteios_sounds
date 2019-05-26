@@ -157,8 +157,8 @@ if __name__ == '__main__':
     # sort by decreasing frequency
     proportion_AA = sorted(proportion_AA.items(), key=lambda kv: kv[1], reverse=True)
 
-    for idx in range(0, len(proportion_AA)):
-        midi_keys[proportion_AA[idx][0]] = initial_midi_keys[idx]
+    for idx, aa_proportion in enumerate(proportion_AA):
+        midi_keys[aa_proportion[0]] = initial_midi_keys[idx]
 
     # create the MIDI file
     midi_file_path, keys_duration = midi_operations.create_midi(args.uniprot_accession_number,
