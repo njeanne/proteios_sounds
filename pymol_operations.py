@@ -28,28 +28,25 @@ def get_common_coordinates(pdb_seq, uniprot_seq, pdb_coord_matching):
     :rtype: dictionary.
     '''
 
-    short_seq = uniprot_seq
-    long_seq = pdb_seq
-    pdb_longer = True
-    if len(uniprot_seq) > len(pdb_seq):
-        pdb_longer = False
-        print('PDB shorter: pdb seq {} AA for uniprot seq {} AA\n'.format(len(pdb_seq),
-                                                                          len(uniprot_seq)))
+    if pdb_coord_matching['uniprot_longer_than_pdb']:
         short_seq = pdb_seq
         long_seq = uniprot_seq
+        print('UNIPROT longer than PDB: uniprot seq {} AA for pdb seq {} AA\n'.format(len(uniprot_seq),
+                                                                                      len(pdb_seq)))
     else:
-        print('UNIPROT shorter: uniprot seq {} AA for pdb seq {} AA\n'.format(len(uniprot_seq),
-                                                                              len(pdb_seq)))
+        short_seq = uniprot_seq
+        long_seq = pdb_seq
+        print('UNIPROT shorter than PDB: uniprot seq {} AA for pdb seq {} AA\n'.format(len(uniprot_seq),
+                                                                                       len(pdb_seq)))
     # look for the matching part between the two sequences
     for i in range(0, len(long_seq) - len(short_seq) + 1):
         ham_dist = hamming(short_seq, long_seq[i:i+len(short_seq)])
         if ham_dist < pdb_coord_matching['nb_diff']:
             pdb_coord_matching['nb_diff'] = ham_dist
-            pdb_coord_matching['start_on_uniprot_without_signal_peptide'] = i
-            pdb_coord_matching['pdb_longer_than_uniprot'] = pdb_longer
+            pdb_coord_matching['start_on_uniprot'] = i
             if pdb_coord_matching['nb_diff'] == 0:
                 break
-    pdb_coord_matching['stop_on_uniprot_without_signal_peptide'] = pdb_coord_matching['start_on_uniprot_without_signal_peptide'] + len(short_seq)
+    pdb_coord_matching['stop_on_uniprot'] = pdb_coord_matching['start_on_uniprot'] + len(short_seq)
     return pdb_coord_matching
 
 
@@ -70,11 +67,8 @@ def create_molecule_movie(prot_dict, durations, output_dir, logger):
     # get the UniProt sequence
     uniprot_seq = ''.join([aa for aa in prot_dict['seq'].values()])
     print('UNI seq complete:\n{}\nlength: {}'.format(uniprot_seq, len(uniprot_seq)))
-    # remove signal peptide
-    if 'signal_peptide' in prot_dict:
-        uniprot_seq = uniprot_seq[prot_dict['signal_peptide'][0][1]:]
-    print('UNI seq no peptide signal:\n{}\nlength: {}\n\n'.format(uniprot_seq, len(uniprot_seq)))
 
+    # open pymol and retrieve the protein with PDB accession number
     __main__.pymol_argv = ['pymol', '-qc'] # Pymol: quiet and no GUI
     pymol.finish_launching()
     logger.info('creating the {} movie'.format(prot_dict['PDB']))
@@ -89,12 +83,20 @@ def create_molecule_movie(prot_dict, durations, output_dir, logger):
 
     print('Chains: {}\n'.format(pymol.cmd.get_chains(prot_dict['PDB'])))
     # create the dictionary to retrieve the best match between PDB and uniprot seq
-    pdb_data = {'start_on_uniprot_without_signal_peptide': 0,
-                'stop_on_uniprot_without_signal_peptide': 0,
-                'pdb_longer_than_uniprot': True,
-                'uniprot_length': len(uniprot_seq),
+    pdb_data = {'start_on_uniprot': 0,
+                'stop_on_uniprot': 0,
+                'uniprot_longer_than_pdb': True,
                 'nb_diff': float('inf'),
                 'chain': None}
+
+
+    # # remove signal peptide from uniprot
+    # if 'signal_peptide' in prot_dict:
+    #     uniprot_seq = uniprot_seq[prot_dict['signal_peptide'][0][1]:]
+    #     pdb_data['uniprot_no_signal_peptide_length'] = len(uniprot_seq)
+    #     if len(pdb_seq) > len(uniprot_seq):
+    #         pdb_data['uniprot_longer_than_pdb'] = False
+
     # iterate over the PDB chains
     for chain in pymol.cmd.get_chains(prot_dict['PDB']):
         if pdb_data['nb_diff'] != 0:
@@ -104,12 +106,14 @@ def create_molecule_movie(prot_dict, durations, output_dir, logger):
             pymol.cmd.iterate('(name ca) and (chain {})'.format(chain),
                               'pymol.stored_list.append((resi, oneletter))')
             pdb_seq = ''.join([tuple_aa[1] for tuple_aa in pymol.stored_list])
+            # check if pdb seq is longer than uniprot
+            if len(pdb_seq) > len(uniprot_seq):
+                pdb_data['uniprot_longer_than_pdb'] = False
             print('PDB seq chain {}: {}'.format(chain, pdb_seq))
             pdb_data = get_common_coordinates(pdb_seq, uniprot_seq, pdb_data)
             if pdb_data['nb_diff'] == 0:
                 break
     pdb_data['pymol_stored_list'] = pymol.stored_list
-    # pymol.cmd.quit()
 
     print('\n\n\nPDB data: {}'.format(pdb_data))
 
@@ -132,57 +136,54 @@ def create_molecule_movie(prot_dict, durations, output_dir, logger):
 
     # no AA colored frames for signal peptide
     idx_frame = 0
-    img_path_0 = os.path.join(frames_dir,
-                              '{}_{}_{}.png'.format(prot_dict['accession_number'],
-                                                    prot_dict['PDB'],
-                                                    idx_frame))
-    print('Frame {} [signal peptide first frame]: {}'.format(idx_frame,
-                                                             img_path_0))
-    pymol.cmd.png(img_path_0, quiet=1)
+    if pdb_data['start_on_uniprot'] > 0:
+        img_path_0 = os.path.join(frames_dir,
+                                  '{}_{}_{}.png'.format(prot_dict['accession_number'],
+                                                        prot_dict['PDB'],
+                                                        idx_frame))
+        print('Frame {} [missing in PDB]: {}'.format(idx_frame,
+                                                     img_path_0))
+        pymol.cmd.png(img_path_0, quiet=1)
+
     # wait for pymol frame creation
     while not os.path.exists(img_path_0):
         time.sleep(1)
     # copy the frame to represent the signal peptide
-    for i in range(1, prot_dict['signal_peptide'][0][1]):
+    for i in range(1, pdb_data['start_on_uniprot']):
         idx_frame += 1
         img_path = os.path.join(frames_dir,
                                 '{}_{}_{}.png'.format(prot_dict['accession_number'],
                                                       prot_dict['PDB'],
                                                       idx_frame))
-        print('Frame {} [signal peptide]: {}'.format(idx_frame,
+        print('Frame {} [missing in PDB]: {}'.format(idx_frame,
                                                      img_path))
         shutil.copyfile(img_path_0, img_path)
 
-    # copy the frame to represent the AA not present on pdb
-    if pdb_data['start_on_uniprot_without_signal_peptide'] > -1:
-        for i in range(pdb_data['start_on_uniprot_without_signal_peptide']):
-            idx_frame += 1
-            img_path = os.path.join(frames_dir,
-                                    '{}_{}_{}.png'.format(prot_dict['accession_number'],
-                                                          prot_dict['PDB'],
-                                                          idx_frame))
-            print('Frame {} [missing in PDB]: {}'.format(idx_frame,
-                                                         img_path))
-            shutil.copyfile(img_path_0, img_path)
+    # quit pymol
+    pymol.cmd.quit()
 
-    # color the amino acids
-    for i in range(pdb_data['stop_on_uniprot_without_signal_peptide'] - pdb_data['start_on_uniprot_without_signal_peptide']):
-        idx_frame += 1
-        # add 1 because pdb index is starts on 1
-        i = i + 1
-        pymol.cmd.color('red', 'resi {}'.format(i))
-        if not i == 1:
-            pymol.cmd.color('green', 'resi {}'.format(i-1))
-        img_path = os.path.join(frames_dir,
-                                '{}_{}_{}.png'.format(prot_dict['accession_number'],
-                                                      prot_dict['PDB'],
-                                                      idx_frame))
-        print('Frame {} [in PDB]: {}'.format(idx_frame,
-                                             img_path))
-        pymol.cmd.png(img_path, quiet=1)
+
+    # color the amino acids and save the frames
+    frames_idx_for_PDB = [i + 1 + idx_frame for i in range(pdb_data['stop_on_uniprot'] - pdb_data['start_on_uniprot'])]
+    print(frames_idx_for_PDB)
+    print(len(frames_idx_for_PDB))
+    # for i in range(pdb_data['stop_on_uniprot'] - pdb_data['start_on_uniprot']):
+    #     idx_frame += 1
+    #     # add 1 because pdb index is starts on 1
+    #     i = i + 1
+    #     pymol.cmd.color('red', 'resi {}'.format(i))
+    #     if not i == 1:
+    #         pymol.cmd.color('green', 'resi {}'.format(i-1))
+    #     img_path = os.path.join(frames_dir,
+    #                             '{}_{}_{}.png'.format(prot_dict['accession_number'],
+    #                                                   prot_dict['PDB'],
+    #                                                   idx_frame))
+    #     print('Frame {} [in PDB]: {}'.format(idx_frame,
+    #                                          img_path))
+    #     pymol.cmd.png(img_path, quiet=1)
 
     # no AA colored frames for uniprot AA outside pdb and after pdb AA
     #TODO: tester si pdb va moins loin que uniprot, si oui copier les frames
     # en incrémentant les numéros
 
-    pymol.cmd.quit()
+    # pymol.cmd.quit()
