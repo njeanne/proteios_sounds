@@ -9,10 +9,13 @@ import argparse
 import sys
 import os
 import logging
+import shutil
 import subprocess
+import concurrent.futures
+import threading
 import parse_uniprot
 import midi_operations
-import pymol_operations
+import parse_pdb
 
 
 def restricted_tempo(tempo_value):
@@ -170,16 +173,95 @@ if __name__ == '__main__':
                                                                 AA_PHY_CHI,
                                                                 logger,
                                                                 args.debug)
-    print('MIDI file for {} {} ({}) created in: {}'.format(protein['entry_name'],
-                                                           protein['organism'],
-                                                           args.uniprot_accession_number,
-                                                           midi_file_path))
+    print('MIDI file for {} {} ({}) created: {}'.format(protein['entry_name'],
+                                                        protein['organism'],
+                                                        args.uniprot_accession_number,
+                                                        midi_file_path))
 
     if 'PDB' in protein:
-        movie_path = pymol_operations.create_molecule_movie(protein,
-                                                            keys_duration,
-                                                            out_dir,
-                                                            logger)
+        # create the directories for PDB data and frames
+        pdb_dir = os.path.join(args.out, 'pdb', '{}_{}'.format(protein['accession_number'], protein['PDB']))
+        if not os.path.exists(pdb_dir):
+            os.makedirs(pdb_dir)
+        frames_dir = os.path.join(pdb_dir, 'frames')
+        if os.path.exists(frames_dir):
+            shutil.rmtree(frames_dir)
+        os.mkdir(frames_dir)
+
+        # get data from the PDB file
+        pdb_data = parse_pdb.get_pdb_info(protein,
+                                          pdb_dir,
+                                          logger)
+
+
+        # pdb_data = None
+        # with open(yaml_path, 'r') as stream:
+        #     try:
+        #         pdb_data = yaml.safe_load(stream)
+        #         print(pdb_data)
+        #         # change dictionary to list of tuples to retrieve pymol format
+        #         tuples_list_pdb = []
+        #         for item in sorted(pdb_data['pymol_stored_list']):
+        #             tuples_list_pdb.append((str(item), pdb_data['pymol_stored_list'][item]))
+        #         pdb_data['pymol_stored_list'] = tuples_list_pdb
+        #         print(pdb_data)
+        #     except yaml.YAMLError as yaml_exc:
+        #         print(yaml_exc)
+
+
+        args_list = []
+        for i in range(10):
+            cmd = './test.py -x {} -y 2 '.format(i)
+            args_list.append(cmd)
+        subprocess.run(cmd, shell=True)
+        with concurrent.futures.ThreadPoolExecutor(max_workers=10) as executor:
+            print('executor')
+            executor.map(subprocess.run, args_list)
+
+        # args_list = []
+        # for aa_idx, frame_idx in pdb_data['frames_idx'].enumerate():
+        #     cmd = './create_pdb_frames.py -p {} -c {} -n {} -i {} {}'.format(os.path.abspath(pdb_dir),
+        #                                                                   pdb_data['chain'],
+        #                                                                   frame_idx,
+        #                                                                   aa_idx + 1,
+        #                                                                   protein['PDB'])
+        #     # subprocess.call(cmd, shell=True)
+        #     args_list.append((cmd, eval('shell=True')))
+        #     # args_list.append(cmd)
+        #
+        # for i in args_list:
+        #     print(i)
+        #
+        # with concurrent.futures.ThreadPoolExecutor(max_workers=10) as executor:
+        #     print('executor')
+        #     executor.map(subprocess.call, args_list)
+        #
+        # args_list1 = [(1, 2, 'deux'), (2, 2, 'deux'), (3, 2, 'deux'), (4, 2, 'deux'), (5, 2, 'deux'), (6, 2, 'deux')]
+        # def toto(argument):
+        #     print('{} pour {}'.format(argument[0]*argument[1], argument[2]))
+        # print('\n\n\ntoto')
+        # with concurrent.futures.ThreadPoolExecutor(max_workers=5) as executor:
+        #     executor.map(toto, args_list1)
+        #
+        # args_list2 = [1,2,3,4,5,6,7,8,9]
+        # def toto2(idx):
+        #     print('{} pour {}'.format(idx*2, idx))
+        # print('\n\n\ntoto2')
+        # with concurrent.futures.ThreadPoolExecutor(max_workers=5) as executor:
+        #     executor.map(toto2, args_list2)
+        #
+        # args_list3 = [{'idx': 1, 'nb': 2, 'str': 'deux'},
+        #               {'idx': 2, 'nb': 2, 'str': 'deux'},
+        #               {'idx': 3, 'nb': 2, 'str': 'deux'},
+        #               {'idx': 4, 'nb': 2, 'str': 'deux'},
+        #               {'idx': 5, 'nb': 2, 'str': 'deux'},
+        #               {'idx': 6, 'nb': 2, 'str': 'deux'}]
+        # def toto3(argument):
+        #     print('{} pour {}'.format(argument['idx']*argument['nb'], argument['str']))
+        # print('\n\n\ntoto3')
+        # with concurrent.futures.ThreadPoolExecutor(max_workers=5) as executor:
+        #     executor.map(toto3, args_list3)
+
 
 
     # get the score
