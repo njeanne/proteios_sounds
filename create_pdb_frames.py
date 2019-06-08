@@ -27,6 +27,7 @@ if __name__ == '__main__':
     parser.add_argument('-c', '--chain', required=True, help='the chain id.')
     parser.add_argument('-n', '--frame_nb', required=True, help='the frame number')
     parser.add_argument('-i', '--idx_aa', required=True, help='the AA idx in PDB')
+    parser.add_argument('--color_aa', required=False, action='store_true', help='color in red the AA specified by "--idx_aa".')
     parser.add_argument('pdb_AN', help='the PDB accession number')
     args = parser.parse_args()
 
@@ -45,11 +46,12 @@ if __name__ == '__main__':
     pymol.cmd.show('cartoon')
     pymol.cmd.set('ray_opaque_background', 1)
 
-    pymol.cmd.color('red', 'resi {}'.format(args.idx_aa))
+    if args.color_aa:
+        pymol.cmd.color('red', 'resi {}'.format(args.idx_aa))
     img_path = os.path.join(args.pdb_dir,
                             'frames',
                             '{}_{}.png'.format(args.pdb_AN, args.frame_nb))
     print('[Pymol] Frame {} (in PDB file): {}'.format(args.frame_nb,
                                                       img_path))
-    pymol.cmd.png(img_path, quiet=1)
+    pymol.cmd.png(img_path, width=800, height=600, quiet=1)
     pymol.cmd.quit()

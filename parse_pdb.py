@@ -30,13 +30,9 @@ def get_common_coordinates(pdb_seq, uniprot_seq, pdb_coord_matching):
     if pdb_coord_matching['uniprot_longer_than_pdb']:
         short_seq = pdb_seq
         long_seq = uniprot_seq
-        print('UNIPROT longer than PDB: uniprot seq {} AA for pdb seq {} AA\n'.format(len(uniprot_seq),
-                                                                                      len(pdb_seq)))
     else:
         short_seq = uniprot_seq
         long_seq = pdb_seq
-        print('UNIPROT shorter than PDB: uniprot seq {} AA for pdb seq {} AA\n'.format(len(uniprot_seq),
-                                                                                       len(pdb_seq)))
     # look for the matching part between the two sequences
     for i in range(0, len(long_seq) - len(short_seq) + 1):
         ham_dist = hamming(short_seq, long_seq[i:i+len(short_seq)])
@@ -60,19 +56,15 @@ def get_pdb_info(prot_dict, pdb_dir, logger):
 
     # get the UniProt sequence
     uniprot_seq = ''.join([aa for aa in prot_dict['seq'].values()])
-    print('UNI seq complete:\n{}\nlength: {}'.format(uniprot_seq, len(uniprot_seq)))
-
     # open pymol and retrieve the protein with PDB accession number
     pymol.finish_launching(['pymol', '-qc']) # Pymol: quiet and no GUI
-    logger.info('creating the {} movie'.format(prot_dict['PDB']))
     # set the path to download the PDB data
     pymol.cmd.set('fetch_path', pymol.cmd.exp_path(pdb_dir), quiet=1)
-    print('Fetching PDB accession number: {}'.format(prot_dict['PDB']))
+    logger.info('Fetching PDB file with accession number: {}'.format(prot_dict['PDB']))
     pymol.cmd.fetch(prot_dict['PDB'])
     pymol.cmd.disable('all')
     pymol.cmd.enable(prot_dict['PDB'])
 
-    print('Chains: {}\n'.format(pymol.cmd.get_chains(prot_dict['PDB'])))
     # create the dictionary to retrieve the best match between PDB and uniprot seq
     pdb_data = {'PDB_start_on_uniprot': 0,
                 'PDB_stop_on_uniprot': 0,
@@ -92,35 +84,14 @@ def get_pdb_info(prot_dict, pdb_dir, logger):
             # check if pdb seq is longer than uniprot
             if len(pdb_seq) > len(uniprot_seq):
                 pdb_data['uniprot_longer_than_pdb'] = False
-            print('PDB seq chain {}: {}'.format(chain, pdb_seq))
             pdb_data = get_common_coordinates(pdb_seq, uniprot_seq, pdb_data)
             if pdb_data['nb_discrepancies'] == 0:
                 break
 
-    print('\n\n\nPDB data: {}'.format(pdb_data))
-
-    pymol.cmd.hide('all')
-    pymol.cmd.show('cartoon')
-    pymol.cmd.set('ray_opaque_background', 1)
-
-    # no AA colored frames for signal peptide
-    if pdb_data['PDB_start_on_uniprot'] > 0:
-        img_path = os.path.join(pdb_dir,
-                                'frames',
-                                '{}_no-idx.png'.format(prot_dict['PDB']))
-        print('[Pymol] Frame without index (missing in PDB): {}'.format(img_path))
-        pymol.cmd.png(img_path, quiet=0)
-
-    # wait for pymol frame creation
-    while not os.path.exists(img_path):
-        time.sleep(0.5)
-
     pymol.cmd.quit()
 
-
-    # color the amino acids and save the frames
+    # set the frames index of the positions to color
     frames_idx = [i + pdb_data['PDB_start_on_uniprot'] for i in range(pdb_data['PDB_stop_on_uniprot'] - pdb_data['PDB_start_on_uniprot'] + 1)]
-
     pdb_data['frames_idx'] = frames_idx
 
     return pdb_data

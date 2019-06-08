@@ -188,24 +188,48 @@ if __name__ == '__main__':
         pdb_data = parse_pdb.get_pdb_info(protein,
                                           pdb_dir,
                                           logger)
+        for k, v in pdb_data.items():
+            print('{}: {}'.format(k, v))
 
-        # create the commands for the python script which generates the pymol pictures
-        cmd_list = []
+        # create a frame without colored AA for all AA outside the PDB data
         existing_frames = sorted([png for png in os.listdir(frames_dir)])
         print('Existing frames: {}'.format(existing_frames))
+        if '{}_no-idx.png'.format(protein['PDB']) not in existing_frames:
+            print('\nCreating {} ({}) protein frame, please wait..'.format(protein['entry_name'], protein['PDB']))
+            logger.info('Creating {} ({}) protein frame.'.format(protein['entry_name'], protein['PDB']))
+            cmd_no_color = './create_pdb_frames.py -p {} -c {} -n {} -i {} {}'.format(os.path.abspath(pdb_dir),
+                                                                                      pdb_data['chain'],
+                                                                                      'no-idx',
+                                                                                      1,
+                                                                                      protein['PDB'])
+            logger.info(cmd_no_color)
+            sub = subprocess.run(cmd_no_color, shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+            # capturing the output
+            if sub.stdout:
+                logger.info(sub.stdout.decode('utf-8'))
+                print('Done!')
+            if sub.stderr:
+                logger.error(sub.stderr.decode('utf-8'))
+                print('Error!')
+
+        # create the commands for the python script which generates the pymol pictures with colored AA
+        cmd_list = []
         for aa_idx, frame_idx in enumerate(pdb_data['frames_idx']):
             if '{}_{}.png'.format(protein['PDB'], frame_idx) not in existing_frames:
-                cmd = './create_pdb_frames.py -p {} -c {} -n {} -i {} {}'.format(os.path.abspath(pdb_dir),
-                                                                                 pdb_data['chain'],
-                                                                                 frame_idx,
-                                                                                 aa_idx + 1,
-                                                                                 protein['PDB'])
+                cmd = './create_pdb_frames.py -p {} -c {} -n {} -i {} --color_aa {}'.format(os.path.abspath(pdb_dir),
+                                                                                            pdb_data['chain'],
+                                                                                            frame_idx,
+                                                                                            aa_idx + 1,
+                                                                                            protein['PDB'])
                 cmd_list.append(cmd)
 
-        # threading to call the commands
+        # threading to run the commands
         if cmd_list:
-            print('\nCreating {} ({}) protein frames, please wait..'.format(protein['entry_name'], protein['PDB']))
-            logger.info('Creating {} ({}) protein frames.'.format(protein['entry_name'], protein['PDB']))
+            nb_threads_to_do = len(cmd_list)
+            nb_threads_done = 0
+            errors = 0
+            print('\nCreating {} ({}) protein colored AA frames, please wait..'.format(protein['entry_name'], protein['PDB']))
+            logger.info('Creating {} ({}) protein colored AA frames.'.format(protein['entry_name'], protein['PDB']))
             with concurrent.futures.ThreadPoolExecutor(max_workers=5) as executor:
                 for cmd in cmd_list:
                     logger.info(cmd)
@@ -213,8 +237,14 @@ if __name__ == '__main__':
                     # capturing the output
                     if thread.result().stdout:
                         logger.info(thread.result().stdout.decode('utf-8'))
+                        nb_threads_done += 1
                     if thread.result().stderr:
                         logger.error(thread.result().stderr.decode('utf-8'))
+                        nb_threads_done += 1
+                        errors += 1
+                    print('{}/{} threads ({} errors)'.format(nb_threads_done,
+                                                             nb_threads_to_do,
+                                                             errors))
 
 
     # create the score
