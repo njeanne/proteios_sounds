@@ -10,9 +10,10 @@ import sys
 import os
 import logging
 import subprocess
+import concurrent.futures
 import parse_uniprot
 import midi_operations
-import pymol_operations
+import parse_pdb
 
 
 def restricted_tempo(tempo_value):
@@ -28,6 +29,7 @@ def restricted_tempo(tempo_value):
     return tempo_value
 
 if __name__ == '__main__':
+    prg_id = os.path.splitext(os.path.basename(__file__))[0]
     descr = '''
     {} v.{}
 
@@ -36,7 +38,7 @@ if __name__ == '__main__':
     {}
 
     Create a MIDI file from a protein entry of the UniProt database (https://www.uniprot.org/).
-    '''.format(os.path.basename(__file__), __version__, __author__, __email__, __copyright__)
+    '''.format(prg_id, __version__, __author__, __email__, __copyright__)
 
     # Parse arguments
     parser = argparse.ArgumentParser(description=descr,
@@ -117,7 +119,7 @@ if __name__ == '__main__':
         os.makedirs(out_dir)
 
     # create the log file
-    log_path = os.path.join(out_dir, '{}.log'.format(os.path.basename(__file__)))
+    log_path = os.path.join(out_dir, '{}.log'.format(prg_id))
     if os.path.exists(log_path):
         os.remove(log_path)
     logging.basicConfig(filename=log_path,
@@ -157,8 +159,8 @@ if __name__ == '__main__':
     # sort by decreasing frequency
     proportion_AA = sorted(proportion_AA.items(), key=lambda kv: kv[1], reverse=True)
 
-    for idx in range(0, len(proportion_AA)):
-        midi_keys[proportion_AA[idx][0]] = initial_midi_keys[idx]
+    for idx, aa_proportion in enumerate(proportion_AA):
+        midi_keys[aa_proportion[0]] = initial_midi_keys[idx]
 
     # create the MIDI file
     midi_file_path, keys_duration = midi_operations.create_midi(args.uniprot_accession_number,
@@ -170,19 +172,82 @@ if __name__ == '__main__':
                                                                 AA_PHY_CHI,
                                                                 logger,
                                                                 args.debug)
-    print('MIDI file for {} {} ({}) created in: {}'.format(protein['entry_name'],
-                                                           protein['organism'],
-                                                           args.uniprot_accession_number,
-                                                           midi_file_path))
+    print('MIDI file for {} {} ({}) created: {}'.format(protein['entry_name'],
+                                                        protein['organism'],
+                                                        args.uniprot_accession_number,
+                                                        midi_file_path))
 
     if 'PDB' in protein:
-        movie_path = pymol_operations.create_molecule_movie(protein,
-                                                            keys_duration,
-                                                            out_dir,
-                                                            logger)
+        # create the directories for PDB data and frames
+        pdb_dir = os.path.join(args.out, 'pdb', '{}_{}'.format(protein['accession_number'], protein['PDB']))
+        frames_dir = os.path.join(pdb_dir, 'frames')
+        if not os.path.exists(frames_dir):
+            os.makedirs(frames_dir)
+
+        # get data from the PDB file
+        pdb_data = parse_pdb.get_pdb_info(protein,
+                                          pdb_dir,
+                                          logger)
+        for k, v in pdb_data.items():
+            print('{}: {}'.format(k, v))
+
+        # create a frame without colored AA for all AA outside the PDB data
+        existing_frames = sorted([png for png in os.listdir(frames_dir)])
+        print('Existing frames: {}'.format(existing_frames))
+        if '{}_no-idx.png'.format(protein['PDB']) not in existing_frames:
+            print('\nCreating {} ({}) protein frame, please wait..'.format(protein['entry_name'], protein['PDB']))
+            logger.info('Creating {} ({}) protein frame.'.format(protein['entry_name'], protein['PDB']))
+            cmd_no_color = './create_pdb_frames.py -p {} -c {} -n {} -i {} {}'.format(os.path.abspath(pdb_dir),
+                                                                                      pdb_data['chain'],
+                                                                                      'no-idx',
+                                                                                      1,
+                                                                                      protein['PDB'])
+            logger.info(cmd_no_color)
+            sub = subprocess.run(cmd_no_color, shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+            # capturing the output
+            if sub.stdout:
+                logger.info(sub.stdout.decode('utf-8'))
+                print('Done!')
+            if sub.stderr:
+                logger.error(sub.stderr.decode('utf-8'))
+                print('Error!')
+
+        # create the commands for the python script which generates the pymol pictures with colored AA
+        cmd_list = []
+        for aa_idx, frame_idx in enumerate(pdb_data['frames_idx']):
+            if '{}_{}.png'.format(protein['PDB'], frame_idx) not in existing_frames:
+                cmd = './create_pdb_frames.py -p {} -c {} -n {} -i {} --color_aa {}'.format(os.path.abspath(pdb_dir),
+                                                                                            pdb_data['chain'],
+                                                                                            frame_idx,
+                                                                                            aa_idx + 1,
+                                                                                            protein['PDB'])
+                cmd_list.append(cmd)
+
+        # threading to run the commands
+        if cmd_list:
+            nb_threads_to_do = len(cmd_list)
+            nb_threads_done = 0
+            errors = 0
+            print('\nCreating {} ({}) protein colored AA frames, please wait..'.format(protein['entry_name'], protein['PDB']))
+            logger.info('Creating {} ({}) protein colored AA frames.'.format(protein['entry_name'], protein['PDB']))
+            with concurrent.futures.ThreadPoolExecutor(max_workers=5) as executor:
+                for cmd in cmd_list:
+                    logger.info(cmd)
+                    thread = executor.submit(subprocess.run, cmd, shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+                    # capturing the output
+                    if thread.result().stdout:
+                        logger.info(thread.result().stdout.decode('utf-8'))
+                        nb_threads_done += 1
+                    if thread.result().stderr:
+                        logger.error(thread.result().stderr.decode('utf-8'))
+                        nb_threads_done += 1
+                        errors += 1
+                    print('{}/{} threads ({} errors)'.format(nb_threads_done,
+                                                             nb_threads_to_do,
+                                                             errors))
 
 
-    # get the score
+    # create the score
     if args.score:
         print('Creating the score:')
         score_basename = '{}_{}_{}_{}bpm_score.pdf'.format(args.uniprot_accession_number,
