@@ -32,7 +32,6 @@ if __name__ == '__main__':
 
     # open pymol and retrieve the protein with PDB accession number
     pymol.finish_launching(['pymol', '-qc']) # Pymol: quiet and no GUI
-    print('THREADING creating the {} movie'.format(args.pdb_AN))
     # set the path to download the PDB data
     # pymol.cmd.set('fetch_path', pymol.cmd.exp_path(fn_arg['pdb_dir']), quiet=1)
     # print('Fetching PDB accession number: {}'.format(fn_arg['pdb_AN']))
@@ -46,12 +45,11 @@ if __name__ == '__main__':
     pymol.cmd.show('cartoon')
     pymol.cmd.set('ray_opaque_background', 1)
 
-    print(args.idx_aa)
     pymol.cmd.color('red', 'resi {}'.format(args.idx_aa))
     img_path = os.path.join(args.pdb_dir,
                             'frames',
                             '{}_{}.png'.format(args.pdb_AN, args.frame_nb))
-    print('Frame {} [in PDB]: {}'.format(args.frame_nb,
-                                         img_path))
+    print('[Pymol] Frame {} (in PDB file): {}'.format(args.frame_nb,
+                                                      img_path))
     pymol.cmd.png(img_path, quiet=1)
     pymol.cmd.quit()
