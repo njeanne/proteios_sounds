@@ -31,6 +31,7 @@ def restricted_tempo(tempo_value):
     return tempo_value
 
 if __name__ == '__main__':
+    prg_id = os.path.splitext(os.path.basename(__file__))[0]
     descr = '''
     {} v.{}
 
@@ -39,7 +40,7 @@ if __name__ == '__main__':
     {}
 
     Create a MIDI file from a protein entry of the UniProt database (https://www.uniprot.org/).
-    '''.format(os.path.basename(__file__), __version__, __author__, __email__, __copyright__)
+    '''.format(prg_id, __version__, __author__, __email__, __copyright__)
 
     # Parse arguments
     parser = argparse.ArgumentParser(description=descr,
@@ -120,7 +121,7 @@ if __name__ == '__main__':
         os.makedirs(out_dir)
 
     # create the log file
-    log_path = os.path.join(out_dir, '{}.log'.format(os.path.basename(__file__)))
+    log_path = os.path.join(out_dir, '{}.log'.format(prg_id))
     if os.path.exists(log_path):
         os.remove(log_path)
     logging.basicConfig(filename=log_path,
