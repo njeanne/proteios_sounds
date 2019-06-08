@@ -108,7 +108,7 @@ def get_pdb_info(prot_dict, pdb_dir, logger):
         img_path = os.path.join(pdb_dir,
                                 'frames',
                                 '{}_no-idx.png'.format(prot_dict['PDB']))
-        print('Frame without index [missing in PDB]: {}'.format(img_path))
+        print('[Pymol] Frame without index (missing in PDB): {}'.format(img_path))
         pymol.cmd.png(img_path, quiet=0)
 
     # wait for pymol frame creation
@@ -122,7 +122,5 @@ def get_pdb_info(prot_dict, pdb_dir, logger):
     frames_idx = [i + pdb_data['PDB_start_on_uniprot'] for i in range(pdb_data['PDB_stop_on_uniprot'] - pdb_data['PDB_start_on_uniprot'] + 1)]
 
     pdb_data['frames_idx'] = frames_idx
-    # with open(yaml_path, 'w') as outfile:
-    #     yaml.dump(pdb_data, outfile, default_flow_style=True)
 
     return pdb_data
