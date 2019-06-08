@@ -9,10 +9,8 @@ import argparse
 import sys
 import os
 import logging
-import shutil
 import subprocess
 import concurrent.futures
-import threading
 import parse_uniprot
 import midi_operations
 import parse_pdb
@@ -193,7 +191,6 @@ if __name__ == '__main__':
 
         # create the commands for the python script which generates the pymol pictures
         cmd_list = []
-        print('Frames dir: {}'.format(sorted(os.listdir(frames_dir))))
         existing_frames = sorted([png for png in os.listdir(frames_dir)])
         print('Existing frames: {}'.format(existing_frames))
         for aa_idx, frame_idx in enumerate(pdb_data['frames_idx']):
@@ -207,12 +204,20 @@ if __name__ == '__main__':
 
         # threading to call the commands
         if cmd_list:
+            print('\nCreating {} ({}) protein frames, please wait..'.format(protein['entry_name'], protein['PDB']))
+            logger.info('Creating {} ({}) protein frames.'.format(protein['entry_name'], protein['PDB']))
             with concurrent.futures.ThreadPoolExecutor(max_workers=5) as executor:
                 for cmd in cmd_list:
-                    executor.submit(subprocess.run, cmd, shell=True)
+                    logger.info(cmd)
+                    thread = executor.submit(subprocess.run, cmd, shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+                    # capturing the output
+                    if thread.result().stdout:
+                        logger.info(thread.result().stdout.decode('utf-8'))
+                    if thread.result().stderr:
+                        logger.error(thread.result().stderr.decode('utf-8'))
 
 
-    # get the score
+    # create the score
     if args.score:
         print('Creating the score:')
         score_basename = '{}_{}_{}_{}bpm_score.pdf'.format(args.uniprot_accession_number,
