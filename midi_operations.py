@@ -141,7 +141,7 @@ def create_midi(uniprot_AN,
             # change the volume of each instrument depending on the structure
             if 'structure' in protein.keys():
                 if i in protein['structure'].keys():
-                    logger.debug('{}:'.format(protein['structure'][i]))
+                    logger.debug('{}: {}'.format(protein['structure'][i], i))
                     if protein['structure'][i] == 'HELIX':
                         channels[0]['vol'] = 40
                         channels[1]['vol'] = 100
