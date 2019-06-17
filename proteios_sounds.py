@@ -1,6 +1,6 @@
 #! /usr/bin/env python3
 
-__author__ = 'Nina Verstraete, Jacques TOEN & Nicolas JEANNE'
+__author__ = 'Nina VERSTRAETE, Jacques TOEN & Nicolas JEANNE'
 __copyright__ = 'GNU General Public License'
 __version__ = '1.0.0'
 __email__ = 'nicolas.jeanne@ntymail.com'

@@ -33,7 +33,7 @@ Rajout d'un dièse (revoir avec Jacques pourquoi SOL# puis FA#?) / nouvelle prop
 - [x] Prendre couple d'AA de droite à gauche et si ils partagent une propriété physico-chimique -> accord
 
 # Percussions:
-- [ ] En fonction de la métrique, caler dessus des patterns rythmiques et en fonction d'une modification post-traductionnelle (résidu modifié?), changement de pattern.
+- [ ] En fonction de la métrique (on peut prendre une rythmique à 4 temps par exemple sur une mesure), caler dessus des patterns rythmiques (Jacques doit en envoyer une 20aine), choix d'un patter random et en fonction d'une modification post-traductionnelle (résidu modifié?), changement de pattern.
 - [ ] Ajout d'une basse systématique élaborée en fonction de la mesure et des percussions.
 - [ ] Si la basse fonctionne bien, rajout d'accords.
 
