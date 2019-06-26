@@ -16,6 +16,7 @@ The proteins data are retrieved from the [UniProt](https://www.uniprot.org/) dat
 
 ## External softwares
 
+- [pymol](https://github.com/schrodinger/pymol-open-source)
 - [musescore](https://musescore.org/en/download)
 
 ## Usage
