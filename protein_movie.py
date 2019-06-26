@@ -1,9 +1,10 @@
 #! /usr/bin/env python3
 
 import os
-import numpy as np
-import cv2
-from cv2 import VideoWriter, VideoWriter_fourcc
+from midi2audio import FluidSynth
+import imageio
+
+
 
 def create_movie(path_movie, dir_frames, duration_keys, logger):
     '''Create the movie of the protein.
@@ -15,34 +16,39 @@ def create_movie(path_movie, dir_frames, duration_keys, logger):
     :return: the movie path.
     :rtype: str
     '''
+
+    # using the default sound font in 44100 Hz sample rate
+    fs = FluidSynth()
+    ######## TO CHANGE
+    midi = '/home/nico/fablab/proteios_sounds/sounds_proteins/P10145_IL8_HUMAN_Homo_sapiens_100bpm_instrus-0-42-65.midi'
+    flac = '/home/nico/fablab/proteios_sounds/proteios_sounds/P10145.flac'
+    fs.midi_to_audio(midi, flac)
+
+    # download ffmpeg if necessary
+    imageio.plugins.ffmpeg.download()
+
     # create a dictionary of the frames directory with the index as keys
     frames_dict = {}
     for png in os.listdir(dir_frames):
         idx_frame_in_prot = os.path.splitext(png)[0].split('_')[1]
-        frames_dict[idx_frame_in_prot] = cv2.imread(os.path.join(dir_frames,
-                                                                 png),
-                                                    1)
-    print('[protein_movie.py]: {}'.format(frames_dict))
+        frames_dict[idx_frame_in_prot] = os.path.join(dir_frames, png)
+
     # set the video parameters
-    width = 1280
-    height = 720
     FPS = 24
 
-    # set the video Codec
-    fourcc = VideoWriter_fourcc(*'MP42')
     # set the video writer
-    video = VideoWriter(path_movie, fourcc, float(FPS), (width, height))
+    video_writer = imageio.get_writer(path_movie, fps=FPS)
+
     # create the frames per second
+    print('Creating the movie file, please wait..')
     for idx, key_duration in enumerate(duration_keys):
+        print('\tFrames for amino acid {}/{}'.format(idx + 1,
+                                                     len(duration_keys)))
         nb_frames_on_key = int(FPS * key_duration)
-        print('[protein_movie.py]: key duration: {}\t nb frames: {}'.format(key_duration,
-                                                        nb_frames_on_key))
         if str(idx) in frames_dict:
             for _ in range(nb_frames_on_key):
-                video.write(frames_dict[str(idx)])
+                video_writer.append_data(imageio.imread(frames_dict[str(idx)]))
         else:
             for _ in range(nb_frames_on_key):
-                video.write(frames_dict['no-idx'])
-
-
-    video.release()
+                video_writer.append_data(imageio.imread(frames_dict['no-idx']))
+    video_writer.close()
