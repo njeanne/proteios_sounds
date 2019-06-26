@@ -39,7 +39,10 @@ if __name__ == '__main__':
     Contact: {}
     {}
 
-    Create a MIDI file from a protein entry of the UniProt database (https://www.uniprot.org/).
+    Create a MIDI file and from a protein entry of the UniProt database
+    (https://www.uniprot.org/).
+    If the data are available in the UniProt entry, a movie file of the 3D
+    representation of the protein will also be created.
     '''.format(prg_id, __version__, __author__, __email__, __copyright__)
 
     # Parse arguments
@@ -62,11 +65,10 @@ if __name__ == '__main__':
     parser.add_argument('-d', '--debug', required=False, action='store_true',
                         help='''debug mode, create a log file which details each
                          entry of the MIDI file.''')
-    parser.add_argument('uniprot_accession_number',
-                        help='''the protein accession number in the UniProt
+    parser.add_argument('uniprot_AN',
+                        help='''the protein Accession Number in the UniProt
                         database. Example: Human Interleukin-8 > P10145''')
     args = parser.parse_args()
-
 
     # check if instruments are between 0 and 127
     if args.instruments:
@@ -86,14 +88,17 @@ if __name__ == '__main__':
     else:
         tempo = 100  # In BPM
 
-    ### midi notes on major mode correspondance with AA sorted by decreasing molecular weight
-    # keys are set as DO (48, 60, 72) degrees I, SOL (55, 67) degrees V, FA (53, 65) degrees IV, RE (50, 62) degrees II,
-    # MI (52, 64) degrees III, LA (57, 69) degrees VI and SI (59, 71) degrees VII. Finally, we add 7 alterations #
-    # following the ascending quint (54, 66, 49, 61, 56, 68, 51)
-    initial_midi_keys = [48, 60, 72, 55, 67, 53, 65, 50, 62, 52, 64, 57, 69, 59, 71, 54, 66, 49, 61, 56, 68, 51]
+    # midi notes on major mode correspondance with AA sorted by decreasing
+    # molecular weight keys are set as DO (48, 60, 72) degrees I,
+    # SOL (55, 67) degrees V, FA (53, 65) degrees IV, RE (50, 62) degrees II,
+    # MI (52, 64) degrees III, LA (57, 69) degrees VI and
+    # SI (59, 71) degrees VII. Finally, we add 7 alterations '#' following the
+    # ascending quint (54, 66, 49, 61, 56, 68, 51)
+    initial_midi_keys = [48, 60, 72, 55, 67, 53, 65, 50, 62, 52, 64, 57, 69,
+                         59, 71, 54, 66, 49, 61, 56, 68, 51]
     midi_keys = {}
 
-    ### Physico-chemical properties of AA
+    # Physico-chemical properties of AA
     AA_PHY_CHI = {'A': {'hybrophobic', 'small'},
                   'R': {'polar', 'pos_charged'},
                   'N': {'polar', 'small'},
@@ -137,8 +142,8 @@ if __name__ == '__main__':
     logger.info('Create score: {}'.format(args.score))
 
     # parsing of uniprot entry
-    protein = parse_uniprot.parse_entry(args.uniprot_accession_number, logger)
-    logger.info('UniProt accession number: {}'.format(args.uniprot_accession_number))
+    protein = parse_uniprot.parse_entry(args.uniprot_AN, logger)
+    logger.info('UniProt accession number: {}'.format(args.uniprot_AN))
     logger.info('Protein: {}'.format(protein['entry_name']))
     logger.info('Organism: {}'.format(protein['organism']))
     if 'PDB' in protein:
@@ -150,7 +155,8 @@ if __name__ == '__main__':
     sequence_length = len(sequence)
     protein['seq'] = {}
     if args.debug:
-        logger.info('AA sequence ({} AA): {}'.format(sequence_length, sequence))
+        logger.info('AA sequence ({} AA): {}'.format(sequence_length,
+                                                     sequence))
     for i in range(sequence_length):
         protein['seq'][i] = sequence[i]
     # frequence of AA in the sequence
@@ -159,24 +165,29 @@ if __name__ == '__main__':
     for aa in set_AA:
         proportion_AA[aa] = sequence.count(aa) / sequence_length
     # sort by decreasing frequency
-    proportion_AA = sorted(proportion_AA.items(), key=lambda kv: kv[1], reverse=True)
+    proportion_AA = sorted(proportion_AA.items(),
+                           key=lambda kv: kv[1],
+                           reverse=True)
 
     for idx, aa_proportion in enumerate(proportion_AA):
         midi_keys[aa_proportion[0]] = initial_midi_keys[idx]
 
+    # set the result files base name
+    file_base_name = '{}_{}_{}_{}bpm_instrus'.format(args.uniprot_AN,
+                                                     protein['entry_name'],
+                                                     protein['organism'],
+                                                     tempo)
+    for instru in instrus:
+        file_base_name = '{}-{}'.format(file_base_name, instru)
+
     # create the MIDI file
-    midi_file_path, keys_duration = midi_operations.create_midi(args.uniprot_accession_number,
-                                                                protein,
-                                                                midi_keys,
-                                                                tempo,
-                                                                instrus,
-                                                                out_dir,
-                                                                AA_PHY_CHI,
-                                                                logger,
-                                                                args.debug)
+    midi_file_path = os.path.join(out_dir, '{}.midi'.format(file_base_name))
+    keys_duration = midi_operations.create_midi(midi_file_path, protein,
+                                                midi_keys, tempo, instrus,
+                                                AA_PHY_CHI, logger, args.debug)
     print('MIDI file for {} {} ({}) created: {}'.format(protein['entry_name'],
                                                         protein['organism'],
-                                                        args.uniprot_accession_number,
+                                                        args.uniprot_AN,
                                                         midi_file_path))
 
     if 'PDB' in protein:
@@ -190,22 +201,23 @@ if __name__ == '__main__':
         pdb_data = parse_pdb.get_pdb_info(protein,
                                           pdb_dir,
                                           logger)
-        for k, v in pdb_data.items():
-            print('{}: {}'.format(k, v))
 
         # create a frame without colored AA for all AA outside the PDB data
         existing_frames = sorted([png for png in os.listdir(frames_dir)])
-        print('Existing frames: {}'.format(existing_frames))
         if '{}_no-idx.png'.format(protein['PDB']) not in existing_frames:
-            print('\nCreating {} ({}) protein frame, please wait..'.format(protein['entry_name'], protein['PDB']))
-            logger.info('Creating {} ({}) protein frame.'.format(protein['entry_name'], protein['PDB']))
+            print('\nCreating {} ({}) protein frame, please wait..'.format(protein['entry_name'],
+                                                                           protein['PDB']))
+            logger.info('Creating {} ({}) protein frame.'.format(protein['entry_name'],
+                                                                 protein['PDB']))
             cmd_no_color = './create_pdb_frames.py -p {} -c {} -n {} -i {} {}'.format(pdb_dir,
                                                                                       pdb_data['chain'],
                                                                                       'no-idx',
                                                                                       1,
                                                                                       protein['PDB'])
             logger.info(cmd_no_color)
-            sub = subprocess.run(cmd_no_color, shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+            sub = subprocess.run(cmd_no_color, shell=True,
+                                 stdout=subprocess.PIPE,
+                                 stderr=subprocess.PIPE)
             # capturing the output
             if sub.stdout:
                 logger.info(sub.stdout.decode('utf-8'))
@@ -214,10 +226,12 @@ if __name__ == '__main__':
                 logger.error(sub.stderr.decode('utf-8'))
                 print('Error!')
 
-        # create the commands for the python script which generates the pymol pictures with colored AA
+        # create the commands for the python script which generates the pymol
+        # pictures with colored AA
         cmd_list = []
         for aa_idx, frame_idx in enumerate(pdb_data['frames_idx']):
-            if '{}_{}.png'.format(protein['PDB'], frame_idx) not in existing_frames:
+            if '{}_{}.png'.format(protein['PDB'],
+                                  frame_idx) not in existing_frames:
                 cmd = './create_pdb_frames.py -p {} -c {} -n {} -i {} --color_aa {}'.format(pdb_dir,
                                                                                             pdb_data['chain'],
                                                                                             frame_idx,
@@ -230,8 +244,10 @@ if __name__ == '__main__':
             nb_threads_to_do = len(cmd_list)
             nb_threads_done = 0
             errors = 0
-            print('\nCreating {} ({}) protein colored AA frames, please wait..'.format(protein['entry_name'], protein['PDB']))
-            logger.info('Creating {} ({}) protein colored AA frames.'.format(protein['entry_name'], protein['PDB']))
+            print('\nCreating {} ({}) protein colored AA frames, please wait..'.format(protein['entry_name'],
+                                                                                       protein['PDB']))
+            logger.info('Creating {} ({}) protein colored AA frames.'.format(protein['entry_name'],
+                                                                             protein['PDB']))
             with concurrent.futures.ThreadPoolExecutor(max_workers=5) as executor:
                 for cmd in cmd_list:
                     logger.info(cmd)
@@ -256,12 +272,18 @@ if __name__ == '__main__':
         while len(os.listdir(frames_dir)) != (len(pdb_data['frames_idx']) + 1):
             time.sleep(1)
         # create the movie
-        movie_path = protein_movie.create_movie(frames_dir, logger)
+        movie_path = os.path.join(out_dir,
+                                  '{}_{}_{}_{}bpm_instrus.avi'.format(args.uniprot_AN,
+                                                                      protein['entry_name'],
+                                                                      protein['organism'],
+                                                                      tempo))
+        protein_movie.create_movie(movie_path, frames_dir, keys_duration,
+                                   logger)
 
     # create the score
     if args.score:
         print('Creating the score:')
-        score_basename = '{}_{}_{}_{}bpm_score.pdf'.format(args.uniprot_accession_number,
+        score_basename = '{}_{}_{}_{}bpm_score.pdf'.format(args.uniprot_AN,
                                                            protein['entry_name'],
                                                            protein['organism'],
                                                            tempo)

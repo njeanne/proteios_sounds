@@ -19,7 +19,8 @@ if __name__ == '__main__':
     {}
 
     Creates a frames from PDB data.
-    '''.format(os.path.basename(__file__), __version__, __author__, __email__, __copyright__)
+    '''.format(os.path.basename(__file__), __version__, __author__, __email__,
+               __copyright__)
 
     # Parse arguments
     parser = argparse.ArgumentParser(description=descr, formatter_class=argparse.RawTextHelpFormatter)
@@ -32,7 +33,7 @@ if __name__ == '__main__':
     args = parser.parse_args()
 
     # open pymol and retrieve the protein with PDB accession number
-    pymol.finish_launching(['pymol', '-qc']) # Pymol: quiet and no GUI
+    pymol.finish_launching(['pymol', '-qc'])  # Pymol: quiet and no GUI
     # set the path to download the PDB data
     # pymol.cmd.set('fetch_path', pymol.cmd.exp_path(fn_arg['pdb_dir']), quiet=1)
     # print('Fetching PDB accession number: {}'.format(fn_arg['pdb_AN']))
