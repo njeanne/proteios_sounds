@@ -252,6 +252,11 @@ if __name__ == '__main__':
                                                              nb_threads_to_do,
                                                              errors))
 
+        # check if all frames are created else wait
+        while len(os.listdir(frames_dir)) != (len(pdb_data['frames_idx']) + 1):
+            time.sleep(1)
+        # create the movie
+        movie_path = protein_movie.create_movie(frames_dir, logger)
 
     # create the score
     if args.score:
