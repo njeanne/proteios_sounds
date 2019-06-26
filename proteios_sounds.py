@@ -11,9 +11,11 @@ import os
 import logging
 import subprocess
 import concurrent.futures
+import time
 import parse_uniprot
 import midi_operations
 import parse_pdb
+import protein_movie
 
 
 def restricted_tempo(tempo_value):
@@ -179,7 +181,7 @@ if __name__ == '__main__':
 
     if 'PDB' in protein:
         # create the directories for PDB data and frames
-        pdb_dir = os.path.join(args.out, 'pdb', '{}_{}'.format(protein['accession_number'], protein['PDB']))
+        pdb_dir = os.path.join(os.path.abspath(args.out), 'pdb', '{}_{}'.format(protein['accession_number'], protein['PDB']))
         frames_dir = os.path.join(pdb_dir, 'frames')
         if not os.path.exists(frames_dir):
             os.makedirs(frames_dir)
@@ -197,7 +199,7 @@ if __name__ == '__main__':
         if '{}_no-idx.png'.format(protein['PDB']) not in existing_frames:
             print('\nCreating {} ({}) protein frame, please wait..'.format(protein['entry_name'], protein['PDB']))
             logger.info('Creating {} ({}) protein frame.'.format(protein['entry_name'], protein['PDB']))
-            cmd_no_color = './create_pdb_frames.py -p {} -c {} -n {} -i {} {}'.format(os.path.abspath(pdb_dir),
+            cmd_no_color = './create_pdb_frames.py -p {} -c {} -n {} -i {} {}'.format(pdb_dir,
                                                                                       pdb_data['chain'],
                                                                                       'no-idx',
                                                                                       1,
@@ -216,7 +218,7 @@ if __name__ == '__main__':
         cmd_list = []
         for aa_idx, frame_idx in enumerate(pdb_data['frames_idx']):
             if '{}_{}.png'.format(protein['PDB'], frame_idx) not in existing_frames:
-                cmd = './create_pdb_frames.py -p {} -c {} -n {} -i {} --color_aa {}'.format(os.path.abspath(pdb_dir),
+                cmd = './create_pdb_frames.py -p {} -c {} -n {} -i {} --color_aa {}'.format(pdb_dir,
                                                                                             pdb_data['chain'],
                                                                                             frame_idx,
                                                                                             aa_idx + 1,
@@ -233,7 +235,11 @@ if __name__ == '__main__':
             with concurrent.futures.ThreadPoolExecutor(max_workers=5) as executor:
                 for cmd in cmd_list:
                     logger.info(cmd)
-                    thread = executor.submit(subprocess.run, cmd, shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+                    thread = executor.submit(subprocess.run,
+                                             cmd,
+                                             shell=True,
+                                             stdout=subprocess.PIPE,
+                                             stderr=subprocess.PIPE)
                     # capturing the output
                     if thread.result().stdout:
                         logger.info(thread.result().stdout.decode('utf-8'))
