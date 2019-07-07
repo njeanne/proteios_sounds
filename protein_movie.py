@@ -1,10 +1,9 @@
 #! /usr/bin/env python3
 
 import os
+import subprocess
 from midi2audio import FluidSynth
 import imageio
-import subprocess
-
 
 
 def create_movie(path_movie, dir_frames, duration_keys, midi_path, logger):
@@ -23,6 +22,7 @@ def create_movie(path_movie, dir_frames, duration_keys, midi_path, logger):
     fs = FluidSynth(sound_font='FluidR3_GM.sf2')
     flac = '{}.flac'.format(os.path.splitext(midi_path)[0])
     fs.midi_to_audio(midi_path, flac)
+    logger.info('Audio file created: {}'.format(flac))
 
     # create the movie
     # download ffmpeg if necessary
@@ -34,11 +34,8 @@ def create_movie(path_movie, dir_frames, duration_keys, midi_path, logger):
         idx_frame_in_prot = os.path.splitext(png)[0].split('_')[1]
         frames_dict[idx_frame_in_prot] = os.path.join(dir_frames, png)
 
-    # set the video parameters
-    FPS = 24
-
     # set the video writer
-    video_writer = imageio.get_writer(path_movie, fps=FPS)
+    video_writer = imageio.get_writer(path_movie, fps=24)
 
     # create the frames per second
     print('Creating the movie file, please wait..')
@@ -54,6 +51,7 @@ def create_movie(path_movie, dir_frames, duration_keys, midi_path, logger):
                 video_writer.append_data(imageio.imread(frames_dict['no-idx']))
     video_writer.close()
 
-    cmd_audio_video = 'ffmpeg -i {0} -i {1} -c copy -map 0:v:0 -map 1:a:0 {0}'.format(path_movie,
-                                                                                           flac)
+    cmd_audio_video = 'ffmpeg -i {0} -i {1} -c copy -map 0:v:0 -map 1:a:0 {2}'.format(path_movie,
+                                                                                      flac,
+                                                                                      '/home/nico/final.avi')
     subprocess.run(cmd_audio_video, shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
