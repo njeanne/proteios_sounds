@@ -3,4 +3,5 @@ pymol/*
 *.pdb
 *.cif
 *.fa
+*.sf2
 __pycache__/
