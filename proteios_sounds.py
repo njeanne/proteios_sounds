@@ -277,8 +277,9 @@ if __name__ == '__main__':
                                                                       protein['entry_name'],
                                                                       protein['organism'],
                                                                       tempo))
+        # if not os.path.exists(movie_path):
         protein_movie.create_movie(movie_path, frames_dir, keys_duration,
-                                   logger)
+                                       midi_file_path, logger)
 
     # create the score
     if args.score:

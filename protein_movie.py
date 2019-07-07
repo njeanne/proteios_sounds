@@ -3,10 +3,11 @@
 import os
 from midi2audio import FluidSynth
 import imageio
+import subprocess
 
 
 
-def create_movie(path_movie, dir_frames, duration_keys, logger):
+def create_movie(path_movie, dir_frames, duration_keys, midi_path, logger):
     '''Create the movie of the protein.
 
     :param str path_movie: the path where the movie will be created.
@@ -17,13 +18,13 @@ def create_movie(path_movie, dir_frames, duration_keys, logger):
     :rtype: str
     '''
 
+    # convert the MIDI file to audio file
     # using the default sound font in 44100 Hz sample rate
-    fs = FluidSynth()
-    ######## TO CHANGE
-    midi = '/home/nico/fablab/proteios_sounds/sounds_proteins/P10145_IL8_HUMAN_Homo_sapiens_100bpm_instrus-0-42-65.midi'
-    flac = '/home/nico/fablab/proteios_sounds/proteios_sounds/P10145.flac'
-    fs.midi_to_audio(midi, flac)
+    fs = FluidSynth(sound_font='FluidR3_GM.sf2')
+    flac = '{}.flac'.format(os.path.splitext(midi_path)[0])
+    fs.midi_to_audio(midi_path, flac)
 
+    # create the movie
     # download ffmpeg if necessary
     imageio.plugins.ffmpeg.download()
 
@@ -52,3 +53,7 @@ def create_movie(path_movie, dir_frames, duration_keys, logger):
             for _ in range(nb_frames_on_key):
                 video_writer.append_data(imageio.imread(frames_dict['no-idx']))
     video_writer.close()
+
+    cmd_audio_video = 'ffmpeg -i {0} -i {1} -c copy -map 0:v:0 -map 1:a:0 {0}'.format(path_movie,
+                                                                                           flac)
+    subprocess.run(cmd_audio_video, shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
