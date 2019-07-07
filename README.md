@@ -23,6 +23,7 @@ All Python library can be installed using `pip install <LIBRARY>`, see:
 - [pymol](https://github.com/schrodinger/pymol-open-source)
 - [musescore](https://musescore.org/en/download)
 - [FluidSynth](http://www.fluidsynth.org/)
+- [ffmpeg](https://ffmpeg.org/)
 
 ## Usage
 ```
