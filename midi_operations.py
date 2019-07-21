@@ -108,7 +108,8 @@ def create_midi(path_midi, protein, midi_keys, tempo, instrus, aa_phy_chi,
                 duration = 2
             else:
                 duration = 4
-            durations_list.append(float(duration))
+            # add each duration adjusted with the tempo
+            durations_list.append(float(duration) * (60 / tempo))
 
             # set the chords depending on number of shared properties between
             # current AA and the previous AA
