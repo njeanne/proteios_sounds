@@ -11,12 +11,19 @@ The proteins data are retrieved from the [UniProt](https://www.uniprot.org/) dat
 
 ## Python libraries
 
+All Python library can be installed using `pip install <LIBRARY>`, see:
+
 - [Biopython](https://biopython.org/)
 - [midiutil](https://pypi.org/project/MIDIUtil/)
+- [midi2audio](https://pypi.org/project/midi2audio/)
+- [imageio](https://pypi.org/project/imageio/)
 
 ## External softwares
 
+- [pymol](https://github.com/schrodinger/pymol-open-source)
 - [musescore](https://musescore.org/en/download)
+- [FluidSynth](http://www.fluidsynth.org/)
+- [ffmpeg](https://ffmpeg.org/)
 
 ## Usage
 ```

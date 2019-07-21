@@ -15,55 +15,47 @@ def create_chord(pitch_list, keys_in_chord, idx_key, KEYS_OCTAVE_ONLY):
     added_keys = 1
     while added_keys < keys_in_chord:
         idx_key = idx_key + 2
-        # if index out of bound, substract the length of the list to change the index
+        # if index out of bound, substract the length of the list
+        # to change the index
         if idx_key >= len(KEYS_OCTAVE_ONLY):
             idx_key = idx_key - len(KEYS_OCTAVE_ONLY)
         pitch_list.append(KEYS_OCTAVE_ONLY[idx_key])
         added_keys += 1
     return pitch_list
 
-def create_midi(uniprot_AN,
-                protein,
-                midi_keys,
-                tempo,
-                instrus,
-                output_directory,
-                aa_phy_chi,
-                logger,
-                debug=False):
+def create_midi(path_midi, protein, midi_keys, tempo, instrus, aa_phy_chi,
+                logger, debug=False):
     '''
     Creates the MIDI file from the protein data.
-    :param int uniprot_AN: the uniprot accession number for the protein.
+    :param str path_midi: the path to the MIDI file.
     :param dict protein: the dictionary descri the protein.
     :param dict midi_keys: the dictionary of the keys
     :param list initial_keys: the list of the initial keys
     :param int tempo: the tempo in BPM
     :param list instrus: the list of the MIDI instrument numbers
-    :param str output_directory: the path to the output directory
     :param dict aa_phy_chi: dictionary of the physico-chemical attributes of the amino acids
     :param logger logger: the logger
     :param boolean debug: the enable debug mode
-    :return: the MIDI file path
-    :rtype: str
+    :return: the list of keys durations
+    :rtype: list of floats
     '''
 
-    # octaves DO, RE, MI, FA, SOL, LA, SI. 2 octaves and 1 more SOL, the remaining 7 keys are altérations (#)
-    KEYS_OCTAVE_ALTERATIONS = [48, 50, 52, 53, 55, 57, 59, 60, 62, 64, 65, 67, 69, 71, 72, 54, 66, 49, 61, 56, 68, 51]
+    # octaves DO, RE, MI, FA, SOL, LA, SI. 2 octaves and 1 more SOL,
+    # the remaining 7 keys are altérations (#)
+    KEYS_OCTAVE_ALTERATIONS = [48, 50, 52, 53, 55, 57, 59, 60, 62, 64, 65, 67,
+                               69, 71, 72, 54, 66, 49, 61, 56, 68, 51]
     KEYS_OCTAVE_ONLY = KEYS_OCTAVE_ALTERATIONS[:15]
 
-    file_base_name = '{}_{}_{}_{}bpm_instrus'.format(uniprot_AN, protein['entry_name'], protein['organism'], tempo)
-
-    for instru in instrus:
-        file_base_name = '{}-{}'.format(file_base_name, instru)
-    midi_file_path = os.path.join(output_directory, '{}.midi'.format(file_base_name))
-
-    with open(midi_file_path, 'wb') as  midiFile:
+    with open(path_midi, 'wb') as  midiFile:
 
         track = 0
         time = 0   # In beats
 
-        # a channel is defined by an instrument nbr and a volume (0-127, as per the MIDI standard, see: http://www.pjb.com.au/muscript/gm.html)
-        # channel 9 is for percussions (see https://pjb.com.au/muscript/gm.html#perc)
+        # a channel is defined by an instrument nbr and
+        # a volume (0-127, as per the MIDI standard,
+        # see: http://www.pjb.com.au/muscript/gm.html)
+        # channel 9 is for percussions
+        # (see https://pjb.com.au/muscript/gm.html#perc)
         channels = {0: {'instrument': instrus[0], 'vol': 100},
                     1: {'instrument': instrus[1], 'vol': 40},
                     2: {'instrument': instrus[2], 'vol': 60}}
@@ -71,15 +63,20 @@ def create_midi(uniprot_AN,
         if debug:
             logger.info('Instrument number by channel, see: http://www.pjb.com.au/muscript/gm.html for instruments number correspondance:')
             for channel_nb in channels:
-                logger.info('\tchannel {}: instrument {}'.format(channel_nb, channels[channel_nb]['instrument']))
+                logger.info('\tchannel {}: instrument {}'.format(channel_nb,
+                                                                 channels[channel_nb]['instrument']))
 
         MyMIDI = MIDIFile(numTracks=1, adjust_origin=False) # One track, defaults to format 1 (tempo track automatically created)
         MyMIDI.addTempo(track, time, tempo)
         # add the channels (1 per instrument)
         for channel_nbr in channels:
-            MyMIDI.addProgramChange(track, channel=channel_nbr, time=time, program=channels[channel_nbr]['instrument'])
+            MyMIDI.addProgramChange(track, channel=channel_nbr,
+                                    time=time,
+                                    program=channels[channel_nbr]['instrument'])
 
         sequence_length = len(protein['seq'])
+
+        durations_list = []
 
         for i in range(0, sequence_length):
             AA = protein['seq'][i]
@@ -95,11 +92,13 @@ def create_midi(uniprot_AN,
                 prev_AA = protein['seq'][i - 1]
                 next_AA = protein['seq'][i + 1]
 
-            # set the duration of the key (current AA) depending on the number of shared properties with the next AA
+            # set the duration of the key (current AA) depending on the number
+            # of shared properties with the next AA
             if AA == 'X' or next_AA == 'X': # non determined AA
                 shared_properties_current_next = 0
             else:
-                shared_properties_current_next = len(set.intersection(aa_phy_chi[AA], aa_phy_chi[next_AA]))
+                shared_properties_current_next = len(set.intersection(aa_phy_chi[AA],
+                                                                      aa_phy_chi[next_AA]))
 
             if shared_properties_current_next == 0:
                 duration = 1
@@ -109,8 +108,11 @@ def create_midi(uniprot_AN,
                 duration = 2
             else:
                 duration = 4
+            # add each duration adjusted with the tempo
+            durations_list.append(float(duration) * (60 / tempo))
 
-            # set the chords depending on number of shared properties between current AA and the previous AA
+            # set the chords depending on number of shared properties between
+            # current AA and the previous AA
             if AA == 'X' or prev_AA == 'X': # non determined AA
                 shared_properties_current_previous = 0
             else:
@@ -121,22 +123,25 @@ def create_midi(uniprot_AN,
                 # 2 keys chord
                 keys_in_chord = 2
                 idx_key = KEYS_OCTAVE_ALTERATIONS.index(midi_keys[AA])
-                pitch_list = create_chord(pitch_list, keys_in_chord, idx_key, KEYS_OCTAVE_ONLY)
+                pitch_list = create_chord(pitch_list, keys_in_chord, idx_key,
+                                          KEYS_OCTAVE_ONLY)
             elif shared_properties_current_previous == 3:
                 # 3 keys chord
                 keys_in_chord = 3
                 idx_key = KEYS_OCTAVE_ALTERATIONS.index(midi_keys[AA])
-                pitch_list = create_chord(pitch_list, keys_in_chord, idx_key, KEYS_OCTAVE_ONLY)
+                pitch_list = create_chord(pitch_list, keys_in_chord, idx_key,
+                                          KEYS_OCTAVE_ONLY)
             elif shared_properties_current_previous >= 4:
                 # 4 keys chord
                 keys_in_chord = 4
                 idx_key = KEYS_OCTAVE_ALTERATIONS.index(midi_keys[AA])
-                pitch_list = create_chord(pitch_list, keys_in_chord, idx_key, KEYS_OCTAVE_ONLY)
+                pitch_list = create_chord(pitch_list, keys_in_chord, idx_key,
+                                          KEYS_OCTAVE_ONLY)
 
             # change the volume of each instrument depending on the structure
             if 'structure' in protein.keys():
                 if i in protein['structure'].keys():
-                    logger.debug('{}:'.format(protein['structure'][i]))
+                    logger.debug('{}: {}'.format(protein['structure'][i], i))
                     if protein['structure'][i] == 'HELIX':
                         channels[0]['vol'] = 40
                         channels[1]['vol'] = 100
@@ -172,4 +177,4 @@ def create_midi(uniprot_AN,
             time = time + duration
         MyMIDI.writeFile(midiFile)
 
-    return midi_file_path
+    return durations_list
