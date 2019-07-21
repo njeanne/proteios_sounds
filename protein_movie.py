@@ -17,17 +17,18 @@ def create_movie(path_movie, dir_frames, duration_keys, midi_path, logger):
     :rtype: str
     '''
 
+    #TODO: Video creation with ffmpeg to reduce the number of libraries
     # convert the MIDI file to audio file
     # using the default sound font in 44100 Hz sample rate
-    fs = FluidSynth(sound_font='FluidR3_GM.sf2')
+    sound_font_path = os.path.join(os.path.dirname(__file__),
+                                   'ressources', 'FluidR3_GM.sf2')
+    fs = FluidSynth(sound_font=sound_font_path)
     flac = '{}.flac'.format(os.path.splitext(midi_path)[0])
     fs.midi_to_audio(midi_path, flac)
     logger.info('Audio file created: {}'.format(flac))
 
+    #TODO: Video creation with ffmpeg to reduce the number of libraries
     # create the movie
-    # download ffmpeg if necessary
-    imageio.plugins.ffmpeg.download()
-
     # create a dictionary of the frames directory with the index as keys
     frames_dict = {}
     for png in os.listdir(dir_frames):
