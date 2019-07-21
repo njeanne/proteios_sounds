@@ -15,7 +15,7 @@ import time
 import parse_uniprot
 import midi_operations
 import parse_pdb
-import protein_movie
+import audio_video
 
 
 def restricted_tempo(tempo_value):
@@ -46,28 +46,13 @@ if __name__ == '__main__':
     '''.format(prg_id, __version__, __author__, __email__, __copyright__)
 
     # Parse arguments
-    parser = argparse.ArgumentParser(description=descr,
-                                     formatter_class=argparse.RawTextHelpFormatter)
+    parser = argparse.ArgumentParser(description=descr, formatter_class=argparse.RawTextHelpFormatter)
     parser.add_argument('-o', '--out', required=True, help='path to the results directory.')
-    parser.add_argument('-s', '--score', required=False, action='store_true',
-                        help='''use musescore software to create the score
-                        corresponding to the MIDI file.''')
-    parser.add_argument('-p', '--play', required=False, action='store_true',
-                        help='play the music with Timidity, just for tests.')
-    parser.add_argument('-t', '--tempo', required=False, type=restricted_tempo,
-                        help='set the tempo in BPM. Value between 60 and 250.')
-    parser.add_argument('-i', '--instruments', required=False, nargs=3,
-                        help='''set channel 0, 1 and 2 instruments,
-                        restricted to 3 values between 0 and 127
-                        separated by spaces. Default is 0:  Acoustic Grand,
-                        42: Cello and 65: Alto Sax.
-                        See: http://www.pjb.com.au/muscript/gm.html#patch for details.''')
-    parser.add_argument('-d', '--debug', required=False, action='store_true',
-                        help='''debug mode, create a log file which details each
-                         entry of the MIDI file.''')
-    parser.add_argument('uniprot_AN',
-                        help='''the protein Accession Number in the UniProt
-                        database. Example: Human Interleukin-8 > P10145''')
+    parser.add_argument('-s', '--score', required=False, action='store_true', help='''use musescore software to create the score corresponding to the MIDI file.''')
+    parser.add_argument('-t', '--tempo', required=False, type=restricted_tempo, help='set the tempo in BPM. Value between 60 and 250.')
+    parser.add_argument('-i', '--instruments', required=False, nargs=3, help='''set channel 0, 1 and 2 instruments, restricted to 3 values between 0 and 127 separated by spaces. Default is 0:  Acoustic Grand, 42: Cello and 65: Alto Sax. See: http://www.pjb.com.au/muscript/gm.html#patch for details.''')
+    parser.add_argument('--log_level', required=False, choices=['DEBUG', 'INFO', 'WARNING', 'ERROR', 'CRITICAL'], default='INFO', help='set the logging level, if not set, default is INFO.')
+    parser.add_argument('uniprot_AN', help='''the protein Accession Number in the UniProt database. Example: Human Interleukin-8 > P10145''')
     args = parser.parse_args()
 
     # check if instruments are between 0 and 127
@@ -129,7 +114,7 @@ if __name__ == '__main__':
     if os.path.exists(log_path):
         os.remove(log_path)
     logging.basicConfig(filename=log_path,
-                        level=logging.DEBUG,
+                        level=args.log_level,
                         format='%(asctime)s\t%(levelname)s:\t%(message)s',
                         datefmt='%Y/%m/%d %H:%M:%S')
     logger = logging.getLogger(__name__)
@@ -153,9 +138,7 @@ if __name__ == '__main__':
     sequence = protein['seq']
     sequence_length = len(sequence)
     protein['seq'] = {}
-    if args.debug:
-        logger.info('AA sequence ({} AA): {}'.format(sequence_length,
-                                                     sequence))
+    logger.debug('AA sequence ({} AA): {}'.format(sequence_length, sequence))
     for i in range(sequence_length):
         protein['seq'][i] = sequence[i]
     # frequence of AA in the sequence
@@ -213,17 +196,18 @@ if __name__ == '__main__':
                                                                                       'no-idx',
                                                                                       1,
                                                                                       protein['PDB'])
-            logger.info(cmd_no_color)
+            logger.debug(cmd_no_color)
             sub = subprocess.run(cmd_no_color, shell=True,
                                  stdout=subprocess.PIPE,
                                  stderr=subprocess.PIPE)
             # capturing the output
             if sub.stdout:
-                logger.info(sub.stdout.decode('utf-8'))
-                print('Done!')
+                logger.debug('{}: {}'.format(cmd_no_color,
+                                             sub.stdout.decode('utf-8')))
             if sub.stderr:
-                logger.error(sub.stderr.decode('utf-8'))
-                print('Error!')
+                logger.error('{}: {}'.format(cmd_no_color,
+                                             sub.stderr.decode('utf-8')))
+
 
         # create the commands for the python script which generates the pymol
         # pictures with colored AA
@@ -243,10 +227,10 @@ if __name__ == '__main__':
             nb_threads_to_do = len(cmd_list)
             nb_threads_done = 0
             errors = 0
-            print('\nCreating {} ({}) protein colored AA frames, please wait..'.format(protein['entry_name'],
-                                                                                       protein['PDB']))
-            logger.info('Creating {} ({}) protein colored AA frames.'.format(protein['entry_name'],
-                                                                             protein['PDB']))
+            msg = 'Creating {} ({}) protein colored AA frames, please wait..'.format(protein['entry_name'],
+                                                                                     protein['PDB'])
+            print('\n{}'.format(msg))
+            logger.info(msg)
             with concurrent.futures.ThreadPoolExecutor(max_workers=5) as executor:
                 for cmd in cmd_list:
                     logger.info(cmd)
@@ -257,15 +241,19 @@ if __name__ == '__main__':
                                              stderr=subprocess.PIPE)
                     # capturing the output
                     if thread.result().stdout:
-                        logger.info(thread.result().stdout.decode('utf-8'))
+                        logger.debug('{}: {}'.format(cmd, thread.result().stdout))
                         nb_threads_done += 1
                     if thread.result().stderr:
-                        logger.error(thread.result().stderr.decode('utf-8'))
+                        logger.error('{}: {}'.format(cmd, thread.result().stderr))
                         nb_threads_done += 1
                         errors += 1
                     print('{}/{} threads ({} errors)'.format(nb_threads_done,
                                                              nb_threads_to_do,
                                                              errors))
+        else:
+            msg = 'No PDB entry in the Uniprot entry for {}, no movie created'.format((args.uniprot_AN))
+            logger.info(msg)
+            print(msg)
 
         # check if all frames are created else wait
         while len(os.listdir(frames_dir)) != (len(pdb_data['frames_idx']) + 1):
@@ -282,7 +270,9 @@ if __name__ == '__main__':
 
     # create the score
     if args.score:
-        print('Creating the score:')
+        msg = 'Creating the score:'
+        logger.info(msg)
+        print(msg)
         score_basename = '{}_{}_{}_{}bpm_score.pdf'.format(args.uniprot_AN,
                                                            protein['entry_name'],
                                                            protein['organism'],
@@ -290,9 +280,6 @@ if __name__ == '__main__':
         score_output = os.path.join(args.out, score_basename)
         cmd = 'mscore -o {} {}'.format(score_output, midi_file_path)
         subprocess.run(cmd, shell=True)
-        print('Score created at {}'.format(score_output))
-
-    # play the file with timidity if asked
-    if args.play:
-        cmd = 'timidity {}'.format(midi_file_path)
-        subprocess.run(cmd, shell=True)
+        msg = 'Score created at {}'.format(score_output)
+        logger.info(msg)
+        print(msg)

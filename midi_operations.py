@@ -23,8 +23,7 @@ def create_chord(pitch_list, keys_in_chord, idx_key, KEYS_OCTAVE_ONLY):
         added_keys += 1
     return pitch_list
 
-def create_midi(path_midi, protein, midi_keys, tempo, instrus, aa_phy_chi,
-                logger, debug=False):
+def create_midi(path_midi, protein, midi_keys, tempo, instrus, aa_phy_chi, logger):
     '''
     Creates the MIDI file from the protein data.
     :param str path_midi: the path to the MIDI file.
@@ -35,7 +34,6 @@ def create_midi(path_midi, protein, midi_keys, tempo, instrus, aa_phy_chi,
     :param list instrus: the list of the MIDI instrument numbers
     :param dict aa_phy_chi: dictionary of the physico-chemical attributes of the amino acids
     :param logger logger: the logger
-    :param boolean debug: the enable debug mode
     :return: the list of keys durations
     :rtype: list of floats
     '''
@@ -46,7 +44,7 @@ def create_midi(path_midi, protein, midi_keys, tempo, instrus, aa_phy_chi,
                                69, 71, 72, 54, 66, 49, 61, 56, 68, 51]
     KEYS_OCTAVE_ONLY = KEYS_OCTAVE_ALTERATIONS[:15]
 
-    with open(path_midi, 'wb') as  midiFile:
+    with open(path_midi, 'wb') as midiFile:
 
         track = 0
         time = 0   # In beats
@@ -60,11 +58,10 @@ def create_midi(path_midi, protein, midi_keys, tempo, instrus, aa_phy_chi,
                     1: {'instrument': instrus[1], 'vol': 40},
                     2: {'instrument': instrus[2], 'vol': 60}}
 
-        if debug:
-            logger.info('Instrument number by channel, see: http://www.pjb.com.au/muscript/gm.html for instruments number correspondance:')
-            for channel_nb in channels:
-                logger.info('\tchannel {}: instrument {}'.format(channel_nb,
-                                                                 channels[channel_nb]['instrument']))
+        logger.debug('Instrument number by channel, see: http://www.pjb.com.au/muscript/gm.html for instruments number correspondance:')
+        for channel_nb in channels:
+            logger.debug('\tchannel {}: instrument {}'.format(channel_nb,
+                                                              channels[channel_nb]['instrument']))
 
         MyMIDI = MIDIFile(numTracks=1, adjust_origin=False) # One track, defaults to format 1 (tempo track automatically created)
         MyMIDI.addTempo(track, time, tempo)
@@ -159,12 +156,12 @@ def create_midi(path_midi, protein, midi_keys, tempo, instrus, aa_phy_chi,
                         channels[1]['vol'] = 60
                         channels[2]['vol'] = 40
 
-            if debug:
-                logger.debug('position: {}'.format(i))
-                logger.debug('AA: {}'.format(AA))
-                logger.debug('pitch: {}'.format(pitch_list))
-                logger.debug('time: {}'.format(time))
-                logger.debug('duration: {}'.format(duration))
+            logger.debug('position: {}'.format(i))
+            logger.debug('AA: {}'.format(AA))
+            logger.debug('pitch: {}'.format(pitch_list))
+            logger.debug('time: {}'.format(time))
+            logger.debug('duration: {}'.format(duration))
+
             for channel_nbr in channels:
                 for pitch in pitch_list:
                     MyMIDI.addNote(track,
