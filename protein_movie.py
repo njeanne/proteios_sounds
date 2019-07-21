@@ -36,14 +36,24 @@ def create_movie(path_movie, dir_frames, duration_keys, midi_path, logger):
         frames_dict[idx_frame_in_prot] = os.path.join(dir_frames, png)
 
     # set the video writer
-    video_writer = imageio.get_writer(path_movie, fps=24)
+    FPS = 24
+    path_tmp_movie = os.path.join(os.path.dirname(path_movie),
+                                  'tmp_movie.avi')
+    video_writer = imageio.get_writer(path_tmp_movie, fps=FPS)
 
     # create the frames per second
-    print('Creating the movie file, please wait..')
+    msg = 'Movie creation'
+    logger.info(msg)
+    print('{}, please wait..'.format(msg))
+
     for idx, key_duration in enumerate(duration_keys):
-        print('\tFrames for amino acid {}/{}'.format(idx + 1,
-                                                     len(duration_keys)))
-        nb_frames_on_key = int(FPS * key_duration)
+        nb_frames_on_key = round(float(FPS) * key_duration)
+        msg = 'Frames for amino acid {}/{}\n\tkey duration: {} seconds\n\tnb of frames: {}'.format(idx + 1,
+                                                                                                   len(duration_keys),
+                                                                                                   key_duration,
+                                                                                                   nb_frames_on_key)
+        logger.info(msg)
+        print(msg)
         if str(idx) in frames_dict:
             for _ in range(nb_frames_on_key):
                 video_writer.append_data(imageio.imread(frames_dict[str(idx)]))
@@ -52,7 +62,23 @@ def create_movie(path_movie, dir_frames, duration_keys, midi_path, logger):
                 video_writer.append_data(imageio.imread(frames_dict['no-idx']))
     video_writer.close()
 
-    cmd_audio_video = 'ffmpeg -i {0} -i {1} -c copy -map 0:v:0 -map 1:a:0 {2}'.format(path_movie,
+    cmd_audio_video = 'ffmpeg -y -i {} -i {} -c copy -map 0:v:0 -map 1:a:0 {}'.format(path_tmp_movie,
                                                                                       flac,
-                                                                                      '/home/nico/final.avi')
-    subprocess.run(cmd_audio_video, shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+                                                                                      path_movie)
+    try:
+        logger.info('ffmpeg: add soundtrack to the movie.')
+        ffmpeg_process = subprocess.run(cmd_audio_video,
+                                        shell=True,
+                                        stdout=subprocess.PIPE,
+                                        stderr=subprocess.PIPE)
+        if ffmpeg_process.stdout:
+            logger.info(ffmpeg_process.stdout)
+        if ffmpeg_process.stderr:
+            logger.warn(ffmpeg_process.stderr.decode('utf-8'))
+        # remove tmp movie file (file without sound)
+        os.remove(path_tmp_movie)
+        msg = 'Movie file created: {}'.format(path_movie)
+        print(msg)
+        logger.info(msg)
+    except Exception as ex:
+        logger.error(ex)
