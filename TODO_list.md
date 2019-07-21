@@ -42,7 +42,6 @@ Rajout d'un dièse (revoir avec Jacques pourquoi SOL# puis FA#?) / nouvelle prop
 
 # Visualisation
 - [x] utilisation du logiciel Pymol pour la création d'images 3D de la protéine.
-
 - [x] Visualisation sur fichier `.pdb` avec image 3D de la protéine et illumination des AA joués.
 
 # IHM
@@ -53,3 +52,7 @@ Rajout d'un dièse (revoir avec Jacques pourquoi SOL# puis FA#?) / nouvelle prop
 - [x] Utiliser musescore dans le script pour produire la partition.
 - [X] voir banque de son MIDI SF2
 - [ ] identifier des formes (cadence etc...) qui permettraient de mieux caler la musique sur une gamme donnée
+
+# préparer install
+- [] install soundfonts: `sudo apt-get install fluid-soundfont-gm fluid-soundfont-gs`, et supprimer dans protein_movie.py l'alternative `ressources/*.sf2`.
+- [] install pymol: voir [github pymol](https://github.com/schrodinger/pymol-open-source), sur l'install, faire `cd <pymol_dir>` et `python setup.py --pymol-path=<dir_install_proteios_sound>/ressources/lib/`
