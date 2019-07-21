@@ -17,17 +17,26 @@ def create_movie(path_movie, dir_frames, duration_keys, midi_path, logger):
     :rtype: str
     '''
 
-    #TODO: Video creation with ffmpeg to reduce the number of libraries
+    # TODO: Video creation with ffmpeg to reduce the number of libraries
     # convert the MIDI file to audio file
     # using the default sound font in 44100 Hz sample rate
+
+    # TODO: suppression du chemin FluidR3_GM.sf2 si pas de téléchargement dans le
+    # projet à l'install dans ressources/
     sound_font_path = os.path.join(os.path.dirname(__file__),
                                    'ressources', 'FluidR3_GM.sf2')
-    fs = FluidSynth(sound_font=sound_font_path)
-    flac = '{}.flac'.format(os.path.splitext(midi_path)[0])
-    fs.midi_to_audio(midi_path, flac)
+    if not os.path.exists(sound_font_path):
+        sound_font_path = '/usr/share/sounds/sf2/FluidR3_GM.sf2'
+    logger.info('FluidSynth: soundfonts library path is {}'.format(sound_font_path))
+    try:
+        fs = FluidSynth(sound_font=sound_font_path)
+        flac = '{}.flac'.format(os.path.splitext(midi_path)[0])
+        fs.midi_to_audio(midi_path, flac)
+    except Exception as ex:
+        logger.error('FluidSynth: {}'.format(ex))
     logger.info('Audio file created: {}'.format(flac))
 
-    #TODO: Video creation with ffmpeg to reduce the number of libraries
+    # TODO: Video creation with ffmpeg to reduce the number of libraries
     # create the movie
     # create a dictionary of the frames directory with the index as keys
     frames_dict = {}
