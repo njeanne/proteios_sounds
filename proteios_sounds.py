@@ -166,11 +166,19 @@ if __name__ == '__main__':
     midi_file_path = os.path.join(out_dir, '{}.midi'.format(file_base_name))
     keys_duration = midi_operations.create_midi(midi_file_path, protein,
                                                 midi_keys, tempo, instrus,
-                                                AA_PHY_CHI, logger, args.debug)
-    print('MIDI file for {} {} ({}) created: {}'.format(protein['entry_name'],
-                                                        protein['organism'],
-                                                        args.uniprot_AN,
-                                                        midi_file_path))
+                                                AA_PHY_CHI, logger)
+    msg_template = 'file for {} {} ({}) created:'.format(protein['entry_name'],
+                                                         protein['organism'],
+                                                         args.uniprot_AN)
+    msg = 'MIDI {} {}'.format(msg_template, midi_file_path)
+    logger.info(msg)
+    print(msg)
+
+    # convert MIDI to flac
+    flac_file_path = audio_video.convert_midi_to_flac(midi_file_path, logger)
+    msg = 'FLAC {} {}'.format(msg_template, flac_file_path)
+    logger.info(msg)
+    print(msg)
 
     if 'PDB' in protein:
         # create the directories for PDB data and frames
@@ -261,7 +269,7 @@ if __name__ == '__main__':
         # create the movie
         movie_path = os.path.join(out_dir, '{}.avi'.format(file_base_name))
         if not os.path.exists(movie_path):
-            protein_movie.create_movie(movie_path, frames_dir, keys_duration,
+            audio_video.create_movie(movie_path, frames_dir, keys_duration,
                                        midi_file_path, logger)
         else:
             msg = 'Movie file already exists: {}'.format(movie_path)
