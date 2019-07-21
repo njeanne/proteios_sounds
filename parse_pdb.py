@@ -2,6 +2,7 @@
 
 import os
 import sys
+import logging
 # add pymol to the python path
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), 'ressources', 'lib',
                                 'python3.7', 'site-packages'))
@@ -47,12 +48,11 @@ def get_common_coordinates(pdb_seq, uniprot_seq, pdb_coord_matching):
     pdb_coord_matching['PDB_stop_on_uniprot'] = pdb_coord_matching['PDB_start_on_uniprot'] + len(short_seq)
     return pdb_coord_matching
 
-def get_pdb_info(prot_dict, pdb_dir, logger):
+def get_pdb_info(prot_dict, pdb_dir):
     '''Get informations about PDB sequences.
 
     :param dictionary prot_dict: the protein dictionary.
     :param str pdb_dir: the path of the pdb data directory.
-    :param logger logger: the logger.
     :return: the PDB data
     :rtype: dictionary
     '''
@@ -63,7 +63,7 @@ def get_pdb_info(prot_dict, pdb_dir, logger):
     pymol.finish_launching(['pymol', '-qc']) # Pymol: quiet and no GUI
     # set the path to download the PDB data
     pymol.cmd.set('fetch_path', pymol.cmd.exp_path(pdb_dir), quiet=1)
-    logger.info('Fetching PDB file with accession number: {}'.format(prot_dict['PDB']))
+    logging.info('Fetching PDB file with accession number: {}'.format(prot_dict['PDB']))
     pymol.cmd.fetch(prot_dict['PDB'])
     pymol.cmd.disable('all')
     pymol.cmd.enable(prot_dict['PDB'])

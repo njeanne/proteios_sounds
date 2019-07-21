@@ -1,15 +1,15 @@
 #! /usr/bin/env python3
 
 import os
+import logging
 import subprocess
 from midi2audio import FluidSynth
 import imageio
 
-def convert_midi_to_flac(midi_path, logger):
+def convert_midi_to_flac(midi_path):
     '''Convert a MIDI file to a FLAC file.
 
     :param str midi_path: the path to the input MIDI file.
-    :param logging logger: the logger.
     :return: the path of the output FLAC file.
     :rtype: str
     '''
@@ -22,23 +22,22 @@ def convert_midi_to_flac(midi_path, logger):
                                    'ressources', 'FluidR3_GM.sf2')
     if not os.path.exists(sound_font_path):
         sound_font_path = '/usr/share/sounds/sf2/FluidR3_GM.sf2'
-    logger.info('FluidSynth: soundfonts library path is {}'.format(sound_font_path))
+    logging.info('FluidSynth: soundfonts library path is {}'.format(sound_font_path))
     try:
         fs = FluidSynth(sound_font=sound_font_path)
         flac_path = '{}.flac'.format(os.path.splitext(midi_path)[0])
         fs.midi_to_audio(midi_path, flac_path)
     except Exception as ex:
-        logger.error('FluidSynth: {}'.format(ex))
-    logger.info('Audio file created: {}'.format(flac_path))
+        logging.error('FluidSynth: {}'.format(ex))
+    logging.info('Audio file created: {}'.format(flac_path))
     return(flac_path)
 
-def create_movie(path_movie, dir_frames, duration_keys, flac_path, logger):
+def create_movie(path_movie, dir_frames, duration_keys, flac_path):
     '''Create the movie of the protein.
 
     :param str path_movie: the path where the movie will be created.
     :param str dir_frames: the path of the pdb frames directory.
     :param list of floats duration_keys: the duration keys list.
-    :param logger logger: the logger.
     :return: the movie path.
     :rtype: str
     '''
@@ -59,7 +58,7 @@ def create_movie(path_movie, dir_frames, duration_keys, flac_path, logger):
 
     # create the frames per second
     msg = 'Movie creation'
-    logger.info(msg)
+    logging.info(msg)
     print('{}, please wait..'.format(msg))
 
     for idx, key_duration in enumerate(duration_keys):
@@ -68,7 +67,7 @@ def create_movie(path_movie, dir_frames, duration_keys, flac_path, logger):
                                                                                                    len(duration_keys),
                                                                                                    key_duration,
                                                                                                    nb_frames_on_key)
-        logger.info(msg)
+        logging.info(msg)
         print(msg)
         if str(idx) in frames_dict:
             for _ in range(nb_frames_on_key):
@@ -82,19 +81,19 @@ def create_movie(path_movie, dir_frames, duration_keys, flac_path, logger):
                                                                                       flac_path,
                                                                                       path_movie)
     try:
-        logger.info('ffmpeg: add soundtrack to the movie.')
+        logging.info('ffmpeg: add soundtrack to the movie.')
         ffmpeg_process = subprocess.run(cmd_audio_video,
                                         shell=True,
                                         stdout=subprocess.PIPE,
                                         stderr=subprocess.PIPE)
         if ffmpeg_process.stdout:
-            logger.info(ffmpeg_process.stdout)
+            logging.info(ffmpeg_process.stdout)
         if ffmpeg_process.stderr:
-            logger.warn(ffmpeg_process.stderr.decode('utf-8'))
+            logging.warn(ffmpeg_process.stderr.decode('utf-8'))
         # remove tmp movie file (file without sound)
         os.remove(path_tmp_movie)
         msg = 'Movie file created: {}'.format(path_movie)
         print(msg)
-        logger.info(msg)
+        logging.info(msg)
     except Exception as ex:
-        logger.error(ex)
+        logging.error(ex)

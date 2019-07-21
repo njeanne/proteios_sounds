@@ -30,6 +30,7 @@ def restricted_tempo(tempo_value):
         raise argparse.ArgumentTypeError('{} not in range 60 to 250.'.format(tempo_value))
     return tempo_value
 
+
 if __name__ == '__main__':
     prg_id = os.path.splitext(os.path.basename(__file__))[0]
     descr = '''
@@ -118,41 +119,15 @@ if __name__ == '__main__':
                         format='%(asctime)s\t%(levelname)s:\t%(message)s',
                         datefmt='%Y/%m/%d %H:%M:%S')
     logger = logging.getLogger(__name__)
-    logger.info(' '.join(sys.argv))
 
+    logger.info(' '.join(sys.argv))
     logger.info('Output directory: {}'.format(out_dir))
     logger.info('Tempo: {} BPM'.format(tempo))
     logger.info('Instruments: {} (general MIDI patch numbers, see: http://www.pjb.com.au/muscript/gm.html#patch)'.format(', '.join(map(str, instrus))))
     logger.info('Create score: {}'.format(args.score))
 
     # parsing of uniprot entry
-    protein = parse_uniprot.parse_entry(args.uniprot_AN, logger)
-    logger.info('UniProt accession number: {}'.format(args.uniprot_AN))
-    logger.info('Protein: {}'.format(protein['entry_name']))
-    logger.info('Organism: {}'.format(protein['organism']))
-    if 'PDB' in protein:
-        logger.info('PDB: {} (Protein DataBase accession number)'.format(protein['PDB']))
-    else:
-        logger.info('PDB: No accession number in Uniprot entry')
-
-    sequence = protein['seq']
-    sequence_length = len(sequence)
-    protein['seq'] = {}
-    logger.debug('AA sequence ({} AA): {}'.format(sequence_length, sequence))
-    for i in range(sequence_length):
-        protein['seq'][i] = sequence[i]
-    # frequence of AA in the sequence
-    set_AA = set(''.join(sequence))
-    proportion_AA = {}
-    for aa in set_AA:
-        proportion_AA[aa] = sequence.count(aa) / sequence_length
-    # sort by decreasing frequency
-    proportion_AA = sorted(proportion_AA.items(),
-                           key=lambda kv: kv[1],
-                           reverse=True)
-
-    for idx, aa_proportion in enumerate(proportion_AA):
-        midi_keys[aa_proportion[0]] = initial_midi_keys[idx]
+    protein = parse_uniprot.parse_entry(args.uniprot_AN, initial_midi_keys)
 
     # set the result files base name
     file_base_name = '{}_{}_{}_{}bpm_instrus'.format(args.uniprot_AN,
@@ -164,9 +139,8 @@ if __name__ == '__main__':
 
     # create the MIDI file
     midi_file_path = os.path.join(out_dir, '{}.midi'.format(file_base_name))
-    keys_duration = midi_operations.create_midi(midi_file_path, protein,
-                                                midi_keys, tempo, instrus,
-                                                AA_PHY_CHI, logger)
+    keys_duration = midi_operations.create_midi(midi_file_path, protein, tempo,
+                                                instrus, AA_PHY_CHI)
     msg_template = 'file for {} {} ({}) created:'.format(protein['entry_name'],
                                                          protein['organism'],
                                                          args.uniprot_AN)
@@ -175,7 +149,7 @@ if __name__ == '__main__':
     print(msg)
 
     # convert MIDI to flac
-    flac_file_path = audio_video.convert_midi_to_flac(midi_file_path, logger)
+    flac_file_path = audio_video.convert_midi_to_flac(midi_file_path)
     msg = 'FLAC {} {}'.format(msg_template, flac_file_path)
     logger.info(msg)
     print(msg)
@@ -188,9 +162,7 @@ if __name__ == '__main__':
             os.makedirs(frames_dir)
 
         # get data from the PDB file
-        pdb_data = parse_pdb.get_pdb_info(protein,
-                                          pdb_dir,
-                                          logger)
+        pdb_data = parse_pdb.get_pdb_info(protein, pdb_dir)
 
         # create a frame without colored AA for all AA outside the PDB data
         existing_frames = sorted([png for png in os.listdir(frames_dir)])
@@ -215,7 +187,6 @@ if __name__ == '__main__':
             if sub.stderr:
                 logger.error('{}: {}'.format(cmd_no_color,
                                              sub.stderr.decode('utf-8')))
-
 
         # create the commands for the python script which generates the pymol
         # pictures with colored AA
@@ -269,8 +240,7 @@ if __name__ == '__main__':
         # create the movie
         movie_path = os.path.join(out_dir, '{}.avi'.format(file_base_name))
         if not os.path.exists(movie_path):
-            audio_video.create_movie(movie_path, frames_dir, keys_duration,
-                                       midi_file_path, logger)
+            audio_video.create_movie(movie_path, frames_dir, keys_duration, midi_file_path)
         else:
             msg = 'Movie file already exists: {}'.format(movie_path)
             print(msg)

@@ -1,6 +1,6 @@
 #! /usr/bin/env python3
 
-import os
+import logging
 from midiutil import MIDIFile
 
 def create_chord(pitch_list, keys_in_chord, idx_key, KEYS_OCTAVE_ONLY):
@@ -23,17 +23,16 @@ def create_chord(pitch_list, keys_in_chord, idx_key, KEYS_OCTAVE_ONLY):
         added_keys += 1
     return pitch_list
 
-def create_midi(path_midi, protein, midi_keys, tempo, instrus, aa_phy_chi, logger):
+def create_midi(path_midi, protein, tempo, instrus, aa_phy_chi):
     '''
     Creates the MIDI file from the protein data.
     :param str path_midi: the path to the MIDI file.
     :param dict protein: the dictionary descri the protein.
-    :param dict midi_keys: the dictionary of the keys
     :param list initial_keys: the list of the initial keys
     :param int tempo: the tempo in BPM
     :param list instrus: the list of the MIDI instrument numbers
     :param dict aa_phy_chi: dictionary of the physico-chemical attributes of the amino acids
-    :param logger logger: the logger
+    :param logging logging: the logging
     :return: the list of keys durations
     :rtype: list of floats
     '''
@@ -58,12 +57,12 @@ def create_midi(path_midi, protein, midi_keys, tempo, instrus, aa_phy_chi, logge
                     1: {'instrument': instrus[1], 'vol': 40},
                     2: {'instrument': instrus[2], 'vol': 60}}
 
-        logger.debug('Instrument number by channel, see: http://www.pjb.com.au/muscript/gm.html for instruments number correspondance:')
+        logging.debug('Instrument number by channel, see: http://www.pjb.com.au/muscript/gm.html for instruments number correspondance:')
         for channel_nb in channels:
-            logger.debug('\tchannel {}: instrument {}'.format(channel_nb,
+            logging.debug('\tchannel {}: instrument {}'.format(channel_nb,
                                                               channels[channel_nb]['instrument']))
 
-        MyMIDI = MIDIFile(numTracks=1, adjust_origin=False) # One track, defaults to format 1 (tempo track automatically created)
+        MyMIDI = MIDIFile(numTracks=1, adjust_origin=False)  # One track, defaults to format 1 (tempo track automatically created)
         MyMIDI.addTempo(track, time, tempo)
         # add the channels (1 per instrument)
         for channel_nbr in channels:
@@ -74,7 +73,7 @@ def create_midi(path_midi, protein, midi_keys, tempo, instrus, aa_phy_chi, logge
         sequence_length = len(protein['seq'])
 
         durations_list = []
-
+        midi_keys = protein['midi_keys']
         for i in range(0, sequence_length):
             AA = protein['seq'][i]
             pitch_list = [midi_keys[AA]]
@@ -91,7 +90,7 @@ def create_midi(path_midi, protein, midi_keys, tempo, instrus, aa_phy_chi, logge
 
             # set the duration of the key (current AA) depending on the number
             # of shared properties with the next AA
-            if AA == 'X' or next_AA == 'X': # non determined AA
+            if AA == 'X' or next_AA == 'X':  # non determined AA
                 shared_properties_current_next = 0
             else:
                 shared_properties_current_next = len(set.intersection(aa_phy_chi[AA],
@@ -110,7 +109,7 @@ def create_midi(path_midi, protein, midi_keys, tempo, instrus, aa_phy_chi, logge
 
             # set the chords depending on number of shared properties between
             # current AA and the previous AA
-            if AA == 'X' or prev_AA == 'X': # non determined AA
+            if AA == 'X' or prev_AA == 'X':  # non determined AA
                 shared_properties_current_previous = 0
             else:
                 shared_properties_current_previous = len(set.intersection(aa_phy_chi[AA],
@@ -138,7 +137,7 @@ def create_midi(path_midi, protein, midi_keys, tempo, instrus, aa_phy_chi, logge
             # change the volume of each instrument depending on the structure
             if 'structure' in protein.keys():
                 if i in protein['structure'].keys():
-                    logger.debug('{}: {}'.format(protein['structure'][i], i))
+                    logging.debug('{}: {}'.format(protein['structure'][i], i))
                     if protein['structure'][i] == 'HELIX':
                         channels[0]['vol'] = 40
                         channels[1]['vol'] = 100
@@ -156,11 +155,11 @@ def create_midi(path_midi, protein, midi_keys, tempo, instrus, aa_phy_chi, logge
                         channels[1]['vol'] = 60
                         channels[2]['vol'] = 40
 
-            logger.debug('position: {}'.format(i))
-            logger.debug('AA: {}'.format(AA))
-            logger.debug('pitch: {}'.format(pitch_list))
-            logger.debug('time: {}'.format(time))
-            logger.debug('duration: {}'.format(duration))
+            logging.debug('position: {}'.format(i))
+            logging.debug('AA: {}'.format(AA))
+            logging.debug('pitch: {}'.format(pitch_list))
+            logging.debug('time: {}'.format(time))
+            logging.debug('duration: {}'.format(duration))
 
             for channel_nbr in channels:
                 for pitch in pitch_list:
