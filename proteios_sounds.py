@@ -78,8 +78,7 @@ if __name__ == '__main__':
             instru = int(args.instruments[i])
             if instru < 0 or instru > 127:
                 raise argparse.ArgumentTypeError('{} should be 3 integers between 0 and 127.'.format(args.instruments))
-            else:
-                args.instruments[i] = instru
+            args.instruments[i] = instru
         instrus = args.instruments
     else:
         instrus = [0, 42, 65]
@@ -274,14 +273,14 @@ if __name__ == '__main__':
         while len(os.listdir(frames_dir)) != (len(pdb_data['frames_idx']) + 1):
             time.sleep(1)
         # create the movie
-        movie_path = os.path.join(out_dir,
-                                  '{}_{}_{}_{}bpm_instrus.avi'.format(args.uniprot_AN,
-                                                                      protein['entry_name'],
-                                                                      protein['organism'],
-                                                                      tempo))
-        # if not os.path.exists(movie_path):
-        protein_movie.create_movie(movie_path, frames_dir, keys_duration,
+        movie_path = os.path.join(out_dir, '{}.avi'.format(file_base_name))
+        if not os.path.exists(movie_path):
+            protein_movie.create_movie(movie_path, frames_dir, keys_duration,
                                        midi_file_path, logger)
+        else:
+            msg = 'Movie file already exists: {}'.format(movie_path)
+            print(msg)
+            logger.info(msg)
 
     # create the score
     if args.score:
