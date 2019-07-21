@@ -1,7 +1,8 @@
-sounds_proteins/
-pymol/*
+.git
+sounds_proteins/*
+__pycache__/
 *.pdb
 *.cif
 *.fa
 *.sf2
-__pycache__/
+ressources/FluidR3_GM.sf2
