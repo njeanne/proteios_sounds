@@ -41,9 +41,9 @@ Rajout d'un dièse (revoir avec Jacques pourquoi SOL# puis FA#?) / nouvelle prop
 - [ ] possibilité d'utiliser des marqueurs épigénétiques (acétylation, méthylation) : comme l'acétylation et la méthylation sont des marqueurs d'activation ou d'inactivation des gènes, cela peut être assez "parlant" musicalement pour transmettre l'idée qu'on entre dans une phase silencée ou au contraire exprimée.
 
 # Visualisation
-- [ ] Visualisation sur fichier .pdb avec projection et rotation 3D de la protéine.
+- [x] utilisation du logiciel Pymol pour la création d'images 3D de la protéine.
 
-- [ ] possibilité d'utiliser le logiciel Pymol pour la visualisation (rotation / zoom in / zoom out) de la protéine en 3D
+- [x] Visualisation sur fichier `.pdb` avec image 3D de la protéine et illumination des AA joués.
 
 # IHM
 - [ ] créer une interface graphique.
@@ -51,5 +51,5 @@ Rajout d'un dièse (revoir avec Jacques pourquoi SOL# puis FA#?) / nouvelle prop
 
 # Divers
 - [x] Utiliser musescore dans le script pour produire la partition.
-- [ ] voir banque de son MIDI SF2
+- [X] voir banque de son MIDI SF2
 - [ ] identifier des formes (cadence etc...) qui permettraient de mieux caler la musique sur une gamme donnée
