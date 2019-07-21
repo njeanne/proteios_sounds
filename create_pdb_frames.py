@@ -9,7 +9,8 @@ import argparse
 import os
 import sys
 # add pymol to the python path
-sys.path.insert(0, os.path.join(os.path.dirname(__file__), 'lib/python3.7/site-packages'))
+sys.path.insert(0, os.path.join(os.path.dirname(__file__), 'ressources', 'lib',
+                                'python3.7','site-packages'))
 import pymol
 
 

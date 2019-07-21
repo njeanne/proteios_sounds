@@ -7,8 +7,7 @@ from Bio import ExPASy
 from Bio import SwissProt
 
 def parse_entry(uniprot_AN, logger):
-    '''
-    Parse the uniprot entry.
+    '''Parse the uniprot entry.
 
     :param int uniprot_AN: the uniprot accession number for the protein
     :param str out_dir: the path to the output directory
