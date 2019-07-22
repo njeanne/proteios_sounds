@@ -53,7 +53,8 @@ def create_movie(path_movie, dir_frames, duration_keys, flac_path):
     # set the video writer
     FPS = 24
     path_tmp_movie = os.path.join(os.path.dirname(path_movie),
-                                  'tmp_movie.avi')
+                                  'tmp_no_sound_movie.avi')
+
     video_writer = imageio.get_writer(path_tmp_movie, fps=FPS)
 
     # create the frames per second
@@ -82,6 +83,7 @@ def create_movie(path_movie, dir_frames, duration_keys, flac_path):
                                                                                       path_movie)
     try:
         logging.info('ffmpeg: add soundtrack to the movie.')
+        logging.info(cmd_audio_video)
         ffmpeg_process = subprocess.run(cmd_audio_video,
                                         shell=True,
                                         stdout=subprocess.PIPE,
