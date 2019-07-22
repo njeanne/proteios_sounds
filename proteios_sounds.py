@@ -229,22 +229,21 @@ if __name__ == '__main__':
                     print('{}/{} threads ({} errors)'.format(nb_threads_done,
                                                              nb_threads_to_do,
                                                              errors))
-        else:
-            msg = 'No PDB entry in the Uniprot entry for {}, no movie created'.format((args.uniprot_AN))
-            logger.info(msg)
-            print(msg)
-
         # check if all frames are created else wait
         while len(os.listdir(frames_dir)) != (len(pdb_data['frames_idx']) + 1):
             time.sleep(1)
         # create the movie
         movie_path = os.path.join(out_dir, '{}.avi'.format(file_base_name))
         if not os.path.exists(movie_path):
-            audio_video.create_movie(movie_path, frames_dir, keys_duration, midi_file_path)
+            audio_video.create_movie(movie_path, frames_dir, keys_duration, flac_file_path)
         else:
             msg = 'Movie file already exists: {}'.format(movie_path)
             print(msg)
             logger.info(msg)
+    else:
+        msg = 'No movie created, no PDB entry (3D image reference) in the Uniprot entry for {}'.format(args.uniprot_AN)
+        logger.info(msg)
+        print(msg)
 
     # create the score
     if args.score:
