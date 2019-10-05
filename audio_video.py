@@ -6,6 +6,7 @@ import subprocess
 from midi2audio import FluidSynth
 import imageio
 
+
 def convert_midi_to_flac(midi_path):
     '''Convert a MIDI file to a FLAC file.
 
@@ -13,6 +14,7 @@ def convert_midi_to_flac(midi_path):
     :return: the path of the output FLAC file.
     :rtype: str
     '''
+
     # convert the MIDI file to audio file
     # using the default sound font in 44100 Hz sample rate
 
@@ -31,6 +33,7 @@ def convert_midi_to_flac(midi_path):
         logging.error('FluidSynth: {}'.format(ex))
     logging.info('Audio file created: {}'.format(flac_path))
     return(flac_path)
+
 
 def create_movie(path_movie, dir_frames, duration_keys, flac_path):
     '''Create the movie of the protein.
@@ -64,10 +67,12 @@ def create_movie(path_movie, dir_frames, duration_keys, flac_path):
 
     for idx, key_duration in enumerate(duration_keys):
         nb_frames_on_key = round(float(FPS) * key_duration)
-        msg = 'Frames for amino acid {}/{}\n\tkey duration: {} seconds\n\tnb of frames: {}'.format(idx + 1,
-                                                                                                   len(duration_keys),
-                                                                                                   key_duration,
-                                                                                                   nb_frames_on_key)
+        msg = ('Frames for amino acid {}/{}\n\t'
+               'key duration: {} seconds\n\t'
+               'nb of frames: {}').format(idx + 1,
+                                          len(duration_keys),
+                                          key_duration,
+                                          nb_frames_on_key)
         logging.info(msg)
         print(msg)
         if str(idx) in frames_dict:
@@ -78,9 +83,10 @@ def create_movie(path_movie, dir_frames, duration_keys, flac_path):
                 video_writer.append_data(imageio.imread(frames_dict['no-idx']))
     video_writer.close()
 
-    cmd_audio_video = 'ffmpeg -y -i {} -i {} -c copy -map 0:v:0 -map 1:a:0 {}'.format(path_tmp_movie,
-                                                                                      flac_path,
-                                                                                      path_movie)
+    cmd_audio_video = ('ffmpeg -y -i {} -i {} -c copy '
+                       '-map 0:v:0 -map 1:a:0 {}').format(path_tmp_movie,
+                                                          flac_path,
+                                                          path_movie)
     try:
         logging.info('ffmpeg: add soundtrack to the movie.')
         logging.info(cmd_audio_video)
@@ -91,7 +97,7 @@ def create_movie(path_movie, dir_frames, duration_keys, flac_path):
         if ffmpeg_process.stdout:
             logging.info(ffmpeg_process.stdout)
         if ffmpeg_process.stderr:
-            logging.warn(ffmpeg_process.stderr.decode('utf-8'))
+            logging.warning(ffmpeg_process.stderr.decode('utf-8'))
         # remove tmp movie file (file without sound)
         os.remove(path_tmp_movie)
         msg = 'Movie file created: {}'.format(path_movie)

@@ -27,7 +27,8 @@ def restricted_tempo(tempo_value):
     '''
     tempo_value = int(tempo_value)
     if tempo_value < 60 or tempo_value > 250:
-        raise argparse.ArgumentTypeError('{} not in range 60 to 250.'.format(tempo_value))
+        raise argparse.ArgumentTypeError(('{} not in range '
+                                          '60 to 250.').format(tempo_value))
     return tempo_value
 
 
@@ -47,13 +48,31 @@ if __name__ == '__main__':
     '''.format(prg_id, __version__, __author__, __email__, __copyright__)
 
     # Parse arguments
-    parser = argparse.ArgumentParser(description=descr, formatter_class=argparse.RawTextHelpFormatter)
-    parser.add_argument('-o', '--out', required=True, help='path to the results directory.')
-    parser.add_argument('-s', '--score', required=False, action='store_true', help='''use musescore software to create the score corresponding to the MIDI file.''')
-    parser.add_argument('-t', '--tempo', required=False, type=restricted_tempo, help='set the tempo in BPM. Value between 60 and 250.')
-    parser.add_argument('-i', '--instruments', required=False, nargs=3, help='''set channel 0, 1 and 2 instruments, restricted to 3 values between 0 and 127 separated by spaces. Default is 0:  Acoustic Grand, 42: Cello and 65: Alto Sax. See: http://www.pjb.com.au/muscript/gm.html#patch for details.''')
-    parser.add_argument('--log_level', required=False, choices=['DEBUG', 'INFO', 'WARNING', 'ERROR', 'CRITICAL'], default='INFO', help='set the logging level, if not set, default is INFO.')
-    parser.add_argument('uniprot_AN', help='''the protein Accession Number in the UniProt database. Example: Human Interleukin-8 > P10145''')
+    parser = argparse.ArgumentParser(description=descr,
+                                     formatter_class=argparse.RawTextHelpFormatter)
+    parser.add_argument('-o', '--out',
+                        required=True,
+                        help='path to the results directory.')
+    parser.add_argument('-s', '--score', required=False, action='store_true',
+                        help=('use musescore software to create the score '
+                              'corresponding to the MIDI file.'))
+    parser.add_argument('-t', '--tempo', required=False, type=restricted_tempo,
+                        help='set the tempo in BPM. Value between 60 and 250.')
+    parser.add_argument('-i', '--instruments', required=False, nargs=3,
+                        help=('set channel 0, 1 and 2 instruments, restricted '
+                              'to 3 values between 0 and 127 separated by '
+                              'spaces. Default is 0:  Acoustic Grand, '
+                              '42: Cello and 65: Alto Sax. See: '
+                              'http://www.pjb.com.au/muscript/gm.html#patch '
+                              'for details.'))
+    parser.add_argument('--log_level', required=False,
+                        choices=['DEBUG', 'INFO', 'WARNING',
+                                 'ERROR', 'CRITICAL'], default='INFO',
+                        help=('set the logging level, if not set, '
+                              'default is INFO.'))
+    parser.add_argument('uniprot_AN',
+                        help=('the protein Accession Number in the UniProt '
+                              'database. Example: Human Interleukin-8 > P10145'))
     args = parser.parse_args()
 
     # check if instruments are between 0 and 127
@@ -61,7 +80,8 @@ if __name__ == '__main__':
         for i in range(len(args.instruments)):
             instru = int(args.instruments[i])
             if instru < 0 or instru > 127:
-                raise argparse.ArgumentTypeError('{} should be 3 integers between 0 and 127.'.format(args.instruments))
+                raise argparse.ArgumentTypeError(('{} should be 3 integers between '
+                                                  '0 and 127.').format(args.instruments))
             args.instruments[i] = instru
         instrus = args.instruments
     else:
@@ -123,7 +143,9 @@ if __name__ == '__main__':
     logger.info(' '.join(sys.argv))
     logger.info('Output directory: {}'.format(out_dir))
     logger.info('Tempo: {} BPM'.format(tempo))
-    logger.info('Instruments: {} (general MIDI patch numbers, see: http://www.pjb.com.au/muscript/gm.html#patch)'.format(', '.join(map(str, instrus))))
+    logger.info(('Instruments: {} (general MIDI patch numbers, see: '
+                 'http://www.pjb.com.au/muscript/gm.html#patch)').format(', '.join(map(str,
+                                                                                       instrus))))
     logger.info('Create score: {}'.format(args.score))
 
     # parsing of uniprot entry
@@ -156,7 +178,10 @@ if __name__ == '__main__':
 
     if 'PDB' in protein:
         # create the directories for PDB data and frames
-        pdb_dir = os.path.join(os.path.abspath(args.out), 'pdb', '{}_{}'.format(protein['accession_number'], protein['PDB']))
+        pdb_dir = os.path.join(os.path.abspath(args.out),
+                               'pdb',
+                               '{}_{}'.format(protein['accession_number'],
+                                              protein['PDB']))
         frames_dir = os.path.join(pdb_dir, 'frames')
         if not os.path.exists(frames_dir):
             os.makedirs(frames_dir)
@@ -167,15 +192,17 @@ if __name__ == '__main__':
         # create a frame without colored AA for all AA outside the PDB data
         existing_frames = sorted([png for png in os.listdir(frames_dir)])
         if '{}_no-idx.png'.format(protein['PDB']) not in existing_frames:
-            print('\nCreating {} ({}) protein frame, please wait..'.format(protein['entry_name'],
-                                                                           protein['PDB']))
+            print(('\nCreating {} ({}) protein frame, '
+                   'please wait..').format(protein['entry_name'],
+                                           protein['PDB']))
             logger.info('Creating {} ({}) protein frame.'.format(protein['entry_name'],
                                                                  protein['PDB']))
-            cmd_no_color = './create_pdb_frames.py -p {} -c {} -n {} -i {} {}'.format(pdb_dir,
-                                                                                      pdb_data['chain'],
-                                                                                      'no-idx',
-                                                                                      1,
-                                                                                      protein['PDB'])
+            cmd_no_color = ('./create_pdb_frames.py -p {} -c {} '
+                            '-n {} -i {} {}').format(pdb_dir,
+                                                     pdb_data['chain'],
+                                                     'no-idx',
+                                                     1,
+                                                     protein['PDB'])
             logger.debug(cmd_no_color)
             sub = subprocess.run(cmd_no_color, shell=True,
                                  stdout=subprocess.PIPE,
@@ -194,11 +221,12 @@ if __name__ == '__main__':
         for aa_idx, frame_idx in enumerate(pdb_data['frames_idx']):
             if '{}_{}.png'.format(protein['PDB'],
                                   frame_idx) not in existing_frames:
-                cmd = './create_pdb_frames.py -p {} -c {} -n {} -i {} --color_aa {}'.format(pdb_dir,
-                                                                                            pdb_data['chain'],
-                                                                                            frame_idx,
-                                                                                            aa_idx + 1,
-                                                                                            protein['PDB'])
+                cmd = ('./create_pdb_frames.py -p {} -c {} '
+                       '-n {} -i {} --color_aa {}').format(pdb_dir,
+                                                           pdb_data['chain'],
+                                                           frame_idx,
+                                                           aa_idx + 1,
+                                                           protein['PDB'])
                 cmd_list.append(cmd)
 
         # threading to run the commands
@@ -206,8 +234,9 @@ if __name__ == '__main__':
             nb_threads_to_do = len(cmd_list)
             nb_threads_done = 0
             errors = 0
-            msg = 'Creating {} ({}) protein colored AA frames, please wait..'.format(protein['entry_name'],
-                                                                                     protein['PDB'])
+            msg = ('Creating {} ({}) protein colored AA frames, '
+                   'please wait..').format(protein['entry_name'],
+                                           protein['PDB'])
             print('\n{}'.format(msg))
             logger.info(msg)
             with concurrent.futures.ThreadPoolExecutor(max_workers=5) as executor:
@@ -220,10 +249,12 @@ if __name__ == '__main__':
                                              stderr=subprocess.PIPE)
                     # capturing the output
                     if thread.result().stdout:
-                        logger.debug('{}: {}'.format(cmd, thread.result().stdout))
+                        logger.debug('{}: {}'.format(cmd,
+                                                     thread.result().stdout))
                         nb_threads_done += 1
                     if thread.result().stderr:
-                        logger.error('{}: {}'.format(cmd, thread.result().stderr))
+                        logger.error('{}: {}'.format(cmd,
+                                                     thread.result().stderr))
                         nb_threads_done += 1
                         errors += 1
                     print('{}/{} threads ({} errors)'.format(nb_threads_done,
@@ -235,13 +266,17 @@ if __name__ == '__main__':
         # create the movie
         movie_path = os.path.join(out_dir, '{}.avi'.format(file_base_name))
         if not os.path.exists(movie_path):
-            audio_video.create_movie(movie_path, frames_dir, keys_duration, flac_file_path)
+            audio_video.create_movie(movie_path,
+                                     frames_dir,
+                                     keys_duration,
+                                     flac_file_path)
         else:
             msg = 'Movie file already exists: {}'.format(movie_path)
             print(msg)
             logger.info(msg)
     else:
-        msg = 'No movie created, no PDB entry (3D image reference) in the Uniprot entry for {}'.format(args.uniprot_AN)
+        msg = ('No movie created, no PDB entry (3D image reference) '
+               'in the Uniprot entry for {}').format(args.uniprot_AN)
         logger.info(msg)
         print(msg)
 

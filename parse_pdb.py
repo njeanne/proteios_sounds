@@ -21,6 +21,7 @@ def hamming(s1, s2):
     assert len(s1) == len(s2)
     return sum(c1 != c2 for c1, c2 in zip(s1, s2))
 
+
 def get_common_coordinates(pdb_seq, uniprot_seq, pdb_coord_matching):
     '''Look for the common part between the PDB and uniprot sequences.
 
@@ -48,6 +49,7 @@ def get_common_coordinates(pdb_seq, uniprot_seq, pdb_coord_matching):
     pdb_coord_matching['PDB_stop_on_uniprot'] = pdb_coord_matching['PDB_start_on_uniprot'] + len(short_seq)
     return pdb_coord_matching
 
+
 def get_pdb_info(prot_dict, pdb_dir):
     '''Get informations about PDB sequences.
 
@@ -60,7 +62,7 @@ def get_pdb_info(prot_dict, pdb_dir):
     # get the UniProt sequence
     uniprot_seq = ''.join([aa for aa in prot_dict['seq'].values()])
     # open pymol and retrieve the protein with PDB accession number
-    pymol.finish_launching(['pymol', '-qc']) # Pymol: quiet and no GUI
+    pymol.finish_launching(['pymol', '-qc'])  # Pymol: quiet and no GUI
     # set the path to download the PDB data
     pymol.cmd.set('fetch_path', pymol.cmd.exp_path(pdb_dir), quiet=1)
     logging.info('Fetching PDB file with accession number: {}'.format(prot_dict['PDB']))

@@ -3,15 +3,18 @@
 import logging
 from midiutil import MIDIFile
 
+
 def create_chord(pitch_list, keys_in_chord, idx_key, KEYS_OCTAVE_ONLY):
     '''
     :param list pitch_list: the list of MIDI keys integers
     :param int keys_in_chord: the number of keys in the chord
-    :param int idx_key: the index in the list of KEYS_OCTAVE_ALTERATIONS of the first key of the chord
+    :param int idx_key: the index in the list of KEYS_OCTAVE_ALTERATIONS of the
+    first key of the chord
     :param list KEYS_OCTAVE_ONLY: the list of keys MIDI without the alterations
     :return: the list of MIDI keys for the chord
     :rtype: list of integers
     '''
+
     added_keys = 1
     while added_keys < keys_in_chord:
         idx_key = idx_key + 2
@@ -22,6 +25,7 @@ def create_chord(pitch_list, keys_in_chord, idx_key, KEYS_OCTAVE_ONLY):
         pitch_list.append(KEYS_OCTAVE_ONLY[idx_key])
         added_keys += 1
     return pitch_list
+
 
 def create_midi(path_midi, protein, tempo, instrus, aa_phy_chi):
     '''
@@ -57,10 +61,12 @@ def create_midi(path_midi, protein, tempo, instrus, aa_phy_chi):
                     1: {'instrument': instrus[1], 'vol': 40},
                     2: {'instrument': instrus[2], 'vol': 60}}
 
-        logging.debug('Instrument number by channel, see: http://www.pjb.com.au/muscript/gm.html for instruments number correspondance:')
+        logging.debug(('Instrument number by channel, see: '
+                       'http://www.pjb.com.au/muscript/gm.html for '
+                       'instruments number correspondance:'))
         for channel_nb in channels:
             logging.debug('\tchannel {}: instrument {}'.format(channel_nb,
-                                                              channels[channel_nb]['instrument']))
+                                                               channels[channel_nb]['instrument']))
 
         MyMIDI = MIDIFile(numTracks=1, adjust_origin=False)  # One track, defaults to format 1 (tempo track automatically created)
         MyMIDI.addTempo(track, time, tempo)
