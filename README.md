@@ -26,6 +26,11 @@ All Python library can be installed using `pip install <LIBRARY>`, see:
 - [FluidSynth](http://www.fluidsynth.org/)
 - [ffmpeg](https://ffmpeg.org/)
 
+## Automatic downloads
+
+If the file `FluidR3_GM.sf2` is not present in the `resources/FluidR3_GM` directory at the first execution of the 
+script, it will be automatically downloaded.
+
 ## Usage
 ```
 proteios_sounds.py -o <results_directory> [-t <tempo>] [-i <INT INT INT>] [-m] [-d] <uniprot_accession_number>
