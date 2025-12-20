@@ -92,7 +92,7 @@ def get_pdb_info(prot_dict, pdb_dir):
             pdb_data["chain"] = chain
             # get the PDB sequence
             pymol.stored_list = []
-            pymol.cmd.iterate("(name ca) and (chain {})".format(chain), "pymol.stored_list.append((resi, oneletter))")
+            pymol.cmd.iterate(f"(name ca) and (chain {chain})", "pymol.stored_list.append((resi, oneletter))")
             pdb_seq = "".join([tuple_aa[1] for tuple_aa in pymol.stored_list])
             # check if pdb seq is longer than uniprot
             if len(pdb_seq) > len(uniprot_seq):

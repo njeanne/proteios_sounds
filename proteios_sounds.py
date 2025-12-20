@@ -3,7 +3,7 @@
 __author__ = "Nina VERSTRAETE, Jacques TOEN & Nicolas JEANNE"
 __copyright__ = "GNU General Public License"
 __version__ = "1.1.0"
-__email__ = "n.jeanne@gmx.fr"
+__email__ = "mesmeraf@gmail.com"
 
 import argparse
 import sys
@@ -89,8 +89,6 @@ def create_pdb_frames(pdb_accession_number, chain, idx_aa, pdb_directory, frame_
     # open pymol and retrieve the protein with PDB accession number
     pymol.finish_launching(["pymol", "-qc"])  # Pymol: quiet and no GUI
     # set the path to download the PDB data
-    # pymol.cmd.set("fetch_path", pymol.cmd.exp_path(fn_arg["pdb_dir"]), quiet=1)
-    # print("Fetching PDB accession number: {}".format(fn_arg["pdb_AN"]))
     pymol.cmd.load(os.path.join(pdb_directory, f"{pdb_accession_number.lower()}.cif"))
     pymol.cmd.disable("all")
     pymol.cmd.enable(pdb_accession_number)
@@ -135,6 +133,8 @@ if __name__ == "__main__":
                         help="set channel 0, 1 and 2 instruments, restricted to 3 values between 0 and 127 separated "
                              "by spaces. Default is 0:  Acoustic Grand, 42: Cello and 65: Alto Sax. "
                              "See: http://www.pjb.com.au/muscript/gm.html#patch for details.")
+    parser.add_argument("-f", "--force", required=False, action="store_true",
+                        help="if the video file exists, force to recreate it.")
     parser.add_argument("-d", "--debug", required=False, action="store_true",
                         help="debug mode, create a log file which details each entry of the MIDI file.")
     parser.add_argument("-l", "--log", required=False, type=str,
@@ -247,6 +247,7 @@ if __name__ == "__main__":
                                                 args.debug)
 
     if "PDB" in protein:
+        multiprocessing.set_start_method("spawn")
         # create the directories for PDB data and frames
         pdb_dir = os.path.join(os.path.abspath(args.out), "pdb", f"{protein['accession_number']}_{protein['PDB']}")
         frames_dir = os.path.join(pdb_dir, "frames")
@@ -257,7 +258,6 @@ if __name__ == "__main__":
 
         # create a frame without colored AA for all AA outside the PDB data
         existing_frames = sorted([png for png in os.listdir(frames_dir)])
-        multiprocessing.set_start_method("spawn")
         if f"{protein['PDB']}_no-idx.png" not in existing_frames:
             logging.info(f"Creating {protein['entry_name']} ({protein['PDB']}) protein frame, please wait..")
             processes = []
@@ -275,120 +275,27 @@ if __name__ == "__main__":
             if f"{protein['PDB']}_{frame_idx}.png" not in existing_frames:
                 amino_acids_indexes.append(aa_idx)
                 frames_indexes.append(frame_idx)
-                # create_pdb_frames_path = os.path.abspath(os.path.join(os.path.dirname(__file__), "create_pdb_frames.py"))
-                # print(create_pdb_frames_path)
-                # cmd = (f"{create_pdb_frames_path} -p {pdb_dir} -c {pdb_data['chain']} -n {frame_idx} -i {aa_idx + 1} "
-                #        f"-color_aa {protein['PDB']}")
-                # cmd_list.append(cmd)
 
         if amino_acids_indexes:
             processes = []
-            process = multiprocessing.Process(target=create_pdb_frames,
-                                              args=(protein["PDB"], pdb_data["chain"], frames_indexes, pdb_dir,
-                                                    amino_acids_indexes, True))
-            processes.append(process)
-            process.start()
+            for idx in range(len(amino_acids_indexes)):
+                process = multiprocessing.Process(target=create_pdb_frames,
+                                                  args=(protein["PDB"], pdb_data["chain"], frames_indexes[idx], pdb_dir,
+                                                        amino_acids_indexes[idx], True))
+                processes.append(process)
+                process.start()
             for process in processes:
                 process.join()
-
-            # nb_threads_to_do = len(cmd_list)
-            # nb_threads_done = 0
-            # errors = 0
-            # logging.info(f"Creating {protein['entry_name']} ({protein['PDB']}) protein colored AA frames, please "
-            #              f"wait..")
-            # with concurrent.futures.ThreadPoolExecutor(max_workers=5) as executor:
-            #     for cmd in cmd_list:
-            #         logging.info(cmd)
-            #         thread = executor.submit(subprocess.run, cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
-            #         # capturing the output
-            #         if thread.result().stdout:
-            #             logging.info(thread.result().stdout.decode("utf-8"))
-            #             nb_threads_done += 1
-            #         if thread.result().stderr:
-            #             logging.error(thread.result().stderr.decode("utf-8"))
-            #             nb_threads_done += 1
-            #             errors += 1
-            #         logging.info(f"{nb_threads_done}/{nb_threads_to_do} threads ({errors} errors)")
-
-
-
 
         # check if all frames are created else wait
         while len(os.listdir(frames_dir)) != (len(pdb_data["frames_idx"]) + 1):
             time.sleep(1)
         # create the movie
-        movie_path = os.path.join(args.out, f"{file_base_name}.avi")
-        if not os.path.exists(movie_path):
+        movie_path = os.path.join(args.out, f"{file_base_name}.mp4")
+        if args.force or not os.path.exists(movie_path):
             protein_movie.create_movie(movie_path, frames_dir, keys_duration, midi_file_path)
         else:
             logging.info(f"Movie file already exists: {movie_path}")
-
-    # if "PDB" in protein:
-    #     # create the directories for PDB data and frames
-    #     pdb_dir = os.path.join(os.path.abspath(args.out), "pdb", f"{protein['accession_number']}_{protein['PDB']}")
-    #     frames_dir = os.path.join(pdb_dir, "frames")
-    #     os.makedirs(frames_dir, exist_ok=True)
-    #
-    #     # get data from the PDB file
-    #     pdb_data = parse_pdb.get_pdb_info(protein, pdb_dir)
-    #
-    #     # create a frame without colored AA for all AA outside the PDB data
-    #     existing_frames = sorted([png for png in os.listdir(frames_dir)])
-    #     if f"{protein['PDB']}_no-idx.png" not in existing_frames:
-    #         logging.info(f"Creating {protein['entry_name']} ({protein['PDB']}) protein frame, please wait..")
-    #         cmd_no_color = f"./create_pdb_frames.py -p {pdb_dir} -c {pdb_data['chain']} -n no-idx -i 1 {protein['PDB']}"
-    #         logging.info(cmd_no_color)
-    #         sub = subprocess.run(cmd_no_color, shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
-    #         # capturing the output
-    #         if sub.stdout:
-    #             logging.info(sub.stdout.decode("utf-8"))
-    #             logging.info("Done!")
-    #         if sub.stderr:
-    #             logging.error(sub.stderr.decode("utf-8"))
-    #             logging.error("Error!")
-    #
-    #     # create the commands for the python script which generates the pymol
-    #     # pictures with colored AA
-    #     cmd_list = []
-    #     for aa_idx, frame_idx in enumerate(pdb_data["frames_idx"]):
-    #         if f"{protein['PDB']}_{frame_idx}.png" not in existing_frames:
-    #             create_pdb_frames_path = os.path.abspath(os.path.join(os.path.dirname(__file__),
-    #                                                                   "create_pdb_frames.py"))
-    #             print(create_pdb_frames_path)
-    #             cmd = (f"{create_pdb_frames_path} -p {pdb_dir} -c {pdb_data['chain']} -n {frame_idx} -i {aa_idx + 1} "
-    #                    f"-color_aa {protein['PDB']}")
-    #             cmd_list.append(cmd)
-    #
-    #     # threading to run the commands
-    #     if cmd_list:
-    #         nb_threads_to_do = len(cmd_list)
-    #         nb_threads_done = 0
-    #         errors = 0
-    #         logging.info(f"Creating {protein['entry_name']} ({protein['PDB']}) protein colored AA frames, please "
-    #                      f"wait..")
-    #         with concurrent.futures.ThreadPoolExecutor(max_workers=5) as executor:
-    #             for cmd in cmd_list:
-    #                 logging.info(cmd)
-    #                 thread = executor.submit(subprocess.run, cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
-    #                 # capturing the output
-    #                 if thread.result().stdout:
-    #                     logging.info(thread.result().stdout.decode("utf-8"))
-    #                     nb_threads_done += 1
-    #                 if thread.result().stderr:
-    #                     logging.error(thread.result().stderr.decode("utf-8"))
-    #                     nb_threads_done += 1
-    #                     errors += 1
-    #                 logging.info(f"{nb_threads_done}/{nb_threads_to_do} threads ({errors} errors)")
-    #
-    #     # check if all frames are created else wait
-    #     while len(os.listdir(frames_dir)) != (len(pdb_data["frames_idx"]) + 1):
-    #         time.sleep(1)
-    #     # create the movie
-    #     movie_path = os.path.join(args.out, f"{file_base_name}.avi")
-    #     if not os.path.exists(movie_path):
-    #         protein_movie.create_movie(movie_path, frames_dir, keys_duration, midi_file_path)
-    #     else:
-    #         logging.info(f"Movie file already exists: {movie_path}")
 
     # create the score
     if args.score:

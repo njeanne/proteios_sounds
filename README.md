@@ -17,6 +17,7 @@ All Python library can be installed using `pip install <LIBRARY>`, see:
 - [midiutil](https://pypi.org/project/MIDIUtil/)
 - [midi2audio](https://pypi.org/project/midi2audio/)
 - [imageio](https://pypi.org/project/imageio/)
+- [imageio-ffmpeg](https://pypi.org/project/imageio-ffmpeg/)
 
 ## External softwares
 
