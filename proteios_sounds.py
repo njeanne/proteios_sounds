@@ -11,7 +11,6 @@ import os
 import logging
 import multiprocessing
 import subprocess
-import concurrent.futures
 import time
 import parse_uniprot
 import midi_operations
