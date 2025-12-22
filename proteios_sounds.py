@@ -124,18 +124,14 @@ if __name__ == "__main__":
     parser.add_argument("-o", "--out", required=True, help="path to the results directory.")
     parser.add_argument("-s", "--score", required=False, action="store_true",
                         help="use musescore software to create the score corresponding to the MIDI file.")
-    parser.add_argument("-p", "--play", required=False, action="store_true",
-                        help="play the music with Timidity, just for tests.")
     parser.add_argument("-t", "--tempo", required=False, type=restricted_tempo,
                         help="set the tempo in BPM. Value between 60 and 250.")
     parser.add_argument("-i", "--instruments", required=False, nargs=3,
-                        help="set channel 0, 1 and 2 instruments, restricted to 3 values between 0 and 127 separated "
-                             "by spaces. Default is 0:  Acoustic Grand, 42: Cello and 65: Alto Sax. "
-                             "See: http://www.pjb.com.au/muscript/gm.html#patch for details.")
+                        help="set channel 0, 1 and 2 instruments, restricted to 3 values between 1 and 128 separated "
+                             "by spaces. Default is 1:  Acoustic Grand, 43: Cello and 66: Alto Sax. "
+                             "See: https://en.wikipedia.org/wiki/General_MIDI for details.")
     parser.add_argument("-f", "--force", required=False, action="store_true",
                         help="if the video file exists, force to recreate it.")
-    parser.add_argument("-d", "--debug", required=False, action="store_true",
-                        help="debug mode, create a log file which details each entry of the MIDI file.")
     parser.add_argument("-l", "--log", required=False, type=str,
                         help="the path for the log file. If this option is skipped, the log file is created in the "
                              "output directory.")
@@ -150,9 +146,9 @@ if __name__ == "__main__":
     # check if instruments are between 0 and 127
     if args.instruments:
         for i in range(len(args.instruments)):
-            instrument = int(args.instruments[i])
+            instrument = int(args.instruments[i]) - 1
             if instrument < 0 or instrument > 127:
-                raise argparse.ArgumentTypeError(f"{args.instruments} should be 3 integers between 0 and 127.")
+                raise argparse.ArgumentTypeError(f"{args.instruments} should be 3 integers between 1 and 128.")
             args.instruments[i] = instrument
         instruments = args.instruments
     else:
@@ -164,12 +160,11 @@ if __name__ == "__main__":
     else:
         tempo = 100  # In BPM
 
-    # midi notes on major mode correspondance with AA sorted by decreasing
-    # molecular weight keys are set as DO (48, 60, 72) degrees I,
-    # SOL (55, 67) degrees V, FA (53, 65) degrees IV, RE (50, 62) degrees II,
-    # MI (52, 64) degrees III, LA (57, 69) degrees VI and
-    # SI (59, 71) degrees VII. Finally, we add 7 alterations "#" following the
-    # ascending quint (54, 66, 49, 61, 56, 68, 51)
+    # MIDI keys on major mode correspondance with AA sorted by decreasing molecular weight are set as "C" or "DO" in
+    # French (48, 60, 72) degrees I, "G" or "SOL" in French (55, 67) degrees V, "F" or "FA" in French (53, 65) degrees
+    # IV, "D" or "RE" in French (50, 62) degrees II, "E" or "MI" in French (52, 64) degrees III, "A" or "LA" in French
+    # (57, 69) degrees VI and "B" or "SI" in French (59, 71) degrees VII. Finally, we add 7 alterations "#" following
+    # the ascending quint (54, 66, 49, 61, 56, 68, 51)
     initial_midi_keys = [48, 60, 72, 55, 67, 53, 65, 50, 62, 52, 64, 57, 69,
                          59, 71, 54, 66, 49, 61, 56, 68, 51]
     midi_keys = {}
@@ -210,8 +205,8 @@ if __name__ == "__main__":
 
     logging.info(f"\tOutput directory: {args.out}")
     logging.info(f"\tTempo: {tempo} BPM")
-    logging.info(f"\tInstruments: {', '.join(map(str, instruments))} (general MIDI patch numbers, "
-                "see: http://www.pjb.com.au/muscript/gm.html#patch)")
+    logging.info(f"\tInstruments: {', '.join(map(str, [x + 1 for x in instruments]))} (general MIDI patch numbers, "
+                 "see: https://en.wikipedia.org/wiki/General_MIDI)")
     logging.info(f"\tCreate score: {args.score}")
 
     # parsing of uniprot entry
@@ -220,8 +215,7 @@ if __name__ == "__main__":
     sequence = protein["seq"]
     sequence_length = len(sequence)
     protein["seq"] = {}
-    if args.debug:
-        logging.info(f"AA sequence ({sequence_length} AA): {sequence}")
+    logging.debug(f"AA sequence ({sequence_length} AA): {sequence}")
     for i in range(sequence_length):
         protein["seq"][i] = sequence[i]
     # frequency of AA in the sequence
@@ -242,8 +236,7 @@ if __name__ == "__main__":
 
     # create the MIDI file
     midi_file_path = os.path.join(args.out, f"{file_base_name}.midi")
-    keys_duration = midi_operations.create_midi(midi_file_path, protein, midi_keys, tempo, instruments, AA_PHY_CHI,
-                                                args.debug)
+    keys_duration = midi_operations.create_midi(midi_file_path, protein, midi_keys, tempo, instruments, AA_PHY_CHI)
 
     if "PDB" in protein:
         multiprocessing.set_start_method("spawn")
@@ -303,7 +296,7 @@ if __name__ == "__main__":
         score_output = os.path.join(args.out, score_basename)
         cmd = f"mscore -o {score_output} {midi_file_path}"
         subprocess.run(cmd, shell=True)
-        logging.info(f"Score created at {score_output}")
+        logging.info(f"\tScore created at {score_output}")
 
     # play the file with timidity if asked
     if args.play:

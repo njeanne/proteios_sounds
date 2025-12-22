@@ -28,7 +28,7 @@ def create_chord(pitch_list, keys_in_chord, idx_key, keys_octave_only):
     return pitch_list
 
 
-def create_midi(path_midi, protein, midi_keys, tempo, instruments, aa_phy_chi, debug=False):
+def create_midi(path_midi, protein, midi_keys, tempo, instruments, aa_phy_chi):
     """
     Creates the MIDI file from the protein data.
     :param path_midi: the path to the MIDI file.
@@ -43,15 +43,13 @@ def create_midi(path_midi, protein, midi_keys, tempo, instruments, aa_phy_chi, d
     :type instruments: list
     :param aa_phy_chi: amino acids physico-chemical attributes dictionary.
     :type aa_phy_chi: dict
-    :param debug: the enable debug mode.
-    :type debug: boolean
     :return: the list of keys durations.
     :rtype: list of floats.
     """
     logging.info("MIDI file creation:")
 
-    # octaves DO, RE, MI, FA, SOL, LA, SI. 2 octaves and 1 more SOL,
-    # the remaining 7 keys are altérations (#)
+    # octaves "C" (DO), "D" (RE), "E" (MI), "F" (FA), "G" (SOL), "A" (LA), "B" (SI).
+    # 2 octaves and 1 more "G" (SOL), the remaining 7 keys are altérations (#).
     keys_octave_alterations = [48, 50, 52, 53, 55, 57, 59, 60, 62, 64, 65, 67, 69, 71, 72, 54, 66, 49, 61, 56, 68, 51]
     keys_octave_only = keys_octave_alterations[:15]
 
@@ -59,27 +57,25 @@ def create_midi(path_midi, protein, midi_keys, tempo, instruments, aa_phy_chi, d
         track = 0
         time = 0   # In beats
 
-        # a channel is defined by an instrument nbr and
-        # a volume (0-127, as per the MIDI standard,
-        # see: http://www.pjb.com.au/muscript/gm.html)
-        # channel 9 is for percussions
-        # (see https://pjb.com.au/muscript/gm.html#perc)
+        # a channel is defined by an instrument nbr and a volume (1-128, as per the MIDI standard,
+        # see: https://en.wikipedia.org/wiki/General_MIDI) channel 10 is set for percussions
+        # (see https://en.wikipedia.org/wiki/Percussion_instrument)
         channels = {0: {"instrument": instruments[0], "vol": 100},
                     1: {"instrument": instruments[1], "vol": 40},
                     2: {"instrument": instruments[2], "vol": 60}}
 
-        if debug:
-            logging.debug("Instrument number by channel, see: http://www.pjb.com.au/muscript/gm.html for instruments "
-                        "number correspondance:")
+        logging.debug("Instrument number by channel, see: https://en.wikipedia.org/wiki/General_MIDI for "
+                      "instruments number correspondance:")
+        if logging.getLogger().getEffectiveLevel() == "DEBUG":
             for channel_nb in channels:
-                logging.debug(f"\tchannel {channel_nb}: instrument {channels[channel_nb]['instrument']}")
+                logging.debug(f"\tchannel {channel_nb}: instrument {channels[channel_nb]['instrument']} (0-indexed).")
 
         # One track, defaults to format 1 (tempo track automatically created)
-        MyMIDI = MIDIFile(numTracks=1, adjust_origin=False)
-        MyMIDI.addTempo(track, time, tempo)
+        my_midi = MIDIFile(numTracks=1, adjust_origin=False)
+        my_midi.addTempo(track, time, tempo)
         # add the channels (1 per instrument)
         for channel_nbr in channels:
-            MyMIDI.addProgramChange(track, channel=channel_nbr, time=time, program=channels[channel_nbr]["instrument"])
+            my_midi.addProgramChange(track, channel=channel_nbr, time=time, program=channels[channel_nbr]["instrument"])
 
         sequence_length = len(protein["seq"])
 
@@ -101,7 +97,7 @@ def create_midi(path_midi, protein, midi_keys, tempo, instruments, aa_phy_chi, d
 
             # set the duration of the key (current AA) depending on the number
             # of shared properties with the next AA
-            if aa == "X" or next_aa == "X": # non determined AA
+            if aa == "X" or next_aa == "X":  # non determined AA
                 shared_properties_current_next = 0
             else:
                 shared_properties_current_next = len(set.intersection(aa_phy_chi[aa], aa_phy_chi[next_aa]))
@@ -160,19 +156,18 @@ def create_midi(path_midi, protein, midi_keys, tempo, instruments, aa_phy_chi, d
                         channels[1]["vol"] = 60
                         channels[2]["vol"] = 40
 
-            if debug:
-                logging.debug(f"position: {i}")
-                logging.debug(f"AA: {aa}")
-                logging.debug(f"pitch: {pitch_list}")
-                logging.debug(f"time: {time}")
-                logging.debug(f"duration: {duration}")
+            logging.debug(f"position: {i}")
+            logging.debug(f"AA: {aa}")
+            logging.debug(f"pitch: {pitch_list}")
+            logging.debug(f"time: {time}")
+            logging.debug(f"duration: {duration}")
             for channel_nbr in channels:
                 for pitch in pitch_list:
-                    MyMIDI.addNote(track, channel=channel_nbr, pitch=pitch, time=time, duration=duration,
-                                   volume=channels[channel_nbr]["vol"])
+                    my_midi.addNote(track, channel=channel_nbr, pitch=pitch, time=time, duration=duration,
+                                    volume=channels[channel_nbr]["vol"])
 
             time = time + duration
-        MyMIDI.writeFile(midiFile)
+        my_midi.writeFile(midiFile)
     logging.info(f"\tMIDI file for {protein['entry_name']} {protein['organism']} created: {path_midi}")
 
     return durations_list

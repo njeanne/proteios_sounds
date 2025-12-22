@@ -1,13 +1,15 @@
 # Proteios sounds project
 
-Listen the sound of the proteins
+Listen the sound of the proteins.
 
 This project aims to transform the data collected by the biologists on proteins to a MIDI file.
+3 instruments are chosen, from the [MIDI instruments numbering](https://en.wikipedia.org/wiki/General_MIDI), to play 
+the score created from the protein amino acids sequence.
 To operate, the script needs an internet connection.
 
 ## data
 
-The proteins data are retrieved from the [UniProt](https://www.uniprot.org/) database.
+The protein data are retrieved from the [UniProt](https://www.uniprot.org/) database.
 
 ## Python libraries
 

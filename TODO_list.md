@@ -54,4 +54,4 @@ Rajout d'un dièse (revoir avec Jacques pourquoi SOL# puis FA#?) / nouvelle prop
 - [ ] identifier des formes (cadence etc...) qui permettraient de mieux caler la musique sur une gamme donnée
 
 # Installation
-- [ ] Téléchargement du fichier `FluidR3_GM.sf2` depuis le cloud à la première utilisation du script, voir issue #4.
+- [X] Téléchargement du fichier `FluidR3_GM.sf2` depuis le cloud à la première utilisation du script, voir issue #4.

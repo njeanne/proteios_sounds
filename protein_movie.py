@@ -68,9 +68,9 @@ def movie_creation(aac, dir_frames, duration_keys, path_movie):
     logging.info("Movie creation, please wait..")
     for idx, key_duration in enumerate(duration_keys):
         nb_frames_on_key = round(float(fps) * key_duration)
-        logging.info(f"Frames for amino acid {idx + 1}/{len(duration_keys)}")
-        logging.info(f"\tkey duration:\t{key_duration} seconds.")
-        logging.info(f"\tframes count:\t{nb_frames_on_key}")
+        logging.debug(f"\tFrames for amino acid {idx + 1}/{len(duration_keys)}")
+        logging.debug(f"\t\tkey duration:\t{key_duration} seconds.")
+        logging.debug(f"\t\tframes count:\t{nb_frames_on_key}")
         if str(idx) in frames_dict:
             for _ in range(nb_frames_on_key):
                 video_writer.append_data(imageio.imread(frames_dict[str(idx)]))
@@ -81,7 +81,7 @@ def movie_creation(aac, dir_frames, duration_keys, path_movie):
     cmd_audio_video = (f"ffmpeg -y -fflags +genpts -i {path_tmp_movie} -i {aac} -c:v copy -c:a copy -shortest "
                        f"{path_movie}")
     try:
-        logging.info("ffmpeg: add soundtrack to the movie.")
+        logging.info("\tffmpeg: add soundtrack to the movie.")
         ffmpeg_process = subprocess.run(cmd_audio_video, shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
         if ffmpeg_process.stdout:
             logging.info(ffmpeg_process.stdout)
@@ -89,7 +89,7 @@ def movie_creation(aac, dir_frames, duration_keys, path_movie):
             logging.warning(ffmpeg_process.stderr.decode("utf-8"))
         # remove tmp movie file (file without sounds)
         os.remove(path_tmp_movie)
-        logging.info(f"Movie file created: {path_movie}")
+        logging.info(f"\tMovie file created: {path_movie}")
     except Exception as ex:
         logging.error(ex)
 
