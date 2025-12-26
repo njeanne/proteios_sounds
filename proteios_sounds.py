@@ -96,6 +96,7 @@ def create_pdb_frames(pdb_accession_number, chain, idx_aa, pdb_directory, frame_
     pymol.cmd.hide("all")
     pymol.cmd.show("cartoon")
     pymol.cmd.set("ray_opaque_background", 1)
+    pymol.cmd.color("white", "polymer.protein")
 
     if color_aa:
         pymol.cmd.color("red", f"resi {idx_aa}")
@@ -165,8 +166,7 @@ if __name__ == "__main__":
     # IV, "D" or "RE" in French (50, 62) degrees II, "E" or "MI" in French (52, 64) degrees III, "A" or "LA" in French
     # (57, 69) degrees VI and "B" or "SI" in French (59, 71) degrees VII. Finally, we add 7 alterations "#" following
     # the ascending quint (54, 66, 49, 61, 56, 68, 51)
-    initial_midi_notes = [48, 60, 72, 55, 67, 53, 65, 50, 62, 52, 64, 57, 69,
-                         59, 71, 54, 66, 49, 61, 56, 68, 51]
+    initial_midi_notes = [48, 60, 72, 55, 67, 53, 65, 50, 62, 52, 64, 57, 69, 59, 71, 54, 66, 49, 61, 56, 68, 51]
     midi_notes = {}
 
     # Physico-chemical properties of AA
@@ -230,9 +230,8 @@ if __name__ == "__main__":
         midi_notes[aa_proportion[0]] = initial_midi_notes[idx]
 
     # set the result files base name
-    file_base_name = f"{args.uniprot}_{protein['entry_name']}_{protein['organism']}_{tempo}bpm_intrus"
-    for instrument in instruments:
-        file_base_name = f"{file_base_name}-{instrument}"
+    file_base_name = (f"{args.uniprot}_{protein['entry_name']}_{protein['organism']}_{tempo}bpm_intrus-"
+                      f"{'-'.join(map(str, [x + 1 for x in instruments]))}")
 
     # create the MIDI file
     midi_file_path = os.path.join(args.out, f"{file_base_name}.midi")
@@ -297,8 +296,3 @@ if __name__ == "__main__":
         cmd = f"mscore -o {score_output} {midi_file_path}"
         subprocess.run(cmd, shell=True)
         logging.info(f"\tScore created at {score_output}")
-
-    # play the file with timidity if asked
-    if args.play:
-        cmd = f"timidity {midi_file_path}"
-        subprocess.run(cmd, shell=True)
