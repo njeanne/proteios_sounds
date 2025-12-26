@@ -48,19 +48,42 @@ All Python library can be installed with [pip](https://pypi.org/), using `pip in
 - [FluidSynth](http://www.fluidsynth.org/)
 - [ffmpeg](https://ffmpeg.org/)
 
-## Automatic downloads
+### Automatic downloads
 
 If the file `FluidR3_GM.sf2` is not present in the `resources/FluidR3_GM` directory at the first execution of the 
 script, it will be automatically downloaded.
 
 ## Usage
 ```
-proteios_sounds.py -o <results_directory> [-t <tempo>] [-i <INT INT INT>] [-m] [-d] <uniprot_accession_number>
+proteios_sounds.py -o <results_directory> [-t <tempo>] [-i <INT INT INT>] [-m] [-f] <uniprot_accession_number>
 ```
 
 - `-o --out <results_directory>`: the path of the output directory where the MIDI file is produced.
 - `-t --tempo <tempo>`: optional, the tempo in BPM. Must be an integer between 60 and 150, default is 100.
 - `-i --instruments <INT INT INT>`: optional, 3 integers separated by spaces between 0 and 127 to set the instruments on the 3 channels. Default are 0, 42 and 65. See the [General MIDI patch numbers](https://www.perfessorbill.com/lyrics/gsinst.htm) for the correspondances between the integers and the MIDI instruments.
 - `-m --musescore`: optional, use musescore to create the score corresponding to the MIDI file.
-- `-d --debug`: create a log file.
+- `-f --force`: if the video file exists, force to recreate it
 - `<uniprot_accession_number>`: the uniprot accession number of the protein to create the MIDI file from the Uniprot entry. i.e: human interleukine 8 accession number is [P10145](https://www.uniprot.org/uniprot/P10145).
+
+## Results
+
+In example, with the following command:
+```
+./proteios_sounds.py --out results --instruments 91 53 11 --score P10145
+```
+
+If the UniProt protein entry [P10145](https://www.uniprot.org/uniprotkb/P10145/entry) contains only the amino-acid 
+sequence, only the MIDI and audio files are generated.
+Since this entry includes a structural section, a movie is also created showing the protein structure of human 
+interleukin-8 corresponding to the UniProt entry P10145.
+Because somtimes the available structural representation does not cover all amino acids in the UniProt sequence, only 
+the amino acids present in the structure are highlighted in red during playback, and only when the audio reaches their 
+corresponding positions in the sequence.
+
+In this example, a movie is created:
+
+![P10145 movie](doc/P10145_IL8_HUMAN_Homo_sapiens_100bpm_intrus-91-53-11.mp4)
+
+<video width="320" height="240" controls>
+  <source src="doc/P10145_IL8_HUMAN_Homo_sapiens_100bpm_intrus-91-53-11.mp4" type="video/mp4">
+</video>
