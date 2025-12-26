@@ -43,7 +43,7 @@ def convert_midi_to_aac(midi):
     return aac
 
 
-def movie_creation(aac, dir_frames, duration_keys, path_movie):
+def movie_creation(aac, dir_frames, duration_notes, path_movie):
     """
     Create the movie with the pictures without sound, and after add the soundtrack.
 
@@ -51,8 +51,8 @@ def movie_creation(aac, dir_frames, duration_keys, path_movie):
     :type aac: str
     :param dir_frames: the frames' directory.
     :type dir_frames: str
-    :param duration_keys: the keys' durations.
-    :type duration_keys: list
+    :param duration_notes: the notes' durations.
+    :type duration_notes: list
     :param path_movie: the movie's path.
     :type path_movie: str
     """
@@ -66,16 +66,16 @@ def movie_creation(aac, dir_frames, duration_keys, path_movie):
     video_writer = imageio.get_writer(path_tmp_movie, fps=fps, codec="libx264")
     # create the frames per second
     logging.info("Movie creation, please wait..")
-    for idx, key_duration in enumerate(duration_keys):
-        nb_frames_on_key = round(float(fps) * key_duration)
-        logging.debug(f"\tFrames for amino acid {idx + 1}/{len(duration_keys)}")
-        logging.debug(f"\t\tkey duration:\t{key_duration} seconds.")
-        logging.debug(f"\t\tframes count:\t{nb_frames_on_key}")
+    for idx, note_duration in enumerate(duration_notes):
+        nb_frames_on_note = round(float(fps) * note_duration)
+        logging.debug(f"\tFrames for amino acid {idx + 1}/{len(duration_notes)}")
+        logging.debug(f"\t\tnote duration:\t{note_duration} seconds.")
+        logging.debug(f"\t\tframes count:\t{nb_frames_on_note}")
         if str(idx) in frames_dict:
-            for _ in range(nb_frames_on_key):
+            for _ in range(nb_frames_on_note):
                 video_writer.append_data(imageio.imread(frames_dict[str(idx)]))
         else:
-            for _ in range(nb_frames_on_key):
+            for _ in range(nb_frames_on_note):
                 video_writer.append_data(imageio.imread(frames_dict["no-idx"]))
     video_writer.close()
     cmd_audio_video = (f"ffmpeg -y -fflags +genpts -i {path_tmp_movie} -i {aac} -c:v copy -c:a copy -shortest "
@@ -94,7 +94,7 @@ def movie_creation(aac, dir_frames, duration_keys, path_movie):
         logging.error(ex)
 
 
-def create_movie(path_of_the_movie, frames_directory, durations_of_the_keys, midi_path):
+def create_movie(path_of_the_movie, frames_directory, durations_of_the_notes, midi_path):
     """
     Create the movie of the protein.
 
@@ -102,8 +102,8 @@ def create_movie(path_of_the_movie, frames_directory, durations_of_the_keys, mid
     :type path_of_the_movie: str
     :param frames_directory: the path of the pdb frames directory.
     :type frames_directory: str
-    :param durations_of_the_keys: the duration keys list.
-    :type durations_of_the_keys: list
+    :param durations_of_the_notes: the duration notes list.
+    :type durations_of_the_notes: list
     :param midi_path: the midi file path.
     :type midi_path: str
     """
@@ -111,6 +111,6 @@ def create_movie(path_of_the_movie, frames_directory, durations_of_the_keys, mid
     # sound conversion
     aac_path = convert_midi_to_aac(midi_path)
     # movie creation
-    movie_creation(aac_path, frames_directory, durations_of_the_keys, path_of_the_movie)
+    movie_creation(aac_path, frames_directory, durations_of_the_notes, path_of_the_movie)
 
 

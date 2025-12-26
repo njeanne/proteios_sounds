@@ -4,54 +4,54 @@ import logging
 from midiutil import MIDIFile
 
 
-def create_chord(pitch_list, keys_in_chord, idx_key, keys_octave_only):
+def create_chord(pitch_list, notes_in_chord, idx_note, notes_octave_only):
     """
-    :param pitch_list: the list of MIDI keys integers.
+    :param pitch_list: the list of MIDI notes integers.
     :type pitch_list: list
-    :param keys_in_chord: the number of keys in the chord.
-    :type keys_in_chord: int
-    :param idx_key: the chord's first key index in the list of keys_octave_alterations.
-    :type idx_key: int
-    :param keys_octave_only: the list of keys' MIDI without the alterations.
-    :type keys_octave_only: list
-    :return: the list of MIDI keys for the chord.
+    :param notes_in_chord: the number of notes in the chord.
+    :type notes_in_chord: int
+    :param idx_note: the chord's first note index in the list of notes_octave_alterations.
+    :type idx_note: int
+    :param notes_octave_only: the list of notes' MIDI without the alterations.
+    :type notes_octave_only: list
+    :return: the list of MIDI notes for the chord.
     :rtype: list of integers
     """
-    added_keys = 1
-    while added_keys < keys_in_chord:
-        idx_key = idx_key + 2
+    added_notes = 1
+    while added_notes < notes_in_chord:
+        idx_note = idx_note + 2
         # if index out of bound, subtract the length of the list to change the index
-        if idx_key >= len(keys_octave_only):
-            idx_key = idx_key - len(keys_octave_only)
-        pitch_list.append(keys_octave_only[idx_key])
-        added_keys += 1
+        if idx_note >= len(notes_octave_only):
+            idx_note = idx_note - len(notes_octave_only)
+        pitch_list.append(notes_octave_only[idx_note])
+        added_notes += 1
     return pitch_list
 
 
-def create_midi(path_midi, protein, midi_keys, tempo, instruments, aa_phy_chi):
+def create_midi(path_midi, protein, midi_notes, tempo, instruments, aa_phy_chi):
     """
     Creates the MIDI file from the protein data.
     :param path_midi: the path to the MIDI file.
     :type path_midi: str
     :param protein: the dictionary describing the protein.
     :type protein: dict
-    :param midi_keys: the dictionary of the keys.
-    :type midi_keys: dict
+    :param midi_notes: the dictionary of the notes.
+    :type midi_notes: dict
     :param tempo: the tempo in BPM.
     :type tempo: int
     :param instruments: the MIDI instrument numbers list.
     :type instruments: list
     :param aa_phy_chi: amino acids physico-chemical attributes dictionary.
     :type aa_phy_chi: dict
-    :return: the list of keys durations.
+    :return: the list of notes durations.
     :rtype: list of floats.
     """
     logging.info("MIDI file creation:")
 
     # octaves "C" (DO), "D" (RE), "E" (MI), "F" (FA), "G" (SOL), "A" (LA), "B" (SI).
-    # 2 octaves and 1 more "G" (SOL), the remaining 7 keys are altérations (#).
-    keys_octave_alterations = [48, 50, 52, 53, 55, 57, 59, 60, 62, 64, 65, 67, 69, 71, 72, 54, 66, 49, 61, 56, 68, 51]
-    keys_octave_only = keys_octave_alterations[:15]
+    # 2 octaves and 1 more "G" (SOL), the remaining 7 notes are altérations (#).
+    notes_octave_alterations = [48, 50, 52, 53, 55, 57, 59, 60, 62, 64, 65, 67, 69, 71, 72, 54, 66, 49, 61, 56, 68, 51]
+    notes_octave_only = notes_octave_alterations[:15]
 
     with open(path_midi, "wb") as midiFile:
         track = 0
@@ -83,7 +83,7 @@ def create_midi(path_midi, protein, midi_keys, tempo, instruments, aa_phy_chi):
 
         for i in range(0, sequence_length):
             aa = protein["seq"][i]
-            pitch_list = [midi_keys[aa]]
+            pitch_list = [midi_notes[aa]]
 
             if i == 0:
                 prev_aa = protein["seq"][sequence_length - 1]
@@ -95,7 +95,7 @@ def create_midi(path_midi, protein, midi_keys, tempo, instruments, aa_phy_chi):
                 prev_aa = protein["seq"][i - 1]
                 next_aa = protein["seq"][i + 1]
 
-            # set the duration of the key (current AA) depending on the number
+            # set the duration of the note (current AA) depending on the number
             # of shared properties with the next AA
             if aa == "X" or next_aa == "X":  # non determined AA
                 shared_properties_current_next = 0
@@ -120,20 +120,20 @@ def create_midi(path_midi, protein, midi_keys, tempo, instruments, aa_phy_chi):
                 shared_properties_current_previous = len(set.intersection(aa_phy_chi[aa], aa_phy_chi[prev_aa]))
 
             if shared_properties_current_previous == 2:
-                # 2 keys chord
-                keys_in_chord = 2
-                idx_key = keys_octave_alterations.index(midi_keys[aa])
-                pitch_list = create_chord(pitch_list, keys_in_chord, idx_key, keys_octave_only)
+                # 2 notes chord
+                notes_in_chord = 2
+                idx_note = notes_octave_alterations.index(midi_notes[aa])
+                pitch_list = create_chord(pitch_list, notes_in_chord, idx_note, notes_octave_only)
             elif shared_properties_current_previous == 3:
-                # 3 keys chord
-                keys_in_chord = 3
-                idx_key = keys_octave_alterations.index(midi_keys[aa])
-                pitch_list = create_chord(pitch_list, keys_in_chord, idx_key, keys_octave_only)
+                # 3 notes chord
+                notes_in_chord = 3
+                idx_note = notes_octave_alterations.index(midi_notes[aa])
+                pitch_list = create_chord(pitch_list, notes_in_chord, idx_note, notes_octave_only)
             elif shared_properties_current_previous >= 4:
-                # 4 keys chord
-                keys_in_chord = 4
-                idx_key = keys_octave_alterations.index(midi_keys[aa])
-                pitch_list = create_chord(pitch_list, keys_in_chord, idx_key, keys_octave_only)
+                # 4 notes chord
+                notes_in_chord = 4
+                idx_note = notes_octave_alterations.index(midi_notes[aa])
+                pitch_list = create_chord(pitch_list, notes_in_chord, idx_note, notes_octave_only)
 
             # change the volume of each instrument depending on the structure
             if "structure" in protein.keys():

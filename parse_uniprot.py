@@ -120,11 +120,6 @@ def parse_entry(uniprot_accession_number):
                 else:
                     protein["disulfid"] = [(feature.location.start, feature.location.end)]
 
-    # print("****************************************")
-    # for start in structures:
-    #     print("{}: start {}, end {}".format(structures[start]["type"], start, structures[start]["end"]))
-    # print("****************************************")
-
     # update protein with the structures
     sequence_length = len(protein["seq"])
     structure_last_position = 0
@@ -154,47 +149,5 @@ def parse_entry(uniprot_accession_number):
         logging.info(f"\tPDB accession number: {protein['PDB']}\t{cross_ref}")
     else:
         logging.info("\tPDB: No accession number in Uniprot entry")
-
-    ### TOREMOVE
-    # print("#####################################################")
-    # print("Keys in protein dictionary: {}".format(protein.keys()))
-    # for k, v in protein.items():
-    #     print("{}:".format(k))
-    #     if k == "organism":
-    #         print("\t{}".format(v))
-    #     if k == "entry_name":
-    #         print("\t{}".format(v))
-    #     if k == "seq":
-    #         print("\tlength: {}\n\t{}".format(len(v), v))
-    #     if k == "structure":
-    #         for start_pos, structure in v.items():
-    #             print("\t{}: {}".format(structure, start_pos))
-    #     if k == "modified_residue":
-    #         for k2, v2 in v.items():
-    #             print("\t{}".format(k2))
-    #             for pos in v2:
-    #                 print("\t\t{}".format(pos))
-    #     elif k == "glycosylation":
-    #         for k2, v2 in v.items():
-    #             print("\t{}".format(k2))
-    #             for pos in v2:
-    #                 print("\t\t{}".format(pos))
-    #     elif k == "site":
-    #         for k2, v2 in v.items():
-    #             print("\t{}".format(k2))
-    #             for pos in v2:
-    #                 print("\t\t{}".format(pos))
-    #     elif k == "propeptide":
-    #         for k2, v2 in v.items():
-    #             print("\t{}".format(k2))
-    #             for pos in v2:
-    #                 print("\t\t{}".format(pos))
-    #     elif k == "disulfid":
-    #         for bond in v:
-    #             print("\t{} disulfid bond to {}".format(bond[0], bond[1]))
-    #     elif k == "signal_peptide":
-    #         for signal_peptide in v:
-    #             print("\tsignal peptide from {} to {}".format(signal_peptide[0], signal_peptide[1]))
-    # print("#####################################################\n\n")
 
     return protein

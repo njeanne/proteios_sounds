@@ -160,14 +160,14 @@ if __name__ == "__main__":
     else:
         tempo = 100  # In BPM
 
-    # MIDI keys on major mode correspondance with AA sorted by decreasing molecular weight are set as "C" or "DO" in
+    # MIDI notes on major mode correspondance with AA sorted by decreasing molecular weight are set as "C" or "DO" in
     # French (48, 60, 72) degrees I, "G" or "SOL" in French (55, 67) degrees V, "F" or "FA" in French (53, 65) degrees
     # IV, "D" or "RE" in French (50, 62) degrees II, "E" or "MI" in French (52, 64) degrees III, "A" or "LA" in French
     # (57, 69) degrees VI and "B" or "SI" in French (59, 71) degrees VII. Finally, we add 7 alterations "#" following
     # the ascending quint (54, 66, 49, 61, 56, 68, 51)
-    initial_midi_keys = [48, 60, 72, 55, 67, 53, 65, 50, 62, 52, 64, 57, 69,
+    initial_midi_notes = [48, 60, 72, 55, 67, 53, 65, 50, 62, 52, 64, 57, 69,
                          59, 71, 54, 66, 49, 61, 56, 68, 51]
-    midi_keys = {}
+    midi_notes = {}
 
     # Physico-chemical properties of AA
     AA_PHY_CHI = {"A": {"hydrophobic", "small"},
@@ -227,7 +227,7 @@ if __name__ == "__main__":
     proportion_AA = sorted(proportion_AA.items(), key=lambda kv: kv[1], reverse=True)
 
     for idx, aa_proportion in enumerate(proportion_AA):
-        midi_keys[aa_proportion[0]] = initial_midi_keys[idx]
+        midi_notes[aa_proportion[0]] = initial_midi_notes[idx]
 
     # set the result files base name
     file_base_name = f"{args.uniprot}_{protein['entry_name']}_{protein['organism']}_{tempo}bpm_intrus"
@@ -236,7 +236,7 @@ if __name__ == "__main__":
 
     # create the MIDI file
     midi_file_path = os.path.join(args.out, f"{file_base_name}.midi")
-    keys_duration = midi_operations.create_midi(midi_file_path, protein, midi_keys, tempo, instruments, AA_PHY_CHI)
+    notes_duration = midi_operations.create_midi(midi_file_path, protein, midi_notes, tempo, instruments, AA_PHY_CHI)
 
     if "PDB" in protein:
         multiprocessing.set_start_method("spawn")
@@ -285,7 +285,7 @@ if __name__ == "__main__":
         # create the movie
         movie_path = os.path.join(args.out, f"{file_base_name}.mp4")
         if args.force or not os.path.exists(movie_path):
-            protein_movie.create_movie(movie_path, frames_dir, keys_duration, midi_file_path)
+            protein_movie.create_movie(movie_path, frames_dir, notes_duration, midi_file_path)
         else:
             logging.info(f"Movie file already exists: {movie_path}")
 
