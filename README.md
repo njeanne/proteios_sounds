@@ -82,8 +82,4 @@ corresponding positions in the sequence.
 
 In this example, a movie is created:
 
-![P10145 movie](doc/P10145_IL8_HUMAN_Homo_sapiens_100bpm_intrus-91-53-11.mp4)
-
-<video width="320" height="240" controls>
-  <source src="doc/P10145_IL8_HUMAN_Homo_sapiens_100bpm_intrus-91-53-11.mp4" type="video/mp4">
-</video>
+[![P10145 Human IL-8](doc%2FP10145_IL8_HUMAN_Homo_sapiens_100bpm_intrus-91-53-11.mp4)](doc%2FP10145_IL8_HUMAN_Homo_sapiens_100bpm_intrus-91-53-11.mp4)
