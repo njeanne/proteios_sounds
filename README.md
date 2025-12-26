@@ -2,18 +2,38 @@
 
 Listen the sound of the proteins.
 
-This project aims to transform the data collected by the biologists on proteins to a MIDI file.
+This project aims to transform the data collected by the biologists on proteins to a MIDI file, then play it.
 3 instruments are chosen, from the [MIDI instruments numbering](https://en.wikipedia.org/wiki/General_MIDI), to play 
 the score created from the protein amino acids sequence.
 To operate, the script needs an internet connection.
 
-## data
+## Data
 
 The protein data are retrieved from the [UniProt](https://www.uniprot.org/) database.
 
-## Python libraries
+## Installation with Conda
+ 
+A [Conda](https://docs.conda.io/projects/conda/en/stable/index.html) environment is provided in the 
+`conda_env/proteios_sonds_env.yml` file.
+The file contains all the dependencies to run the script except MuseScore which installation procedure is explained with
+the link provided on the next section.
 
-All Python library can be installed using `pip install <LIBRARY>`, see:
+The conda environment is generated using the command:
+```shell script
+# create the environment
+conda env create -f conda_env/proteios_sonds_env.yml
+
+# activate the environment
+conda activate proteios_sonds
+```
+
+## Manual installation
+
+The script was tested with [Python 3.12](https://www.python.org/downloads/release/python-31212/).
+
+### Python libraries
+
+All Python library can be installed with [pip](https://pypi.org/), using `pip install <LIBRARY>`, see:
 
 - [Biopython](https://biopython.org/)
 - [midiutil](https://pypi.org/project/MIDIUtil/)
@@ -21,7 +41,7 @@ All Python library can be installed using `pip install <LIBRARY>`, see:
 - [imageio](https://pypi.org/project/imageio/)
 - [imageio-ffmpeg](https://pypi.org/project/imageio-ffmpeg/)
 
-## External softwares
+### External softwares
 
 - [pymol](https://github.com/schrodinger/pymol-open-source)
 - [musescore](https://musescore.org/en/download)
