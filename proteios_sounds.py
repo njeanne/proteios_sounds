@@ -129,7 +129,7 @@ if __name__ == "__main__":
                         help="set the tempo in BPM. Value between 60 and 250.")
     parser.add_argument("-i", "--instruments", required=False, nargs=3,
                         help="set channel 0, 1 and 2 instruments, restricted to 3 values between 1 and 128 separated "
-                             "by spaces. Default is 1:  Acoustic Grand, 43: Cello and 66: Alto Sax. "
+                             "by spaces. Default is 91: Pad 3 (polysynth), 53: CelloChoir Aahs and 11: Music Box. "
                              "See: https://en.wikipedia.org/wiki/General_MIDI for details.")
     parser.add_argument("-f", "--force", required=False, action="store_true",
                         help="if the video file exists, force to recreate it.")
@@ -153,7 +153,7 @@ if __name__ == "__main__":
             args.instruments[i] = instrument
         instruments = args.instruments
     else:
-        instruments = [0, 42, 65]
+        instruments = [90, 52, 10]
 
     # tempo
     if args.tempo:
